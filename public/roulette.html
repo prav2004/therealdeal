@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Roulette — Pickr Casino</title>
+    <script src="config.js?v=20260410"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script>
+      (function () {
+        const firebaseConfig = {
+          apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+          authDomain: "pickr-d4d9b.firebaseapp.com",
+          projectId: "pickr-d4d9b",
+          storageBucket: "pickr-d4d9b.firebasestorage.app",
+          messagingSenderId: "972106331799",
+          appId: "1:972106331799:web:d261170267bbd7dfaf5bd2"
+        };
+        if (!window.firebase) return;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        firebase.auth().onAuthStateChanged((user) => {
+          if (!user) window.location.replace('/login.html');
+        });
+      })();
+    </script>
+    <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink: #0b0f1a;
+        --ember: #ff7a1a;
+        --mint: #40d9b5;
+        --sky: #7aa7ff;
+      }
+      body {
+        font-family: 'IBM Plex Sans', sans-serif;
+        background: radial-gradient(ellipse at 50% 30%, #7f1d1d 0%, #3f0f0f 35%, #1f0a0a 70%, var(--ink) 100%);
+        color: #e5e7eb;
+        min-height: 100vh;
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+      }
+      .hero-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+      .panel {
+        background: rgba(17, 25, 40, 0.82);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 0.9rem;
+        backdrop-filter: blur(8px);
+      }
+      .num-btn {
+        min-height: 42px;
+        border-radius: 0.55rem;
+        border: 1px solid rgba(255,255,255,0.16);
+        font-weight: 700;
+        font-size: 0.85rem;
+        transition: transform .12s ease, box-shadow .2s ease;
+      }
+      .num-btn:active { transform: scale(0.96); }
+      .num-red { background: rgba(185,28,28,.85); }
+      .num-black { background: rgba(15,23,42,.92); }
+      .num-green { background: rgba(22,163,74,.85); }
+      .outside-btn {
+        min-height: 44px;
+        border-radius: 0.65rem;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(30,41,59,.8);
+        color: #e2e8f0;
+        font-size: 0.74rem;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .chip {
+        width: 50px;
+        height: 50px;
+        border-radius: 999px;
+        border: 3px dashed rgba(255,255,255,.45);
+        font-weight: 800;
+        font-size: .73rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 16px rgba(0,0,0,.4);
+      }
+      .chip.selected { box-shadow: 0 0 0 3px var(--ember), 0 8px 22px rgba(255,122,26,.35); transform: translateY(-2px) scale(1.06); }
+      .nav-link { color: #94a3b8; transition: color 0.2s ease; }
+      .nav-link:hover { color: #e2e8f0; }
+      .nav-link.active { color: var(--ember); }
+      .bottom-nav { padding-bottom: env(safe-area-inset-bottom); bottom: env(safe-area-inset-bottom); z-index: 50; }
+      .pulse-spin { animation: spinPulse 0.9s ease-in-out infinite; }
+      @keyframes spinPulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 rgba(64,217,181,0); }
+        50% { transform: scale(1.05); box-shadow: 0 0 24px rgba(64,217,181,.35); }
+        100% { transform: scale(1); box-shadow: 0 0 0 rgba(64,217,181,0); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="max-w-3xl mx-auto px-4 pt-6 pb-24">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <a href="casino.html" class="rounded-full border border-white/10 bg-slate-900/80 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-200 hover:border-white/30 hover:text-white">&larr; Casino</a>
+        <div class="text-right">
+          <div class="hero-title text-2xl font-bold text-white">🎡 Roulette</div>
+          <div class="text-xs text-slate-400">Single-zero table</div>
+        </div>
+      </div>
+
+      <section class="panel p-4 mb-4">
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div>
+            <div class="text-[11px] uppercase tracking-widest text-slate-400">Balance</div>
+            <div id="balanceEl" class="hero-title text-xl text-amber-400">1,000</div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-widest text-slate-400">Current Bet</div>
+            <div id="betEl" class="hero-title text-xl text-sky-300">0</div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-widest text-slate-400">Last Spin</div>
+            <div id="spinEl" class="hero-title text-xl text-emerald-300">--</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel p-4 mb-4">
+        <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">Select Chip</div>
+        <div id="chips" class="flex flex-wrap gap-2"></div>
+      </section>
+
+      <section class="panel p-4 mb-4">
+        <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">Straight Bets</div>
+        <div id="numbersGrid" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
+      </section>
+
+      <section class="panel p-4 mb-4">
+        <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">Outside Bets</div>
+        <div id="outsideGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      </section>
+
+      <section class="panel p-4 mb-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button id="clearBtn" class="rounded-lg border border-white/10 bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200">Clear Bets</button>
+          <button id="repeatBtn" class="rounded-lg border border-white/10 bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200">Repeat Last</button>
+          <button id="undoBtn" class="rounded-lg border border-white/10 bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-200">Undo</button>
+          <button id="spinBtn" class="rounded-lg border border-emerald-400/40 bg-emerald-500/20 px-3 py-2 text-sm font-bold text-emerald-300">Spin</button>
+        </div>
+        <div id="msgEl" class="mt-3 text-sm text-slate-300 min-h-[22px]"></div>
+      </section>
+
+      <section class="panel p-4">
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div><div class="text-[11px] uppercase tracking-widest text-slate-400">Spins</div><div id="statSpins" class="text-lg font-bold text-white">0</div></div>
+          <div><div class="text-[11px] uppercase tracking-widest text-slate-400">Wins</div><div id="statWins" class="text-lg font-bold text-emerald-300">0</div></div>
+          <div><div class="text-[11px] uppercase tracking-widest text-slate-400">Net</div><div id="statNet" class="text-lg font-bold text-sky-300">0</div></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
+      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2"><span class="text-xl">⭐</span><span>Pickr Picks</span></a>
+      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2"><span class="text-xl">📝</span><span>Tasks</span></a>
+      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2"><span class="text-xl">🏈</span><span>Sports</span></a>
+      <a href="casino.html" class="nav-link active flex-1 flex flex-col items-center py-2"><span class="text-xl">🎰</span><span>Casino</span></a>
+      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2"><span class="text-xl">🎯</span><span>Picks</span></a>
+      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2"><span>💰</span><span>Wallet</span></a>
+    </nav>
+
+    <script>
+      const redNums = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+      const blackNums = new Set([2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]);
+      const chips = [5, 25, 50, 100, 250];
+      const outsideBets = [
+        { key: 'red', label: 'Red', payout: 1 },
+        { key: 'black', label: 'Black', payout: 1 },
+        { key: 'odd', label: 'Odd', payout: 1 },
+        { key: 'even', label: 'Even', payout: 1 },
+        { key: 'low', label: '1-18', payout: 1 },
+        { key: 'high', label: '19-36', payout: 1 },
+        { key: 'dozen1', label: '1st 12', payout: 2 },
+        { key: 'dozen2', label: '2nd 12', payout: 2 },
+        { key: 'dozen3', label: '3rd 12', payout: 2 },
+        { key: 'col1', label: 'Column 1', payout: 2 },
+        { key: 'col2', label: 'Column 2', payout: 2 },
+        { key: 'col3', label: 'Column 3', payout: 2 }
+      ];
+
+      let balance = 1000;
+      let selectedChip = 25;
+      let bets = {};
+      let lastBets = {};
+      let betStack = [];
+      let spinning = false;
+      let stats = { spins: 0, wins: 0, net: 0 };
+
+      const balanceEl = document.getElementById('balanceEl');
+      const betEl = document.getElementById('betEl');
+      const spinEl = document.getElementById('spinEl');
+      const msgEl = document.getElementById('msgEl');
+      const statSpins = document.getElementById('statSpins');
+      const statWins = document.getElementById('statWins');
+      const statNet = document.getElementById('statNet');
+      const spinBtn = document.getElementById('spinBtn');
+      const chipsEl = document.getElementById('chips');
+      const numbersGrid = document.getElementById('numbersGrid');
+      const outsideGrid = document.getElementById('outsideGrid');
+
+      function getBetTotal() {
+        return Object.values(bets).reduce((sum, amount) => sum + Number(amount || 0), 0);
+      }
+
+      function renderStats() {
+        statSpins.textContent = String(stats.spins);
+        statWins.textContent = String(stats.wins);
+        statNet.textContent = (stats.net >= 0 ? '+' : '') + stats.net.toLocaleString();
+        statNet.className = 'text-lg font-bold ' + (stats.net >= 0 ? 'text-emerald-300' : 'text-red-300');
+      }
+
+      function renderTop() {
+        balanceEl.textContent = balance.toLocaleString();
+        betEl.textContent = getBetTotal().toLocaleString();
+      }
+
+      function betColor(n) {
+        if (n === 0) return 'num-green';
+        return redNums.has(n) ? 'num-red' : 'num-black';
+      }
+
+      function placeBet(key, amount) {
+        if (spinning) return;
+        const nextTotal = getBetTotal() + amount;
+        if (nextTotal > balance) {
+          msgEl.textContent = 'Not enough balance for that bet.';
+          return;
+        }
+        bets[key] = Number((bets[key] || 0) + amount);
+        betStack.push({ key, amount });
+        renderTop();
+        renderBetLabels();
+      }
+
+      function renderBetLabels() {
+        document.querySelectorAll('[data-bet-key]').forEach((el) => {
+          const key = el.getAttribute('data-bet-key');
+          const amount = bets[key] || 0;
+          const badge = el.querySelector('.bet-amt');
+          if (!badge) return;
+          if (amount > 0) {
+            badge.textContent = '$' + amount;
+            badge.classList.remove('hidden');
+          } else {
+            badge.textContent = '';
+            badge.classList.add('hidden');
+          }
+        });
+      }
+
+      function checkWin(number, key) {
+        if (key.startsWith('n_')) return Number(key.slice(2)) === number;
+        if (number === 0) return false;
+        switch (key) {
+          case 'red': return redNums.has(number);
+          case 'black': return blackNums.has(number);
+          case 'odd': return number % 2 === 1;
+          case 'even': return number % 2 === 0;
+          case 'low': return number >= 1 && number <= 18;
+          case 'high': return number >= 19 && number <= 36;
+          case 'dozen1': return number >= 1 && number <= 12;
+          case 'dozen2': return number >= 13 && number <= 24;
+          case 'dozen3': return number >= 25 && number <= 36;
+          case 'col1': return number % 3 === 1;
+          case 'col2': return number % 3 === 2;
+          case 'col3': return number % 3 === 0;
+          default: return false;
+        }
+      }
+
+      function payoutMultiplier(key) {
+        if (key.startsWith('n_')) return 36;
+        const row = outsideBets.find((b) => b.key === key);
+        return row ? row.payout + 1 : 0;
+      }
+
+      function finishSpin(number) {
+        const totalBet = getBetTotal();
+        let payout = 0;
+        let won = false;
+        Object.entries(bets).forEach(([key, amount]) => {
+          if (checkWin(number, key)) {
+            won = true;
+            payout += amount * payoutMultiplier(key);
+          }
+        });
+
+        balance -= totalBet;
+        balance += payout;
+
+        const netRound = payout - totalBet;
+        stats.spins += 1;
+        stats.net += netRound;
+        if (netRound > 0) stats.wins += 1;
+
+        lastBets = Object.assign({}, bets);
+        bets = {};
+        betStack = [];
+        spinning = false;
+
+        spinBtn.disabled = false;
+        spinBtn.classList.remove('pulse-spin', 'opacity-60');
+
+        const c = betColor(number);
+        spinEl.textContent = String(number);
+        spinEl.className = 'hero-title text-xl ' + (c === 'num-red' ? 'text-red-300' : c === 'num-black' ? 'text-slate-100' : 'text-emerald-300');
+
+        if (won) {
+          msgEl.textContent = `Result ${number}. You won $${payout.toLocaleString()} (${netRound >= 0 ? '+' : ''}${netRound.toLocaleString()}).`;
+        } else {
+          msgEl.textContent = `Result ${number}. No winning bets this spin (${netRound.toLocaleString()}).`;
+        }
+
+        if (balance <= 0) {
+          balance = 1000;
+          msgEl.textContent += ' Balance refilled to $1,000.';
+        }
+
+        renderTop();
+        renderStats();
+        renderBetLabels();
+      }
+
+      function spinWheel() {
+        if (spinning) return;
+        const totalBet = getBetTotal();
+        if (totalBet <= 0) {
+          msgEl.textContent = 'Place at least one bet first.';
+          return;
+        }
+        if (totalBet > balance) {
+          msgEl.textContent = 'Your total bets exceed balance.';
+          return;
+        }
+
+        spinning = true;
+        spinBtn.disabled = true;
+        spinBtn.classList.add('pulse-spin', 'opacity-60');
+        msgEl.textContent = 'Spinning...';
+
+        const number = Math.floor(Math.random() * 37);
+        let flashes = 0;
+        const anim = setInterval(() => {
+          spinEl.textContent = String(Math.floor(Math.random() * 37));
+          flashes += 1;
+          if (flashes >= 12) {
+            clearInterval(anim);
+            finishSpin(number);
+          }
+        }, 95);
+      }
+
+      function initChips() {
+        chips.forEach((v, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'chip text-white ' + (idx % 2 ? 'bg-sky-700' : 'bg-amber-700') + (v === selectedChip ? ' selected' : '');
+          btn.textContent = '$' + v;
+          btn.addEventListener('click', () => {
+            selectedChip = v;
+            chipsEl.querySelectorAll('.chip').forEach((n) => n.classList.remove('selected'));
+            btn.classList.add('selected');
+          });
+          chipsEl.appendChild(btn);
+        });
+      }
+
+      function initNumbers() {
+        for (let n = 0; n <= 36; n += 1) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `num-btn ${betColor(n)} text-white relative`;
+          btn.setAttribute('data-bet-key', 'n_' + n);
+          btn.innerHTML = `<span>${n}</span><span class="bet-amt hidden absolute -top-2 right-1 text-[10px] bg-amber-400 text-slate-900 font-bold px-1.5 rounded-full"></span>`;
+          btn.addEventListener('click', () => placeBet('n_' + n, selectedChip));
+          numbersGrid.appendChild(btn);
+        }
+      }
+
+      function initOutside() {
+        outsideBets.forEach((b) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'outside-btn relative';
+          btn.setAttribute('data-bet-key', b.key);
+          btn.innerHTML = `<span>${b.label}</span><span class="bet-amt hidden absolute -top-2 right-1 text-[10px] bg-amber-400 text-slate-900 font-bold px-1.5 rounded-full"></span>`;
+          btn.addEventListener('click', () => placeBet(b.key, selectedChip));
+          outsideGrid.appendChild(btn);
+        });
+      }
+
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        if (spinning) return;
+        bets = {};
+        betStack = [];
+        msgEl.textContent = 'Bets cleared.';
+        renderTop();
+        renderBetLabels();
+      });
+
+      document.getElementById('undoBtn').addEventListener('click', () => {
+        if (spinning || betStack.length === 0) return;
+        const last = betStack.pop();
+        if (!last) return;
+        bets[last.key] = Math.max(0, Number((bets[last.key] || 0) - last.amount));
+        if (!bets[last.key]) delete bets[last.key];
+        renderTop();
+        renderBetLabels();
+      });
+
+      document.getElementById('repeatBtn').addEventListener('click', () => {
+        if (spinning) return;
+        const nextTotal = Object.values(lastBets).reduce((s, v) => s + Number(v || 0), 0);
+        if (nextTotal <= 0) {
+          msgEl.textContent = 'No previous bets to repeat.';
+          return;
+        }
+        if (nextTotal > balance) {
+          msgEl.textContent = 'Not enough balance to repeat last bets.';
+          return;
+        }
+        bets = Object.assign({}, lastBets);
+        betStack = [];
+        Object.entries(lastBets).forEach(([k, v]) => betStack.push({ key: k, amount: Number(v) }));
+        msgEl.textContent = 'Previous bets loaded.';
+        renderTop();
+        renderBetLabels();
+      });
+
+      spinBtn.addEventListener('click', spinWheel);
+
+      initChips();
+      initNumbers();
+      initOutside();
+      renderTop();
+      renderStats();
+      renderBetLabels();
+    </script>
+  </body>
+</html>
