@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Pickr – Pickr Picks</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink: #0b0f1a;
+        --ember: #ff7a1a;
+        --mint: #40d9b5;
+        --sky: #7aa7ff;
+        --fog: rgba(255, 255, 255, 0.08);
+        --card: rgba(17, 25, 40, 0.82);
+      }
+      body {
+        font-family: 'IBM Plex Sans', sans-serif;
+        background: radial-gradient(circle at top, rgba(122, 167, 255, 0.18), transparent 45%),
+          radial-gradient(circle at 10% 20%, rgba(64, 217, 181, 0.2), transparent 40%),
+          radial-gradient(circle at 90% 10%, rgba(255, 122, 26, 0.15), transparent 40%),
+          var(--ink);
+        color: #e5e7eb;
+      }
+      .hero-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+      .glass {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(12px);
+      }
+      .chip {
+        background: rgba(64, 217, 181, 0.16);
+        color: #7de6c9;
+        border: 1px solid rgba(64, 217, 181, 0.4);
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+      .tab-chip {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #cbd5f5;
+        transition: all 0.2s ease;
+      }
+      .tab-chip:hover { border-color: rgba(255, 255, 255, 0.3); color: #f8fafc; }
+      .tab-chip.active { background: var(--ember); color: #0b0f1a; border-color: rgba(255, 122, 26, 0.6); }
+      /* Odds format toggle */
+      .odds-toggle {
+        display: inline-flex;
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.8);
+      }
+      .odds-toggle-btn {
+        padding: 6px 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: transparent;
+        color: #94a3b8;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .odds-toggle-btn.active {
+        background: rgba(122, 167, 255, 0.25);
+        color: #a5c4ff;
+      }
+      .odds-toggle-btn:hover:not(.active) { color: #e2e8f0; }
+      .select-ghost {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #e2e8f0;
+      }
+      .pick-card {
+        background: linear-gradient(145deg, rgba(17, 25, 40, 0.95), rgba(17, 25, 40, 0.7));
+        border: 1px solid rgba(122, 167, 255, 0.15);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      }
+      .pick-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
+        border-color: rgba(122, 167, 255, 0.35);
+      }
+      .lock-card {
+        background: linear-gradient(145deg, rgba(255, 122, 26, 0.12), rgba(17, 25, 40, 0.92));
+        border: 1px solid rgba(255, 180, 90, 0.5);
+        box-shadow: 0 16px 32px rgba(255, 122, 26, 0.2), inset 0 0 60px rgba(255, 180, 60, 0.03);
+      }
+      .lock-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 40px rgba(255, 122, 26, 0.3);
+        border-color: rgba(255, 180, 90, 0.7);
+      }
+
+      /* H2H section */
+      .h2h-section {
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: rgba(15, 23, 42, 0.5);
+      }
+      .h2h-header {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .h2h-game {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-weight: 600;
+      }
+      /* Stats comparison table */
+      .stats-compare {
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(15, 23, 42, 0.5);
+      }
+      .stats-compare-header {
+        display: grid;
+        grid-template-columns: 80px 1fr 1fr;
+        gap: 0;
+        padding: 6px 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .stats-compare-header span {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        font-weight: 600;
+      }
+      .stats-compare-row {
+        display: grid;
+        grid-template-columns: 80px 1fr 1fr;
+        gap: 0;
+        padding: 5px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      }
+      .stats-compare-row:last-child { border-bottom: 0; }
+      .stats-compare-row .scr-label {
+        font-size: 10px;
+        color: #64748b;
+        font-weight: 600;
+      }
+      .stats-compare-row .scr-val {
+        font-size: 11px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-weight: 700;
+        text-align: center;
+      }
+      .nav-link { color: #94a3b8; transition: color 0.2s ease; }
+      .nav-link:hover { color: #e2e8f0; }
+      .nav-link.active { color: var(--ember); }
+      .bottom-nav { padding-bottom: env(safe-area-inset-bottom); bottom: env(safe-area-inset-bottom); z-index: 50; }
+      .page-main { padding-bottom: calc(9rem + env(safe-area-inset-bottom)); }
+      @media (orientation: portrait) {
+        .page-main { padding-bottom: calc(10rem + env(safe-area-inset-bottom)); }
+      }
+      .footer-safe { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+
+      /* ── Mobile leaderboard: avatar protection ── */
+      @media (max-width: 640px) {
+        #playerLeaderboard .pickr-avatar {
+          flex: 0 0 32px !important;
+          width: 32px !important;
+          height: 32px !important;
+          min-width: 32px !important;
+          min-height: 32px !important;
+          max-width: 32px !important;
+          max-height: 32px !important;
+          border-radius: 999px !important;
+          position: relative !important;
+          overflow: hidden !important;
+          transform: translateZ(0) !important;
+          will-change: transform !important;
+          contain: layout style size !important;
+        }
+      }
+
+      .icon-orb {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25), inset 0 0 10px rgba(255, 255, 255, 0.12);
+      }
+      .icon-orb::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 6px;
+        width: 60%;
+        height: 60%;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.55), transparent 60%);
+        opacity: 0.7;
+      }
+      .icon-orb::after {
+        content: '';
+        position: absolute;
+        inset: 5px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.28), transparent 60%);
+        opacity: 0.6;
+      }
+      .icon-orb svg {
+        width: 20px;
+        height: 20px;
+        z-index: 1;
+        color: rgba(255, 255, 255, 0.95);
+      }
+      .token-orb {
+        background: radial-gradient(circle at 30% 30%, #34d399, #059669 55%, #065f46 100%);
+        border: 1px solid rgba(52, 211, 153, 0.55);
+      }
+      .cash-orb {
+        background: radial-gradient(circle at 30% 30%, #fbbf24, #f59e0b 55%, #b45309 100%);
+        border: 1px solid rgba(251, 191, 36, 0.55);
+      }
+
+      /* ── Redesigned header ── */
+      .edges-header {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        padding: 1.75rem 1.5rem;
+        background: linear-gradient(145deg, rgba(17,25,40,0.92), rgba(30,41,59,0.85));
+        border: 1px solid rgba(122,167,255,0.15);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        backdrop-filter: blur(14px);
+      }
+      .edges-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(122,167,255,0.2), transparent 60%);
+        pointer-events: none;
+      }
+      .edges-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 250px;
+        height: 250px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(64,217,181,0.12), transparent 60%);
+        pointer-events: none;
+      }
+      .edges-header .header-content {
+        position: relative;
+        z-index: 1;
+      }
+      .header-accent-line {
+        width: 48px;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--sky), var(--mint));
+        margin-bottom: 0.75rem;
+      }
+      .header-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.65rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #f1f5f9;
+        line-height: 1.2;
+      }
+      @media (min-width: 640px) {
+        .header-title { font-size: 2rem; }
+        .edges-header { padding: 2rem 2rem; }
+      }
+      .header-sub {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-top: 0.35rem;
+        max-width: 480px;
+      }
+      .header-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .header-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+      }
+      .header-chip--blue {
+        background: rgba(122,167,255,0.12);
+        color: #a5c4ff;
+        border: 1px solid rgba(122,167,255,0.3);
+      }
+      .header-chip--green {
+        background: rgba(64,217,181,0.12);
+        color: #7de6c9;
+        border: 1px solid rgba(64,217,181,0.35);
+      }
+      .header-chip--amber {
+        background: rgba(255,180,60,0.12);
+        color: #ffd073;
+        border: 1px solid rgba(255,180,60,0.35);
+      }
+      .header-chip .pulse-dot {
+        width: 6px; height: 6px; border-radius: 999px;
+        background: currentColor;
+        animation: pulse-dot 2s ease-in-out infinite;
+      }
+      @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.7); }
+      }
+
+      /* ── Redesigned leaderboard ── */
+      .lb-section {
+        border-radius: 20px;
+        padding: 1.5rem;
+        background: linear-gradient(145deg, rgba(17,25,40,0.92), rgba(30,41,59,0.85));
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        backdrop-filter: blur(12px);
+        position: relative;
+        overflow: hidden;
+      }
+      .lb-section::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(122,167,255,0.35), rgba(64,217,181,0.25), transparent);
+      }
+      .lb-title-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+      .lb-heading {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        letter-spacing: -0.01em;
+      }
+      .lb-live-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        background: rgba(52,211,153,0.1);
+        color: #34d399;
+        border: 1px solid rgba(52,211,153,0.3);
+      }
+      .lb-live-chip .live-dot {
+        width: 6px; height: 6px; border-radius: 999px;
+        background: #34d399;
+        animation: pulse-dot 1.5s ease-in-out infinite;
+      }
+
+      /* Podium for top 3 */
+      .lb-podium {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .lb-podium-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 0.5rem;
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+      }
+      .lb-podium-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        pointer-events: none;
+      }
+      .lb-podium-card--1 {
+        background: linear-gradient(180deg, rgba(255,180,60,0.15) 0%, rgba(17,25,40,0.9) 100%);
+        border: 1px solid rgba(255,180,60,0.35);
+        order: 2;
+      }
+      .lb-podium-card--1::before {
+        background: radial-gradient(ellipse at 50% 0%, rgba(255,180,60,0.2), transparent 70%);
+      }
+      .lb-podium-card--2 {
+        background: linear-gradient(180deg, rgba(192,192,220,0.12) 0%, rgba(17,25,40,0.9) 100%);
+        border: 1px solid rgba(192,192,220,0.25);
+        order: 1;
+      }
+      .lb-podium-card--3 {
+        background: linear-gradient(180deg, rgba(205,127,50,0.12) 0%, rgba(17,25,40,0.9) 100%);
+        border: 1px solid rgba(205,127,50,0.25);
+        order: 3;
+      }
+      .lb-rank-badge {
+        width: 28px; height: 28px;
+        border-radius: 999px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 0.75rem;
+      }
+      .lb-rank-badge--1 {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #422006;
+        box-shadow: 0 4px 14px rgba(251,191,36,0.4);
+      }
+      .lb-rank-badge--2 {
+        background: linear-gradient(135deg, #c0c0dc, #94a3b8);
+        color: #1e293b;
+        box-shadow: 0 4px 14px rgba(192,192,220,0.3);
+      }
+      .lb-rank-badge--3 {
+        background: linear-gradient(135deg, #cd7f32, #b45309);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(205,127,50,0.3);
+      }
+      .lb-podium-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: #e2e8f0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .lb-podium-pts {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #34d399;
+      }
+      .lb-podium-sub {
+        font-size: 0.6rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      /* Rows for rank 4+ */
+      .lb-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0.85rem;
+        border-radius: 12px;
+        transition: background 0.15s ease;
+      }
+      .lb-row:hover {
+        background: rgba(255,255,255,0.04);
+      }
+      .lb-row + .lb-row {
+        border-top: 1px solid rgba(255,255,255,0.05);
+      }
+      .lb-row-rank {
+        flex: 0 0 32px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #64748b;
+        text-align: center;
+      }
+      .lb-row-player {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+        overflow: visible;
+      }
+      .lb-row-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #e2e8f0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+      }
+      .lb-row-pts {
+        flex: 0 0 auto;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #34d399;
+        text-align: right;
+      }
+      .lb-row-stat {
+        flex: 0 0 48px;
+        text-align: right;
+        font-size: 0.75rem;
+        color: #94a3b8;
+      }
+      @media (max-width: 640px) {
+        .lb-row-stat { display: none; }
+        .lb-podium-card { padding: 0.75rem 0.35rem; }
+        .lb-podium-pts { font-size: 0.95rem; }
+        .lb-podium-name { font-size: 0.65rem; }
+        .lb-rank-badge { width: 24px; height: 24px; font-size: 0.65rem; }
+        .lb-row { gap: 0.5rem; padding: 0.65rem 0.5rem; }
+      }
+      @media (min-width: 640px) {
+        .lb-section { padding: 2rem; }
+        .lb-podium { gap: 0.75rem; }
+        .lb-heading { font-size: 1.5rem; }
+      }
+      /* ── Sticky top banner ── */
+      .top-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: linear-gradient(135deg, rgba(35,48,72,0.72) 0%, rgba(50,65,88,0.72) 40%, rgba(62,56,48,0.72) 100%);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 1px 8px rgba(0,0,0,0.25);
+        padding: env(safe-area-inset-top, 0px) 16px 0 16px;
+        height: calc(67px + env(safe-area-inset-top, 0px));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        box-sizing: border-box;
+      }
+      .top-banner .banner-logo {
+        height: 43px;
+        width: auto;
+        object-fit: contain;
+        flex-shrink: 0;
+      }
+      .top-banner .banner-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        flex-shrink: 1;
+        overflow: hidden;
+      }
+      .top-banner .banner-player {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .top-banner .banner-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #cbd5e1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100px;
+      }
+      .top-banner .banner-balances {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 1;
+        min-width: 0;
+      }
+      .banner-bal {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 1.03rem;
+        line-height: 1;
+        position: relative;
+        overflow: hidden;
+      }
+      .banner-bal::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        padding: 1px;
+        background: var(--bal-border);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+      .banner-bal-token {
+        background: rgba(52,211,153,0.12);
+        color: #34d399;
+        --bal-border: linear-gradient(135deg, rgba(52,211,153,0.5), rgba(16,185,129,0.15));
+      }
+      .banner-bal-cash {
+        background: rgba(251,191,36,0.10);
+        color: #fbbf24;
+        --bal-border: linear-gradient(135deg, rgba(251,191,36,0.5), rgba(245,158,11,0.15));
+      }
+      .banner-bal .bal-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+      .banner-bal-token .bal-icon {
+        filter: drop-shadow(0 0 4px rgba(52,211,153,0.5));
+      }
+      .banner-bal-cash .bal-icon {
+        filter: drop-shadow(0 0 4px rgba(251,191,36,0.5));
+      }
+      @media (max-width: 400px) {
+        .top-banner { padding: env(safe-area-inset-top, 0px) 8px 0 8px; gap: 6px; height: calc(60px + env(safe-area-inset-top, 0px)); }
+        .top-banner .banner-logo { height: 32px; }
+        .banner-bal { padding: 4px 8px; font-size: 0.75rem; gap: 3px; }
+        .top-banner .banner-name { display: none; }
+        .top-banner .banner-player { gap: 0; }
+        .top-banner .banner-right { gap: 6px; }
+        .top-banner .banner-balances { gap: 4px; }
+      }
+      @media (min-width: 401px) and (max-width: 480px) {
+        .top-banner { padding: env(safe-area-inset-top, 0px) 10px 0 10px; gap: 8px; }
+        .top-banner .banner-logo { height: 36px; }
+        .banner-bal { padding: 5px 10px; font-size: 0.82rem; }
+        .top-banner .banner-name { max-width: 50px; font-size: 0.75rem; }
+      }
+      /* Push page content below the fixed banner + safe area */
+      body { padding-top: calc(67px + env(safe-area-inset-top, 0px)); }
+      @media (min-width: 769px) {
+        .top-banner { height: calc(80px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 28px 0 28px; gap: 18px; }
+        .top-banner .banner-logo { height: 52px; }
+        .banner-bal { padding: 9px 18px; font-size: 1.15rem; gap: 6px; }
+        .top-banner .banner-name { font-size: 0.95rem; max-width: 140px; }
+        body { padding-top: calc(80px + env(safe-area-inset-top, 0px)); }
+      }
+      /* ── Page loader — bouncing ball ── */
+      #pageLoader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:#0b0f1a;transition:opacity .6s ease}
+      #pageLoader.loaded{opacity:0;pointer-events:none}
+      .loader-ball{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#ffb347 0%,#ff7a1a 45%,#c05600 100%);box-shadow:inset -4px -6px 10px rgba(0,0,0,.35),inset 2px 2px 6px rgba(255,220,160,.4);position:relative;animation:ballBounce 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+      .loader-ball::after{content:'';position:absolute;inset:6px;border-radius:50%;border:1.5px solid rgba(0,0,0,.18);border-top-color:transparent;border-left-color:transparent;transform:rotate(-35deg)}
+      .loader-ball::before{content:'';position:absolute;left:50%;top:4px;width:1.5px;height:28px;background:rgba(0,0,0,.15);transform:translateX(-50%) rotate(25deg);border-radius:2px}
+      .loader-shadow{width:38px;height:8px;border-radius:50%;background:rgba(255,122,26,.25);filter:blur(3px);margin-top:4px;animation:shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+      @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
+      @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
+    </style>
+  </head>
+  <!--
+    The picks page adopts the dark gradient used throughout the rest of
+    the application.  This improves contrast and makes the coloured picks
+    and badges stand out.  Text is set to a light colour for readability.
+  -->
+  <body class="flex flex-col min-h-screen">
+    <!-- Page loader -->
+    <div id="pageLoader"><div class="loader-ball"></div><div class="loader-shadow"></div></div>
+    <div class="pickr-page-content" style="visibility:hidden;">
+    <!-- Sticky top banner: logo + player + tokens + cash -->
+    <div class="top-banner">
+      <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Pickr" class="banner-logo" /></a>
+      <div class="banner-right">
+        <div class="banner-player">
+          <div class="pickr-avatar" data-size="30" aria-hidden="true"></div>
+          <div class="banner-name header-screen-name">—</div>
+        </div>
+        <div class="banner-balances">
+          <div class="banner-bal banner-bal-token">
+            <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#34d399" stroke-width="2"/><path d="M12 7v10" stroke="#34d399" stroke-width="2" stroke-linecap="round"/><path d="M9 9.5c0-1 1.3-1.5 3-1.5s3 .5 3 1.5-1.3 1.5-3 1.5-3 .5-3 1.5 1.3 1.5 3 1.5 3 .5 3 1.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="tokens">0</span>
+          </div>
+          <div class="banner-bal banner-bal-cash">
+            <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" stroke="#fbbf24" stroke-width="2"/><path d="M12 9v6" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/><path d="M10 10.5c0-.8 .9-1.2 2-1.2s2 .4 2 1.2-.9 1.2-2 1.2-2 .4-2 1.2.9 1.2 2 1.2 2 .4 2 1.2" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="cash">$0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page header (scrolls with content) -->
+    <div class="px-4">
+      <header class="edges-header max-w-6xl mx-auto w-full mt-4">
+        <div class="header-content">
+          <div class="header-accent-line"></div>
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div class="text-[10px] uppercase tracking-[0.35em] text-sky-300/70 mb-1">Pickr insights</div>
+              <h2 class="header-title">Daily edges, ranked.</h2>
+              <p class="header-sub">Curated recommendations and insights — use as learning tools, not financial advice.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 sm:flex-col sm:items-end sm:mt-1">
+              <span class="header-chip header-chip--green"><span class="pulse-dot"></span>Updated daily</span>
+              <span id="nextUpdate" class="text-xs font-medium text-slate-400">Next update: --:--:--</span>
+            </div>
+          </div>
+        </div>
+      </header>
+    </div>
+    <!-- Pickr Picks Content -->
+    <main class="flex-1 px-4 pt-6 page-main">
+      <div class="max-w-6xl mx-auto">
+        <section id="playerLeaderboard" class="lb-section mb-6">
+          <div class="lb-title-row">
+            <div>
+              <h3 class="lb-heading">Top players</h3>
+              <p class="text-slate-500 text-xs mt-0.5">Points combine wins, streaks &amp; XP momentum.</p>
+            </div>
+            <div class="lb-live-chip"><span class="live-dot"></span>Live</div>
+          </div>
+          <div id="playerLeaderboardPodium" class="lb-podium"></div>
+          <div id="playerLeaderboardList">
+            <div class="px-4 py-4 text-sm text-slate-400">Loading players...</div>
+          </div>
+          <div class="mt-5 flex justify-end">
+            <a href="leaderboard-full.html" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.15em] text-slate-300 hover:border-white/25 hover:text-white transition-colors">View full leaderboard &rarr;</a>
+          </div>
+        </section>
+
+        <section id="lockOfDay" class="lb-section mb-6 relative overflow-hidden">
+          <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 50% 0%, rgba(255,180,60,0.14) 0%, transparent 55%);"></div>
+          <div class="relative">
+            <div class="lb-title-row">
+              <div>
+                <div class="flex items-center gap-2 mb-0.5">
+                  <span class="text-xl">🔒</span>
+                  <h3 class="lb-heading" style="color:#ffd073;">Lock of the Day</h3>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">Our highest-confidence pick — backed by odds, trends &amp; momentum.</p>
+              </div>
+              <span class="header-chip header-chip--amber">Featured</span>
+            </div>
+            <div id="lockOfDayCard" class="relative"></div>
+          </div>
+        </section>
+
+        <section class="lb-section mb-6">
+          <div class="lb-title-row">
+            <div>
+              <h3 class="lb-heading">Today's picks</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Moneyline recommendations across all sports — use as a guide before you pick.</p>
+            </div>
+          </div>
+          <div id="leagueTabs" class="flex flex-wrap items-center gap-2 mb-3">
+            <button class="league-tab tab-chip active rounded-full px-4 py-2 text-xs font-semibold" data-sport="nba-moneyline">NBA</button>
+            <button class="league-tab tab-chip rounded-full px-4 py-2 text-xs font-semibold" data-sport="nhl-moneyline">NHL</button>
+            <button class="league-tab tab-chip rounded-full px-4 py-2 text-xs font-semibold" data-sport="nfl-moneyline">NFL</button>
+            <button class="league-tab tab-chip rounded-full px-4 py-2 text-xs font-semibold" data-sport="mlb-moneyline">MLB</button>
+            <button class="league-tab tab-chip rounded-full px-4 py-2 text-xs font-semibold" data-sport="soccer-moneyline">Soccer</button>
+            <div class="odds-toggle ml-auto" id="oddsToggle">
+              <button class="odds-toggle-btn active" data-fmt="american">American</button>
+              <button class="odds-toggle-btn" data-fmt="decimal">Decimal</button>
+            </div>
+          </div>
+          <select id="sortSelect" class="select-ghost rounded-full px-3 py-2 text-xs mb-2">
+            <option value="confidence">Sort: Confidence</option>
+            <option value="value">Sort: Value</option>
+          </select>
+        </section>
+
+        <!-- Picks grid -->
+        <div id="dailyPicksContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+    </main>
+    <!-- Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
+      <!-- Pickr Picks tab (highlighted on this page) -->
+      <a href="leaderboard.html" class="nav-link active flex-1 flex flex-col items-center py-2">
+        <span class="text-2xl">⭐</span>
+        <span>Pickr Picks</span>
+      </a>
+      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-2xl">📝</span>
+        <span>Tasks</span>
+      </a>
+      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-2xl">🏈</span>
+        <span>Sports</span>
+      </a>
+      <a href="casino.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-2xl">🎰</span>
+        <span>Casino</span>
+      </a>
+      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-2xl">📜</span>
+        <span>My Bets</span>
+      </a>
+      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <div class="pickr-avatar" data-size="24" aria-hidden="true"></div>
+        <span>Wallet</span>
+      </a>
+    </nav>
+    <script src="config.js"></script>
+    <script src="config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+      (function(){
+        // Minimal Firebase init and auth watcher so leaderboard requests
+        // /api/me promptly like the Sports page does.
+        try {
+          const firebaseConfig = {
+            apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+            authDomain: "pickr-d4d9b.firebaseapp.com",
+            projectId: "pickr-d4d9b",
+            storageBucket: "pickr-d4d9b.firebasestorage.app",
+            messagingSenderId: "972106331799",
+            appId: "1:972106331799:web:d261170267bbd7dfaf5bd2",
+            measurementId: "G-J0DC1K39NN"
+          };
+          if (!window.firebase) return;
+          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          const auth = firebase.auth();
+          try {
+            const params = new URLSearchParams(window.location.search);
+            const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+            const useEmu = isLocalhost && (params.get('emulator') === '1' || localStorage.getItem('USE_FIREBASE_EMULATOR') === '1');
+            if (useEmu) auth.useEmulator && auth.useEmulator('http://localhost:9099/');
+          } catch (e) {}
+          async function enforceProfile(user) {
+            if (!user) {
+              window.location.replace('/login.html');
+              return;
+            }
+            try {
+              const idToken = await user.getIdToken();
+              const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
+              const resp = await fetch(apiBase + '/api/me', { headers: { Authorization: 'Bearer ' + idToken } });
+              if (!resp.ok) {
+                window.location.replace('/onboarding.html');
+                return;
+              }
+              const profile = await resp.json();
+              if (!profile || !profile.profileComplete || !profile.ageVerified) {
+                window.location.replace('/onboarding.html');
+                return;
+              }
+            } catch (e) {
+              window.location.replace('/onboarding.html');
+            }
+          }
+
+          auth.onAuthStateChanged(async (user) => {
+            if (user) {
+              // trigger canonical profile sync which will broadcast balances
+              try { if (typeof syncUserProfile === 'function') await syncUserProfile(); } catch (e) {}
+            }
+            enforceProfile(user);
+          });
+
+          window.addEventListener('pageshow', () => {
+            if (auth.currentUser) {
+              enforceProfile(auth.currentUser);
+              return;
+            }
+            const unsub = auth.onAuthStateChanged((user) => {
+              try { unsub && unsub(); } catch (e) {}
+              enforceProfile(user);
+            });
+          });
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
+    <script>
+      (function () {
+        const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
+        const listEl = document.getElementById('playerLeaderboardList');
+        if (!listEl) return;
+
+        async function getAuthHeaders() {
+          const headers = {};
+          try {
+            if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+              const idToken = await firebase.auth().currentUser.getIdToken();
+              headers.Authorization = 'Bearer ' + idToken;
+              return headers;
+            }
+          } catch (e) {}
+          const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+          const devUid = localStorage.getItem('DEV_AUTH_UID') || (isLocalhost ? 'test-user-123' : null);
+          if (devUid) headers['x-dev-uid'] = devUid;
+          return headers;
+        }
+
+        function renderRows(players) {
+          const podiumEl = document.getElementById('playerLeaderboardPodium');
+          if (!players || players.length === 0) {
+            listEl.innerHTML = '<div class="px-4 py-4 text-sm text-slate-400">No leaderboard data yet.</div>';
+            if (podiumEl) podiumEl.innerHTML = '';
+            return;
+          }
+          listEl.innerHTML = '';
+          if (podiumEl) podiumEl.innerHTML = '';
+
+          // Filter valid players first
+          const validPlayers = [];
+          players.forEach((player) => {
+            const nameRaw = String(player.name || '').trim();
+            if (!nameRaw || nameRaw.includes('@') || nameRaw !== nameRaw.toUpperCase()) return;
+            if (!/^[A-Z0-9_.]+$/.test(nameRaw)) return;
+            validPlayers.push(player);
+          });
+          if (!validPlayers.length) {
+            listEl.innerHTML = '<div class="px-4 py-4 text-sm text-slate-400">No leaderboard data yet.</div>';
+            return;
+          }
+
+          // Top 3 → podium cards
+          const top3 = validPlayers.slice(0, 3);
+          if (podiumEl && top3.length >= 3) {
+            top3.forEach((player, i) => {
+              const rank = i + 1;
+              const name = String(player.name || '').trim();
+              const avatarId = player.avatarId || '';
+              const points = Number(player.points || 0);
+
+              const card = document.createElement('div');
+              card.className = `lb-podium-card lb-podium-card--${rank}`;
+
+              const badge = document.createElement('div');
+              badge.className = `lb-rank-badge lb-rank-badge--${rank}`;
+              badge.textContent = rank === 1 ? '\u{1F451}' : String(rank);
+
+              const avatarEl = document.createElement('div');
+              avatarEl.className = 'pickr-avatar';
+              avatarEl.setAttribute('data-size', rank === 1 ? '48' : '40');
+              if (avatarId) avatarEl.setAttribute('data-avatar-id', avatarId);
+              if (window.PickrApp && typeof window.PickrApp.renderAvatar === 'function') {
+                window.PickrApp.renderAvatar(avatarEl, avatarId || 'avatar-1');
+              }
+
+              const nameEl = document.createElement('div');
+              nameEl.className = 'lb-podium-name';
+              nameEl.textContent = name;
+
+              const ptsEl = document.createElement('div');
+              ptsEl.className = 'lb-podium-pts';
+              ptsEl.textContent = points.toLocaleString();
+
+              const subEl = document.createElement('div');
+              subEl.className = 'lb-podium-sub';
+              subEl.textContent = 'points';
+
+              card.appendChild(badge);
+              card.appendChild(avatarEl);
+              card.appendChild(nameEl);
+              card.appendChild(ptsEl);
+              card.appendChild(subEl);
+              podiumEl.appendChild(card);
+            });
+          }
+
+          // Remaining players → clean rows
+          const startIdx = (podiumEl && top3.length >= 3) ? 3 : 0;
+          validPlayers.slice(startIdx).forEach((player, i) => {
+            const rank = startIdx + i + 1;
+            const name = String(player.name || '').trim();
+            const avatarId = player.avatarId || '';
+            const points = Number(player.points || 0);
+            const wins = Number(player.wins || 0);
+            const streak = Number(player.streakWins || 0);
+
+            const row = document.createElement('div');
+            row.className = 'lb-row';
+
+            const rankEl = document.createElement('div');
+            rankEl.className = 'lb-row-rank';
+            rankEl.textContent = String(rank);
+
+            const playerEl = document.createElement('div');
+            playerEl.className = 'lb-row-player';
+            const avatarEl = document.createElement('div');
+            avatarEl.className = 'pickr-avatar';
+            avatarEl.setAttribute('data-size', '32');
+            if (avatarId) avatarEl.setAttribute('data-avatar-id', avatarId);
+            if (window.PickrApp && typeof window.PickrApp.renderAvatar === 'function') {
+              window.PickrApp.renderAvatar(avatarEl, avatarId || 'avatar-1');
+            }
+            const nameText = document.createElement('span');
+            nameText.className = 'lb-row-name';
+            nameText.textContent = name;
+            playerEl.appendChild(avatarEl);
+            playerEl.appendChild(nameText);
+
+            const ptsEl = document.createElement('div');
+            ptsEl.className = 'lb-row-pts';
+            ptsEl.textContent = points.toLocaleString();
+
+            const winsEl = document.createElement('div');
+            winsEl.className = 'lb-row-stat';
+            winsEl.innerHTML = `<span class="text-slate-300">${wins}</span><span class="text-[10px] text-slate-500 block">wins</span>`;
+
+            const streakEl = document.createElement('div');
+            streakEl.className = 'lb-row-stat';
+            streakEl.innerHTML = `<span class="text-slate-300">${streak}</span><span class="text-[10px] text-slate-500 block">streak</span>`;
+
+            row.appendChild(rankEl);
+            row.appendChild(playerEl);
+            row.appendChild(ptsEl);
+            row.appendChild(winsEl);
+            row.appendChild(streakEl);
+            listEl.appendChild(row);
+          });
+          if (window.PickrApp && typeof window.PickrApp.refreshAvatars === 'function') {
+            window.PickrApp.refreshAvatars();
+          }
+        }
+
+        async function loadLeaderboard() {
+          try {
+            listEl.innerHTML = '<div class="px-4 py-4 text-sm text-slate-400">Loading players...</div>';
+            const headers = await getAuthHeaders();
+            const res = await fetch(apiBase + '/api/leaderboard/players?limit=10', { headers });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data && data.error ? data.error : 'Failed to load leaderboard');
+            renderRows(data.players || []);
+          } catch (err) {
+            listEl.innerHTML = '<div class="px-4 py-4 text-sm text-red-400">Failed to load leaderboard.</div>';
+          }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+          loadLeaderboard();
+          setInterval(loadLeaderboard, 15 * 60 * 1000);
+        });
+      })();
+    </script>
+    <script src="script.js?v=20260327-spinfix"></script>
+    <script>
+      (function () {
+        // Robust leaderboard header sync: wait for syncUserProfile if needed,
+        // fallback to draft/localStorage, and listen for balance events.
+        async function ensureAndSync() {
+          try {
+            // wait briefly for syncUserProfile to be available (if it's loaded async)
+            let tries = 0;
+            while (tries < 20 && typeof syncUserProfile !== 'function' && !window.userProfile) {
+              // eslint-disable-next-line no-await-in-loop
+              await new Promise((r) => setTimeout(r, 150));
+              tries++;
+            }
+
+            let data = null;
+            if (typeof syncUserProfile === 'function') {
+              try { data = await syncUserProfile(); } catch (e) { /* ignore */ }
+            }
+
+            // Resolve tokens/cash from the best available source. Prefer server
+            // authoritative values when present (even if zero). Only use the
+            // onboarding draft as a temporary placeholder when server data is
+            // not available. Do NOT fall back to stale localStorage tokens.
+            const draft = (function(){ try { const d = localStorage.getItem('LAST_PROFILE_DRAFT'); return d ? JSON.parse(d) : null; } catch(e){ return null; } })();
+            let tokens = 0;
+            if (data && (typeof data.tokens !== 'undefined' || typeof data.tokenBalance !== 'undefined')) {
+              tokens = Number(typeof data.tokens !== 'undefined' ? data.tokens : data.tokenBalance || 0);
+            } else if (window.userProfile && typeof window.userProfile.tokens !== 'undefined') {
+              tokens = Number(window.userProfile.tokens || 0);
+            } else if (draft && (typeof draft.tokens !== 'undefined' || typeof draft.tokenBalance !== 'undefined')) {
+              tokens = Number(typeof draft.tokens !== 'undefined' ? draft.tokens : draft.tokenBalance || 0);
+            }
+            let cash = 0;
+            if (data && typeof data.cash !== 'undefined') {
+              cash = Number(data.cash || 0);
+            } else if (window.userProfile && typeof window.userProfile.cash !== 'undefined') {
+              cash = Number(window.userProfile.cash || 0);
+            } else if (draft && typeof draft.cash !== 'undefined') {
+              cash = Number(draft.cash || 0);
+            }
+
+            if (typeof updateBalances === 'function') {
+              updateBalances(Number(tokens || 0), Number(cash || 0));
+            } else {
+              // Manual DOM fallback
+              try {
+                document.querySelectorAll('.tokens').forEach(el => el.textContent = String(tokens || 0));
+                document.querySelectorAll('.cash').forEach(el => el.textContent = `$${Number(cash || 0).toFixed(2)}`);
+              } catch (e) {}
+            }
+          } catch (e) { /* noop */ }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { ensureAndSync(); });
+
+        // When other pages update balances, refresh our header too.
+        try {
+          window.addEventListener('pickr:balances-updated', (e) => {
+            try {
+              if (typeof refreshHeaders === 'function') return refreshHeaders();
+              const d = (e && e.detail) || {};
+              const t = typeof d.tokens !== 'undefined' ? String(d.tokens) : (window.userProfile && String(window.userProfile.tokens)) || '0';
+              const c = typeof d.cash !== 'undefined' ? `$${Number(d.cash).toFixed(2)}` : (window.userProfile && typeof window.userProfile.cash !== 'undefined' ? `$${Number(window.userProfile.cash).toFixed(2)}` : '$0');
+              document.querySelectorAll('.tokens').forEach(el => el.textContent = t);
+              document.querySelectorAll('.cash').forEach(el => el.textContent = c);
+            } catch (err) { /* ignore */ }
+          });
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
+    <script>
+      (function () {
+        // Enhanced picks rendering for Pickr Picks page
+        const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
+        const API = apiBase + '/api/dailyPicks';
+        const GAME_APIS = {
+          nba: apiBase + '/api/games/nba',
+          nhl: apiBase + '/api/games/nhl',
+          nfl: apiBase + '/api/games/nfl',
+          mlb: apiBase + '/api/games/mlb',
+          soccer: apiBase + '/api/games/soccer'
+        };
+        const MAX_PICKS = 50;
+
+        const container = document.getElementById('dailyPicksContainer');
+        const nextUpdateEl = document.getElementById('nextUpdate');
+        const leagueTabs = document.getElementById('leagueTabs');
+        const sortSelect = document.getElementById('sortSelect');
+
+        if (!container) return;
+
+        // Small utility helpers
+        const slugify = (str = '') => String(str).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const formatDate = (iso) => {
+          try { const d = new Date(iso); return d.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }); } catch (e) { return iso; }
+        };
+        const toMillis = (value) => {
+          if (!value) return 0;
+          if (typeof value === 'number') return value > 1e12 ? value : value * 1000;
+          if (typeof value === 'string') {
+            const parsed = Date.parse(value);
+            return Number.isFinite(parsed) ? parsed : 0;
+          }
+          if (typeof value === 'object') {
+            const seconds = value.seconds ?? value._seconds;
+            const nanos = value.nanoseconds ?? value._nanoseconds;
+            if (typeof seconds === 'number') return seconds * 1000 + Math.floor((nanos || 0) / 1e6);
+          }
+          return 0;
+        };
+
+        const normalizeLogoSportKey = (sportKey) => {
+          const key = String(sportKey || '').toLowerCase();
+          if (key.includes('nba')) return 'nba';
+          if (key.includes('nfl') || key.includes('football')) return 'nfl';
+          if (key.includes('nhl') || key.includes('hockey')) return 'nhl';
+          if (key.includes('mlb') || key.includes('baseball')) return 'mlb';
+          if (key.includes('soccer') || key.includes('fifa')) return 'soccer';
+          return '';
+        };
+
+        const normalizeTeamName = (name) => String(name || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        const applyTeamLogo = (imgEl, teamName, sportKey) => {
+          if (!imgEl || !teamName) return;
+          const fallback = '/images/logos/logo-placeholder.png';
+          const sportParam = normalizeLogoSportKey(sportKey);
+          // Use server ESPN-backed logo proxy for all sports
+          const sportQuery = sportParam ? `&sport=${encodeURIComponent(sportParam)}` : '';
+          const proxyUrl = `${apiBase}/api/teams/logo/image?name=${encodeURIComponent(teamName)}&league=12&season=2024${sportQuery}&ts=${Date.now()}`;
+          imgEl.src = fallback;
+          imgEl.onerror = () => { imgEl.src = fallback; };
+          imgEl.src = proxyUrl;
+        };
+        const insightSeen = new Set();
+
+        async function trackInsightView(pick) {
+          const key = pick && (pick.id || pick.match_id || pick.commence_time || pick.pickTeam || pick.recommended || '')
+            ? String(pick.id || pick.match_id || pick.commence_time || pick.pickTeam || pick.recommended)
+            : null;
+          if (!key || insightSeen.has(key)) return;
+          insightSeen.add(key);
+          try {
+            const headers = await getAuthHeaders();
+            const resp = await fetch(apiBase + '/api/insights/view', {
+              method: 'POST',
+              headers: Object.assign({ 'Content-Type': 'application/json' }, headers),
+              body: JSON.stringify({})
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (data && data.dailyInsights && window.userProfile) {
+              window.userProfile.dailyInsights = data.dailyInsights;
+              if (typeof updateQuestTasks === 'function') updateQuestTasks(window.userProfile);
+            }
+          } catch (e) {
+            // ignore tracking failures
+          }
+        }
+
+        // Compute confidence score — multi-factor using real ESPN data
+        function computeConfidence(pick) {
+          // if explicit confidence 0-1 or 0-100
+          if (typeof pick.confidence === 'number') return pick.confidence > 1 ? pick.confidence / 100 : pick.confidence;
+
+          let factors = [];
+          let weights = [];
+
+          // Factor 1: Implied probability from odds (always available)
+          const d = pick.displayOdds || pick.odds || {};
+          const vals = [];
+          if (d.home) vals.push(1 / parseFloat(d.home));
+          if (d.draw) vals.push(1 / parseFloat(d.draw));
+          if (d.away) vals.push(1 / parseFloat(d.away));
+          let oddsProb = 0.5;
+          if (vals.length) {
+            const sum = vals.reduce((s, v) => s + (isFinite(v) ? v : 0), 0);
+            const recommended = pick.pickTeam || pick.recommended;
+            if (recommended && d.home && String(pick.home_team) === String(recommended)) oddsProb = (1 / parseFloat(d.home)) / sum;
+            else if (recommended && d.away && String(pick.away_team) === String(recommended)) oddsProb = (1 / parseFloat(d.away)) / sum;
+            else oddsProb = Math.max(...vals) / sum;
+          }
+          factors.push(oddsProb);
+          weights.push(0.40);
+
+          // Factor 2: Win rate from season record
+          const rec = pick.pickTeam === pick.home_team ? pick.homeTeamRecord : pick.awayTeamRecord;
+          if (rec) {
+            const parts = rec.split('-').map(Number);
+            if (parts.length >= 2 && (parts[0] + parts[1]) > 0) {
+              const winRate = parts[0] / (parts[0] + parts[1]);
+              factors.push(winRate);
+              weights.push(0.25);
+            }
+          }
+
+          // Factor 3: Home/away split advantage
+          const splitRec = pick.pickTeam === pick.home_team ? pick.homeRecord : pick.awayRecord;
+          if (splitRec) {
+            const sp = splitRec.split('-').map(Number);
+            if (sp.length >= 2 && (sp[0] + sp[1]) > 0) {
+              const splitWin = sp[0] / (sp[0] + sp[1]);
+              factors.push(splitWin);
+              weights.push(0.20);
+            }
+          }
+
+          // Factor 4: Recent form momentum
+          const form = pick.pickTeam === pick.home_team
+            ? (pick.recentForm && pick.recentForm.home || [])
+            : (pick.recentForm && pick.recentForm.away || []);
+          if (form.length >= 3) {
+            const wins = form.filter(r => r === 'W').length;
+            const formScore = wins / form.length;
+            factors.push(formScore);
+            weights.push(0.15);
+          }
+
+          // Weighted average
+          if (factors.length <= 1) return oddsProb; // fallback to odds only
+          const totalWeight = weights.reduce((s, w) => s + w, 0);
+          const weighted = factors.reduce((s, f, i) => s + f * weights[i], 0) / totalWeight;
+          return Math.max(0.05, Math.min(0.95, weighted));
+        }
+
+        function confidenceLabel(score) {
+          if (score >= 0.66) return { text: 'High', color: 'bg-green-500' };
+          if (score >= 0.4) return { text: 'Medium', color: 'bg-yellow-500' };
+          return { text: 'Low', color: 'bg-red-500' };
+        }
+
+        function valueScore(pick, conf) {
+          // prefer explicit value; otherwise approximate by (odds - 1) * prob
+          const val = pick.value || pick.valueScore || pick.pickTeamValue;
+          if (typeof val === 'number') return val;
+          const odds = (pick.displayOdds && (pick.displayOdds.home || pick.displayOdds.away)) || pick.oddsDecimal || null;
+          const o = parseFloat(odds) || (pick.pickTeamValue ? parseFloat(pick.pickTeamValue) : NaN);
+          if (isFinite(o) && conf) return (o - 1) * conf;
+          return 0;
+        }
+
+        function formatPercent(value) {
+          const num = Number(value);
+          if (!Number.isFinite(num)) return '0.00';
+          return num.toFixed(2);
+        }
+
+        // Convert decimal odds to American format string
+        // Global odds format: 'american' (default) or 'decimal'
+        let oddsFormat = 'american';
+
+        function decimalToAmerican(dec) {
+          const d = parseFloat(dec);
+          if (!Number.isFinite(d) || d <= 1) return null;
+          if (d >= 2.0) return '+' + Math.round((d - 1) * 100);
+          return String(Math.round(-100 / (d - 1)));
+        }
+
+        function americanToDecimal(ml) {
+          const n = Number(ml);
+          if (!Number.isFinite(n)) return null;
+          if (n > 0) return (n / 100 + 1).toFixed(2);
+          if (n < 0) return (100 / Math.abs(n) + 1).toFixed(2);
+          return null;
+        }
+
+        // Format moneyline in current oddsFormat
+        function fmtML(ml) {
+          if (ml === null || ml === undefined) return '—';
+          const n = Number(ml);
+          if (!Number.isFinite(n)) return String(ml);
+          if (oddsFormat === 'decimal') {
+            const dec = americanToDecimal(n);
+            return dec || String(n);
+          }
+          return n > 0 ? '+' + n : String(n);
+        }
+
+        // Get decimal odds value for a team directly
+        function getDecimalOdds(pick, side) {
+          const d = pick.displayOdds || {};
+          return side === 'home' ? d.home : d.away;
+        }
+
+        // Get current streak from form array (most recent first)
+        function getStreak(formArr) {
+          if (!formArr || formArr.length === 0) return null;
+          const first = formArr[0];
+          if (first !== 'W' && first !== 'L') return null;
+          let count = 0;
+          for (const r of formArr) {
+            if (r === first) count++;
+            else break;
+          }
+          return { type: first, count };
+        }
+
+        // Extract win percentage from record string like "45-30"
+        function getWinPct(record) {
+          if (!record) return null;
+          const parts = record.split('-').map(Number);
+          if (parts.length < 2 || (parts[0] + parts[1]) === 0) return null;
+          return parts[0] / (parts[0] + parts[1]);
+        }
+
+        /**
+         * Build real insight pack from ESPN data (replaces old fake seeded data)
+         */
+        function getRealInsights(pick) {
+          const insights = [];
+          const recommended = pick.pickTeam || pick.recommended || '';
+          const isHome = recommended === pick.home_team;
+
+          // Season record comparison
+          const homeRec = pick.homeTeamRecord;
+          const awayRec = pick.awayTeamRecord;
+          if (homeRec && awayRec) {
+            insights.push({ icon: '📊', label: 'Season Record', value: `${pick.home_team ? pick.home_team.split(' ').pop() : 'Home'} ${homeRec}  vs  ${pick.away_team ? pick.away_team.split(' ').pop() : 'Away'} ${awayRec}` });
+          } else if (homeRec || awayRec) {
+            const rec = homeRec || awayRec;
+            const team = homeRec ? (pick.home_team || 'Home') : (pick.away_team || 'Away');
+            insights.push({ icon: '📊', label: 'Season Record', value: `${team.split(' ').pop()} ${rec}` });
+          }
+
+          // Home/away split
+          const splitRec = isHome ? pick.homeRecord : pick.awayRecord;
+          if (splitRec) {
+            insights.push({ icon: '🏟️', label: isHome ? 'Home Record' : 'Away Record', value: splitRec });
+          }
+
+          // Recent form
+          const form = isHome
+            ? (pick.recentForm && pick.recentForm.home || [])
+            : (pick.recentForm && pick.recentForm.away || []);
+          if (form.length >= 1) {
+            // Show W-L count from recent form
+            const w = form.filter(r => r === 'W').length;
+            const l = form.filter(r => r === 'L').length;
+            const d = form.filter(r => r === 'D').length;
+            let formStr = `${w}W-${l}L`;
+            if (d > 0) formStr += `-${d}D`;
+            formStr += ` (last ${form.length})`;
+            insights.push({ icon: '🔥', label: 'Recent Form', value: formStr, form: form.slice(0, 5) });
+          }
+
+          // ESPN spread
+          const espnOdds = pick.espnOdds || {};
+          if (espnOdds.spread) {
+            insights.push({ icon: '📈', label: 'Spread', value: espnOdds.spread });
+          }
+
+          // ESPN O/U
+          if (espnOdds.overUnder) {
+            insights.push({ icon: '🎯', label: 'Over/Under', value: String(espnOdds.overUnder) });
+          }
+
+          // Venue
+          if (pick.venue) {
+            insights.push({ icon: '📍', label: 'Venue', value: pick.venue });
+          }
+
+          return insights;
+        }
+
+        // UI helpers
+        function renderSkeletons(count = 6) {
+          container.innerHTML = '';
+          for (let i = 0; i < count; i++) {
+            const s = document.createElement('div');
+            s.className = 'animate-pulse bg-gray-800 rounded-lg p-4 h-36';
+            container.appendChild(s);
+          }
+        }
+
+        function renderEmpty() {
+          container.innerHTML = '<div class="p-6 text-center text-gray-400">No picks available right now. Check back later.</div>';
+        }
+
+        function createCard(pick, options = {}) {
+          const conf = computeConfidence(pick);
+          const confBadge = confidenceLabel(conf);
+          const isLock = options.isLock || false;
+
+          // Determine recommended pick
+          let recommended = pick.pickTeam || pick.recommended || '';
+          if (!recommended && pick.displayOdds) {
+            const opts = [];
+            if (pick.displayOdds.home) opts.push({ team: pick.home_team, odds: parseFloat(pick.displayOdds.home) });
+            if (pick.displayOdds.draw) opts.push({ team: 'Draw', odds: parseFloat(pick.displayOdds.draw) });
+            if (pick.displayOdds.away) opts.push({ team: pick.away_team, odds: parseFloat(pick.displayOdds.away) });
+            const inv = opts.map(o => ({ ...o, imp: o.odds ? 1 / o.odds : 0 })).filter(o => o.imp > 0);
+            if (inv.length) {
+              const sum = inv.reduce((s, x) => s + x.imp, 0) || 1;
+              inv.forEach(x => x.prob = x.imp / sum);
+              inv.sort((a, b) => b.prob - a.prob);
+              recommended = inv[0].team || '';
+            }
+          }
+          const isPickHome = recommended === pick.home_team;
+          const espnOdds = pick.espnOdds || {};
+
+          const card = document.createElement('article');
+          card.className = isLock
+            ? 'lock-card rounded-2xl p-5 shadow-lg transition-transform duration-150'
+            : 'pick-card rounded-xl p-5 shadow-sm transition-transform duration-150';
+
+          // --- Header: league chip + game time ---
+          const top = document.createElement('div');
+          top.className = 'flex items-center justify-between mb-3';
+          const leagueChip = document.createElement('span');
+          leagueChip.className = 'text-[10px] uppercase tracking-[0.15em] font-semibold px-2.5 py-1 rounded-full';
+          leagueChip.style.cssText = isLock
+            ? 'background:rgba(255,180,60,0.18);color:#ffd073;border:1px solid rgba(255,180,60,0.4);'
+            : 'background:rgba(122,167,255,0.14);color:#a5c4ff;border:1px solid rgba(122,167,255,0.3);';
+          leagueChip.textContent = [pick.league || pick.sport || 'NBA', pick.marketLabel || 'Moneyline'].filter(Boolean).join(' · ');
+          const timeEl = document.createElement('div');
+          timeEl.className = 'text-xs text-slate-400';
+          timeEl.textContent = formatDate(pick.commence_time || pick.startTime || pick.date || '');
+          top.appendChild(leagueChip);
+          top.appendChild(timeEl);
+          card.appendChild(top);
+
+          // --- Matchup: teams + records + win% + streaks ---
+          const matchup = document.createElement('div');
+          matchup.className = 'flex items-center justify-center gap-3 sm:gap-5 py-2';
+
+          function buildTeamCol(teamName, record, form, isPicked) {
+            const col = document.createElement('div');
+            col.className = 'flex flex-col items-center gap-1 flex-1 min-w-0';
+            // Logo
+            const logoWrap = document.createElement('div');
+            logoWrap.className = 'w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-800/80 flex items-center justify-center overflow-hidden';
+            logoWrap.style.border = isPicked ? '2px solid rgba(64,217,181,0.5)' : '1px solid rgba(255,255,255,0.1)';
+            if (isPicked) logoWrap.style.boxShadow = '0 0 12px rgba(64,217,181,0.15)';
+            const logo = document.createElement('img');
+            logo.alt = teamName || '';
+            logo.className = 'w-9 h-9 sm:w-11 sm:h-11 object-contain';
+            applyTeamLogo(logo, teamName || '', pick.sport_key || pick.sport || pick.league || '');
+            logoWrap.appendChild(logo);
+            col.appendChild(logoWrap);
+            // Name
+            const nm = document.createElement('div');
+            nm.className = 'text-xs sm:text-sm font-semibold text-center truncate max-w-full';
+            nm.style.color = isPicked ? '#7de6c9' : '#e2e8f0';
+            nm.textContent = teamName || '';
+            col.appendChild(nm);
+            // Record + Win%
+            if (record) {
+              const pct = getWinPct(record);
+              const recEl = document.createElement('div');
+              recEl.className = 'text-[10px] font-mono';
+              recEl.style.color = '#94a3b8';
+              recEl.textContent = pct !== null ? record + ' (' + (pct * 100).toFixed(0) + '%)' : record;
+              col.appendChild(recEl);
+            }
+            // Streak badge
+            const streak = getStreak(form || []);
+            if (streak && streak.count >= 2) {
+              const sEl = document.createElement('div');
+              sEl.className = 'text-[10px] font-bold mt-0.5 px-1.5 py-0.5 rounded-full';
+              if (streak.type === 'W') {
+                sEl.style.cssText = 'background:rgba(34,197,94,0.15);color:#4ade80;';
+                sEl.textContent = '\uD83D\uDD25 ' + streak.count + 'W Streak';
+              } else {
+                sEl.style.cssText = 'background:rgba(239,68,68,0.15);color:#f87171;';
+                sEl.textContent = '\u2744\uFE0F ' + streak.count + 'L Streak';
+              }
+              col.appendChild(sEl);
+            }
+            return col;
+          }
+
+          const awayCol = buildTeamCol(pick.away_team, pick.awayTeamRecord,
+            pick.recentForm && pick.recentForm.away, recommended === pick.away_team);
+          const vsEl = document.createElement('div');
+          vsEl.className = 'flex-shrink-0 text-[10px] font-bold uppercase tracking-widest';
+          vsEl.style.color = '#475569';
+          vsEl.textContent = 'VS';
+          const homeCol = buildTeamCol(pick.home_team, pick.homeTeamRecord,
+            pick.recentForm && pick.recentForm.home, recommended === pick.home_team);
+          matchup.appendChild(awayCol);
+          matchup.appendChild(vsEl);
+          matchup.appendChild(homeCol);
+          card.appendChild(matchup);
+
+          // Determine American moneylines (for pick recommendation)
+          let homeMLVal = espnOdds.homeML;
+          let awayMLVal = espnOdds.awayML;
+          if (!homeMLVal && pick.displayOdds && pick.displayOdds.home) homeMLVal = decimalToAmerican(pick.displayOdds.home);
+          if (!awayMLVal && pick.displayOdds && pick.displayOdds.away) awayMLVal = decimalToAmerican(pick.displayOdds.away);
+
+          // --- Matchup Intel Section (always shows data) ---
+          {
+            const awayShortI = (pick.away_team || '').split(' ').pop();
+            const homeShortI = (pick.home_team || '').split(' ').pop();
+
+            const intelSection = document.createElement('div');
+            intelSection.className = 'stats-compare mb-3';
+
+            // Header
+            const intelHead = document.createElement('div');
+            intelHead.className = 'stats-compare-header';
+            const ihLbl = document.createElement('span');
+            ihLbl.textContent = '\uD83D\uDCCA STAT';
+            const ihAway = document.createElement('span');
+            ihAway.style.textAlign = 'center';
+            ihAway.textContent = awayShortI;
+            const ihHome = document.createElement('span');
+            ihHome.style.textAlign = 'center';
+            ihHome.textContent = homeShortI;
+            intelHead.appendChild(ihLbl);
+            intelHead.appendChild(ihAway);
+            intelHead.appendChild(ihHome);
+            intelSection.appendChild(intelHead);
+
+            // Row helper
+            const addIntelRow = (label, awayVal, homeVal, higherIsBetter) => {
+              const row = document.createElement('div');
+              row.className = 'stats-compare-row';
+              const rl = document.createElement('span');
+              rl.className = 'scr-label';
+              rl.textContent = label;
+              const rv1 = document.createElement('span');
+              rv1.className = 'scr-val';
+              rv1.textContent = awayVal;
+              const rv2 = document.createElement('span');
+              rv2.className = 'scr-val';
+              rv2.textContent = homeVal;
+              const av = parseFloat(String(awayVal).replace(/[^0-9.\-]/g, ''));
+              const hv = parseFloat(String(homeVal).replace(/[^0-9.\-]/g, ''));
+              if (higherIsBetter !== null && Number.isFinite(av) && Number.isFinite(hv) && av !== hv) {
+                const awayBetter = higherIsBetter ? av > hv : av < hv;
+                if (awayBetter) { rv1.style.color = '#4ade80'; rv2.style.color = '#94a3b8'; }
+                else { rv2.style.color = '#4ade80'; rv1.style.color = '#94a3b8'; }
+              } else {
+                rv1.style.color = '#e2e8f0'; rv2.style.color = '#e2e8f0';
+              }
+              row.appendChild(rl); row.appendChild(rv1); row.appendChild(rv2);
+              intelSection.appendChild(row);
+            };
+
+            // --- Always-available rows ---
+            // Record
+            const awayRec = pick.awayTeamRecord || '';
+            const homeRec = pick.homeTeamRecord || '';
+            if (awayRec || homeRec) {
+              addIntelRow('RECORD', awayRec || '\u2014', homeRec || '\u2014', null);
+            }
+
+            // Win %
+            const awayWPct = getWinPct(awayRec);
+            const homeWPct = getWinPct(homeRec);
+            if (awayWPct !== null || homeWPct !== null) {
+              addIntelRow('WIN %',
+                awayWPct !== null ? (awayWPct * 100).toFixed(1) + '%' : '\u2014',
+                homeWPct !== null ? (homeWPct * 100).toFixed(1) + '%' : '\u2014',
+                true);
+            }
+
+            // Home/Away splits (away team's road record vs home team's home record)
+            const awaySplit = pick.awayRecord || '';
+            const homeSplit = pick.homeRecord || '';
+            if (awaySplit || homeSplit) {
+              addIntelRow('H/A REC', awaySplit || '\u2014', homeSplit || '\u2014', null);
+            }
+
+            // Recent form
+            const awayForm = (pick.recentForm && pick.recentForm.away) || [];
+            const homeForm = (pick.recentForm && pick.recentForm.home) || [];
+            if (awayForm.length > 0 || homeForm.length > 0) {
+              const aW = awayForm.filter(r => r === 'W').length;
+              const aL = awayForm.filter(r => r === 'L').length;
+              const hW = homeForm.filter(r => r === 'W').length;
+              const hL = homeForm.filter(r => r === 'L').length;
+              const n = Math.max(awayForm.length, homeForm.length);
+              addIntelRow('LAST ' + n,
+                awayForm.length > 0 ? aW + 'W-' + aL + 'L' : '\u2014',
+                homeForm.length > 0 ? hW + 'W-' + hL + 'L' : '\u2014',
+                true);
+            }
+
+            // Moneyline odds row
+            const awayMLI = espnOdds.awayML || (pick.displayOdds && pick.displayOdds.away ? decimalToAmerican(pick.displayOdds.away) : null);
+            const homeMLI = espnOdds.homeML || (pick.displayOdds && pick.displayOdds.home ? decimalToAmerican(pick.displayOdds.home) : null);
+            if (awayMLI || homeMLI) {
+              addIntelRow('ODDS', fmtML(awayMLI), fmtML(homeMLI), null);
+            }
+
+            card.appendChild(intelSection);
+          }
+
+          // --- ESPN Win Probability (if available) ---
+          const espnWP = pick.espnWinProb || {};
+          if (espnWP.home || espnWP.away) {
+            const wpRow = document.createElement('div');
+            wpRow.className = 'flex items-center justify-between mb-3 px-1';
+            const wpLabel = document.createElement('span');
+            wpLabel.className = 'text-[10px] uppercase tracking-widest font-semibold';
+            wpLabel.style.color = '#64748b';
+            wpLabel.textContent = 'ESPN WIN PROB';
+            wpRow.appendChild(wpLabel);
+            const wpVals = document.createElement('div');
+            wpVals.className = 'flex items-center gap-3 text-xs font-bold';
+            const awayWP = espnWP.away ? Math.round(parseFloat(espnWP.away) * 100) : null;
+            const homeWP = espnWP.home ? Math.round(parseFloat(espnWP.home) * 100) : null;
+            if (awayWP !== null) {
+              const awEl = document.createElement('span');
+              awEl.style.color = awayWP > (homeWP || 0) ? '#4ade80' : '#94a3b8';
+              awEl.textContent = (pick.away_team || '').split(' ').pop() + ' ' + awayWP + '%';
+              wpVals.appendChild(awEl);
+            }
+            if (homeWP !== null) {
+              const hmEl = document.createElement('span');
+              hmEl.style.color = homeWP > (awayWP || 0) ? '#4ade80' : '#94a3b8';
+              hmEl.textContent = (pick.home_team || '').split(' ').pop() + ' ' + homeWP + '%';
+              wpVals.appendChild(hmEl);
+            }
+            wpRow.appendChild(wpVals);
+            card.appendChild(wpRow);
+          }
+
+          // --- Pick Recommendation with American odds + Edge indicator ---
+          if (recommended) {
+            const pickML = isPickHome ? homeMLVal : awayMLVal;
+            const pickMLStr = fmtML(pickML);
+
+            // Calculate edge: actual win% minus implied probability (vig-removed)
+            const recWinPct = getWinPct(isPickHome ? pick.homeTeamRecord : pick.awayTeamRecord);
+            const impliedProb = (() => {
+              const d = pick.displayOdds || {};
+              const vals = [];
+              if (d.home) vals.push({ side: 'home', raw: 1 / parseFloat(d.home) });
+              if (d.draw) vals.push({ side: 'draw', raw: 1 / parseFloat(d.draw) });
+              if (d.away) vals.push({ side: 'away', raw: 1 / parseFloat(d.away) });
+              const sum = vals.reduce((s, v) => s + (isFinite(v.raw) ? v.raw : 0), 0);
+              if (!sum) return null;
+              const pickSide = isPickHome ? 'home' : 'away';
+              const match = vals.find(v => v.side === pickSide);
+              return match ? match.raw / sum : null;
+            })();
+            const edge = (recWinPct !== null && impliedProb !== null) ? recWinPct - impliedProb : null;
+
+            const recRow = document.createElement('div');
+            recRow.className = 'mt-1 mb-3 p-2.5 rounded-lg';
+            recRow.style.cssText = isLock
+              ? 'background:rgba(255,180,60,0.1);border:1px solid rgba(255,180,60,0.3);'
+              : 'background:rgba(64,217,181,0.08);border:1px solid rgba(64,217,181,0.2);';
+
+            const recInner = document.createElement('div');
+            recInner.className = 'flex items-center justify-between flex-wrap gap-2';
+
+            // Pick label
+            const recLabel = document.createElement('div');
+            recLabel.className = 'flex items-center gap-1.5 text-xs font-semibold';
+            recLabel.style.color = isLock ? '#ffd073' : '#7de6c9';
+            const starSpan = document.createElement('span');
+            starSpan.style.fontSize = '13px';
+            starSpan.textContent = '\u2605';
+            recLabel.appendChild(starSpan);
+            recLabel.appendChild(document.createTextNode(' PICK: '));
+            const recBold = document.createElement('strong');
+            recBold.textContent = recommended;
+            recLabel.appendChild(recBold);
+            // American odds tag
+            if (pickMLStr !== '\u2014') {
+              const oddsTag = document.createElement('span');
+              oddsTag.className = 'ml-1.5 px-2 py-0.5 rounded text-[11px] font-bold';
+              oddsTag.style.cssText = 'background:rgba(255,255,255,0.08);color:#e2e8f0;';
+              oddsTag.textContent = pickMLStr;
+              recLabel.appendChild(oddsTag);
+            }
+            recInner.appendChild(recLabel);
+
+            // Edge badge
+            if (edge !== null && Math.abs(edge) >= 0.01) {
+              const edgeBadge = document.createElement('span');
+              edgeBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full';
+              if (edge > 0.05) {
+                edgeBadge.style.cssText = 'background:rgba(34,197,94,0.18);color:#4ade80;';
+                edgeBadge.textContent = '\uD83D\uDD25 +' + (edge * 100).toFixed(1) + '% Edge';
+              } else if (edge > 0) {
+                edgeBadge.style.cssText = 'background:rgba(250,204,21,0.15);color:#fde047;';
+                edgeBadge.textContent = '+' + (edge * 100).toFixed(1) + '% Edge';
+              } else {
+                edgeBadge.style.cssText = 'background:rgba(239,68,68,0.12);color:#f87171;';
+                edgeBadge.textContent = (edge * 100).toFixed(1) + '% Edge';
+              }
+              recInner.appendChild(edgeBadge);
+            }
+
+            // Implied probability sub-line
+            if (impliedProb !== null) {
+              const probLine = document.createElement('div');
+              probLine.className = 'w-full text-[10px] mt-1';
+              probLine.style.color = '#64748b';
+              probLine.textContent = 'Implied prob: ' + (impliedProb * 100).toFixed(1) + '%'
+                + (recWinPct !== null ? '  \u2022  Actual win rate: ' + (recWinPct * 100).toFixed(1) + '%' : '');
+              recInner.appendChild(probLine);
+            }
+
+            recRow.appendChild(recInner);
+            card.appendChild(recRow);
+          }
+
+          // --- Confidence Bar (visual) ---
+          const confSection = document.createElement('div');
+          confSection.className = 'mb-3';
+          const confHeader = document.createElement('div');
+          confHeader.className = 'flex items-center justify-between mb-1.5';
+          const confLabelEl = document.createElement('span');
+          confLabelEl.className = 'text-[10px] uppercase tracking-widest font-semibold';
+          confLabelEl.style.color = '#94a3b8';
+          confLabelEl.textContent = 'Confidence';
+          const confValueEl = document.createElement('span');
+          confValueEl.className = 'text-xs font-bold';
+          const pct = Math.round(conf * 100);
+          const confColor = pct >= 66 ? '#4ade80' : pct >= 40 ? '#fde047' : '#f87171';
+          confValueEl.style.color = confColor;
+          confValueEl.textContent = pct + '% ' + confBadge.text;
+          confHeader.appendChild(confLabelEl);
+          confHeader.appendChild(confValueEl);
+
+          const confTrack = document.createElement('div');
+          confTrack.className = 'w-full h-2 rounded-full overflow-hidden';
+          confTrack.style.background = 'rgba(255,255,255,0.08)';
+          const confFill = document.createElement('div');
+          confFill.className = 'h-full rounded-full';
+          confFill.style.width = pct + '%';
+          confFill.style.transition = 'width 0.5s ease';
+          if (pct >= 66) confFill.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+          else if (pct >= 40) confFill.style.background = 'linear-gradient(90deg, #eab308, #fde047)';
+          else confFill.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
+          confTrack.appendChild(confFill);
+          confSection.appendChild(confHeader);
+          confSection.appendChild(confTrack);
+          card.appendChild(confSection);
+
+
+
+          // Track insight view on render
+          trackInsightView(pick);
+
+          return card;
+        }
+
+        // Determine next update time (use API metadata if present; fallback to next local midnight)
+        function getNextUpdateFromAPI(meta) {
+          if (!meta) {
+            const now = new Date(); const next = new Date(now);
+            next.setDate(now.getDate() + 1); next.setHours(0,0,0,0); return next;
+          }
+          if (meta.nextUpdate) return new Date(meta.nextUpdate);
+          if (meta.lastUpdated) { const d = new Date(meta.lastUpdated); d.setDate(d.getDate() + 1); d.setHours(0,0,0,0); return d; }
+          return null;
+        }
+
+        function startCountdown(toDate) {
+          if (!nextUpdateEl || !toDate) return;
+          function tick() {
+            const now = new Date(); let diff = Math.max(0, toDate - now);
+            const hrs = String(Math.floor(diff / (1000*60*60))).padStart(2,'0');
+            diff %= 1000*60*60;
+            const mins = String(Math.floor(diff / (1000*60))).padStart(2,'0');
+            diff %= 1000*60;
+            const secs = String(Math.floor(diff / 1000)).padStart(2,'0');
+            nextUpdateEl.textContent = `Next update: ${hrs}:${mins}:${secs}`;
+          }
+          tick(); clearInterval(window._pickrCountdown); window._pickrCountdown = setInterval(tick, 1000);
+        }
+
+        // Fetch and render picks with filters and sorting
+        async function getAuthHeaders() {
+          const headers = {};
+          try {
+            if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+              const idToken = await firebase.auth().currentUser.getIdToken();
+              headers.Authorization = 'Bearer ' + idToken;
+              return headers;
+            }
+          } catch (e) {
+            // ignore and fall back to dev header
+          }
+
+          const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+          const devUid = localStorage.getItem('DEV_AUTH_UID') || (isLocalhost ? 'test-user-123' : null);
+          if (devUid) headers['x-dev-uid'] = devUid;
+          return headers;
+        }
+
+        async function waitForAuthReady(timeoutMs = 5000) {
+          if (window.firebase && firebase.auth) {
+            if (firebase.auth().currentUser) return firebase.auth().currentUser;
+            return new Promise((resolve) => {
+              let done = false;
+              const timer = setTimeout(() => {
+                if (done) return;
+                done = true;
+                resolve(null);
+              }, timeoutMs);
+              const unsub = firebase.auth().onAuthStateChanged((user) => {
+                if (done) return;
+                done = true;
+                clearTimeout(timer);
+                try { unsub && unsub(); } catch (e) {}
+                resolve(user || null);
+              });
+            });
+          }
+          return null;
+        }
+
+        function formatLine(value) {
+          if (!Number.isFinite(value)) return '—';
+          const sign = value > 0 ? '+' : '';
+          return `${sign}${value}`;
+        }
+
+        function normalizeOdd(value) {
+          const num = Number(value);
+          if (!Number.isFinite(num) || num <= 1) return null;
+          return num;
+        }
+
+        function pickRecommendedByOdds(options) {
+          const valid = options
+            .map((option) => ({
+              ...option,
+              implied: option.odds && Number.isFinite(option.odds) ? 1 / option.odds : 0
+            }))
+            .filter((option) => option.implied > 0);
+          if (!valid.length) return null;
+          valid.sort((a, b) => b.implied - a.implied);
+          return valid[0];
+        }
+
+        function buildMoneylinePicks(games, sportLabel, sportKey) {
+          return (games || []).map((game) => {
+            const homeOdds = normalizeOdd(game && (game.moneyline && game.moneyline.home) || (game.odds && game.odds.moneyline && game.odds.moneyline.home));
+            const awayOdds = normalizeOdd(game && (game.moneyline && game.moneyline.away) || (game.odds && game.odds.moneyline && game.odds.moneyline.away));
+            const drawOdds = normalizeOdd(game && (game.moneyline && game.moneyline.draw) || (game.odds && game.odds.moneyline && game.odds.moneyline.draw));
+            const displayOdds = {};
+            if (Number.isFinite(homeOdds)) displayOdds.home = homeOdds;
+            if (Number.isFinite(awayOdds)) displayOdds.away = awayOdds;
+            if (Number.isFinite(drawOdds)) displayOdds.draw = drawOdds;
+            const options = [
+              { team: game.homeTeam, odds: homeOdds },
+              { team: game.awayTeam, odds: awayOdds }
+            ];
+            if (Number.isFinite(drawOdds)) options.push({ team: 'Draw', odds: drawOdds });
+            const recommended = pickRecommendedByOdds(options);
+            return {
+              id: `${sportKey}-${game.gameId || slugify(game.homeTeam || '')}-${slugify(game.awayTeam || '')}-ml`,
+              league: game.league || sportLabel,
+              sport_key: sportKey,
+              home_team: game.homeTeam,
+              away_team: game.awayTeam,
+              commence_time: game.startTime,
+              displayOdds,
+              oddsDisplay: recommended && Number.isFinite(recommended.odds) ? recommended.odds : null,
+              pickTeam: recommended && recommended.team ? recommended.team : '',
+              marketLabel: 'Moneyline',
+              // ESPN enrichment data
+              homeTeamRecord: game.homeTeamRecord || '',
+              awayTeamRecord: game.awayTeamRecord || '',
+              homeRecord: game.homeRecord || '',
+              awayRecord: game.awayRecord || '',
+              recentForm: game.recentForm || { home: [], away: [] },
+              espnOdds: game.espnOdds || {},
+              espnWinProb: game.espnWinProb || { home: null, away: null },
+              h2h: game.h2h || { wins: 0, losses: 0, draws: 0, games: [] },
+              teamStats: game.teamStats || { home: null, away: null },
+              venue: game.venue || '',
+              spreadData: (game.odds && game.odds.spread) || {},
+              totalsData: (game.odds && game.odds.totals) || {}
+            };
+          });
+        }
+
+        // Sport-specific window durations (ms)
+        const SPORT_WINDOWS = {
+          nba: 7 * 24 * 60 * 60 * 1000,
+          nhl: 14 * 24 * 60 * 60 * 1000,
+          nfl: 7 * 24 * 60 * 60 * 1000,
+          mlb: 3 * 24 * 60 * 60 * 1000,
+          soccer: 3 * 24 * 60 * 60 * 1000
+        };
+
+        async function fetchAndRender(sport = 'all', sortBy = 'confidence') {
+          try {
+            renderSkeletons(6);
+            let headers = await getAuthHeaders();
+            if (!headers.Authorization && !headers['x-dev-uid']) {
+              await waitForAuthReady();
+              headers = await getAuthHeaders();
+            }
+            let picks = [];
+            let meta = null;
+            const sportMap = {
+              'nba-moneyline': { key: 'nba', label: 'NBA' },
+              'nhl-moneyline': { key: 'nhl', label: 'NHL' },
+              'nfl-moneyline': { key: 'nfl', label: 'NFL' },
+              'mlb-moneyline': { key: 'mlb', label: 'MLB' },
+              'soccer-moneyline': { key: 'soccer', label: 'Soccer' }
+            };
+            const sportInfo = sportMap[sport];
+            if (sportInfo) {
+              const url = GAME_APIS[sportInfo.key];
+              const res = await fetch(`${url}?ts=${Date.now()}`, { headers, cache: 'no-store' });
+              if (res.status === 401) {
+                container.innerHTML = '<div class="p-6 text-center text-red-600">Please sign in again to load picks.</div>';
+                return;
+              }
+              const data = await res.json();
+              const games = Array.isArray(data) ? data : (Array.isArray(data.games) ? data.games : []);
+              picks = buildMoneylinePicks(games, sportInfo.label, sportInfo.key);
+              meta = { nextUpdate: null };
+            } else {
+              const qs = sport && sport !== 'all' ? `?sport=${encodeURIComponent(sport)}` : '';
+              const joiner = qs ? '&' : '?';
+              const res = await fetch(API + qs + joiner + `ts=${Date.now()}`, { headers, cache: 'no-store' });
+              if (res.status === 401) {
+                container.innerHTML = '<div class="p-6 text-center text-red-600">Please sign in again to load picks.</div>';
+                return;
+              }
+              const data = await res.json();
+              picks = Array.isArray(data) ? data.slice(0, MAX_PICKS) : (Array.isArray(data.picks) ? data.picks.slice(0, MAX_PICKS) : []);
+              meta = data.meta || data;
+            }
+            const next = getNextUpdateFromAPI(meta) || getNextUpdateFromAPI(null);
+            startCountdown(next);
+
+            const nowMs = Date.now();
+            const getWindowMs = (pick) => {
+              const sk = String(pick.sport_key || pick.sport || pick.league || '').toLowerCase();
+              if (sk.includes('nba')) return SPORT_WINDOWS.nba;
+              if (sk.includes('nhl')) return SPORT_WINDOWS.nhl;
+              if (sk.includes('nfl')) return SPORT_WINDOWS.nfl;
+              if (sk.includes('mlb')) return SPORT_WINDOWS.mlb;
+              if (sk.includes('soccer') || sk.includes('mls') || sk.includes('epl') || sk.includes('liga') || sk.includes('serie') || sk.includes('bundesliga') || sk.includes('ligue') || sk.includes('ucl') || sk.includes('uefa') || sk.includes('fifa')) return SPORT_WINDOWS.soccer;
+              return 24 * 60 * 60 * 1000;
+            };
+            // Only show games that haven't started yet
+            const filtered = picks
+              .map(p => ({ pick: p, ts: toMillis(p.commence_time || p.startTime || p.date || null), windowMs: getWindowMs(p) }))
+              .filter(p => p.ts && p.ts > nowMs && p.ts <= nowMs + p.windowMs)
+              .sort((a, b) => a.ts - b.ts)
+              .map(p => p.pick);
+
+            if (!filtered || filtered.length === 0) { renderEmpty(); return; }
+
+            // compute confidence and value for sorting
+            filtered.forEach(p => { p._conf = computeConfidence(p); p._value = valueScore(p, p._conf); });
+            if (sortBy === 'confidence') filtered.sort((a,b) => b._conf - a._conf); else filtered.sort((a,b) => b._value - a._value);
+
+            // limit final number
+            const final = filtered.slice(0, MAX_PICKS);
+            container.innerHTML = '';
+            final.forEach(pick => container.appendChild(createCard(pick)));
+
+            const lockEl = document.getElementById('lockOfDayCard');
+            if (lockEl) {
+              lockEl.innerHTML = '';
+              if (final.length) lockEl.appendChild(createCard(final[0], { isLock: true }));
+            }
+          } catch (err) {
+            console.error('Failed to load picks:', err);
+            container.innerHTML = '<div class="p-6 text-center text-red-600">Failed to load picks. Please try again later.</div>';
+          }
+        }
+
+        // Initial load
+        let activeSport = 'nba-moneyline'; let activeSort = 'confidence';
+        fetchAndRender(activeSport, activeSort);
+        setInterval(() => {
+          fetchAndRender(activeSport, activeSort);
+        }, 15 * 60 * 1000);
+
+        // Wire up controls
+        if (leagueTabs) {
+          leagueTabs.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.league-tab'); if (!btn) return;
+            leagueTabs.querySelectorAll('.league-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeSport = btn.dataset.sport || 'all';
+            fetchAndRender(activeSport, activeSort);
+          });
+        }
+
+        // Odds format toggle
+        const oddsToggle = document.getElementById('oddsToggle');
+        if (oddsToggle) {
+          oddsToggle.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.odds-toggle-btn'); if (!btn) return;
+            oddsToggle.querySelectorAll('.odds-toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            oddsFormat = btn.dataset.fmt || 'american';
+            fetchAndRender(activeSport, activeSort);
+          });
+        }
+
+        if (sortSelect) {
+          sortSelect.addEventListener('change', () => {
+            activeSort = sortSelect.value;
+            fetchAndRender(activeSport, activeSort);
+          });
+        }
+
+        // Boost button removed from UI.
+
+      })();
+    </script>
+    <footer class="mt-14 border-t border-white/10 bg-white/5 footer-safe">
+      <div class="mx-auto w-full max-w-6xl px-4 py-10">
+        <div class="grid gap-8 md:grid-cols-3">
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Pickr</div>
+            <div class="text-xl font-semibold text-white">Stay in the know</div>
+            <p class="text-sm text-zinc-400">Free-to-play insights, product updates, and community highlights.</p>
+            <div class="flex flex-wrap gap-2">
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.linkedin.com/in/pickr-picks-a654423b2/" target="_blank" rel="noopener">LinkedIn</a>
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.tiktok.com/@pickrpicks_?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener">TikTok</a>
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.instagram.com/pickrpicks/" target="_blank" rel="noopener">Instagram</a>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Support</div>
+            <div class="flex flex-col gap-2 text-sm">
+              <a class="text-zinc-200 hover:text-white" href="contact.html">Contact us</a>
+              <a class="text-zinc-200 hover:text-white" href="faq.html">FAQ</a>
+              <a class="text-zinc-200 hover:text-white" href="terms.html">Terms of Service</a>
+              <a class="text-zinc-200 hover:text-white" href="about.html">About</a>
+              <a class="text-zinc-200 hover:text-white" href="careers.html">Careers</a>
+            </div>
+            <div class="text-xs text-zinc-500">We reply within 1-2 business days.</div>
+          </div>
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Get help</div>
+            <p class="text-sm text-zinc-400">Need a hand with picks, rewards, or your account? Submit a support ticket any time.</p>
+            <a class="inline-flex items-center justify-center rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20" href="contact.html">Submit a ticket</a>
+          </div>
+        </div>
+        <div class="mt-8 flex flex-col gap-2 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+          <div>© 2026 Pickr. Free-to-play. 19+ only in Canada.</div>
+          <div class="flex flex-wrap gap-3">
+            <a class="hover:text-zinc-200" href="terms.html">Terms</a>
+            <a class="hover:text-zinc-200" href="faq.html">FAQ</a>
+            <a class="hover:text-zinc-200" href="about.html">About</a>
+            <a class="hover:text-zinc-200" href="careers.html">Careers</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    </div><!-- .pickr-page-content -->
+  </body>
+</html>

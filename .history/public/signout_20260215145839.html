@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signing Out - Pickr</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+</head>
+<body style="font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif; background:#0b0f1a; color:#e5e7eb; display:flex; flex-direction:column; min-height:100vh;">
+  <main style="flex:1; display:flex; align-items:center; justify-content:center;">
+    <div style="text-align:center;">
+      <img src="logo.png" alt="Pickr logo" style="height:160px;width:160px;object-fit:contain;margin:0 auto 1rem;" />
+      <h1>Signing out...</h1>
+    </div>
+  </main>
+  <footer style="width:100%;border-top:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);padding:20px 0;">
+    <div style="max-width:1000px;margin:0 auto;padding:0 16px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center;font-size:12px;color:#cbd5f5;">
+      <div>© 2026 Pickr. Free-to-play. 19+ only in Canada.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;">
+        <a href="contact.html" style="color:#e2e8f0;text-decoration:none;">Contact</a>
+        <a href="faq.html" style="color:#e2e8f0;text-decoration:none;">FAQ</a>
+        <a href="terms.html" style="color:#e2e8f0;text-decoration:none;">Terms</a>
+        <a href="careers.html" style="color:#e2e8f0;text-decoration:none;">Careers</a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+      authDomain: "pickr-d4d9b.firebaseapp.com",
+      projectId: "pickr-d4d9b",
+      storageBucket: "pickr-d4d9b.firebasestorage.app",
+      messagingSenderId: "972106331799",
+      appId: "1:972106331799:web:d261170267bbd7dfaf5bd2",
+      measurementId: "G-J0DC1K39NN"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    firebase.auth().signOut().then(() => {
+      console.log('Signed out successfully');
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/login.html';
+    }).catch((error) => {
+      console.error('Sign out error:', error);
+      window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>

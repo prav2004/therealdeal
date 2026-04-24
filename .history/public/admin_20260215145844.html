@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin — Users</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { padding: 8px; margin: 4px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    tr:hover { background: #f1f1f1; cursor: pointer; }
+    #detail { white-space: pre-wrap; background:#fafafa; padding:10px; border:1px solid #eee; margin-top:12px }
+  </style>
+</head>
+<body>
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;">
+    <img src="logo.png" alt="Pickr logo" style="height:160px;width:160px;object-fit:contain;" />
+    <h2 style="margin:0;">Admin — Users</h2>
+  </div>
+  <p>Enter your <strong>ADMIN_KEY</strong> to list users from Firestore (server must be running with ADMIN_KEY set).</p>
+  <div>
+    <input id="adminkey" placeholder="ADMIN_KEY" style="width:420px" />
+    <button id="load">Load users</button>
+    <label style="margin-left:10px">Limit: <input id="limit" value="200" style="width:60px" /></label>
+  </div>
+  <div id="status"></div>
+  <table id="usersTable" style="display:none">
+    <thead><tr><th>UID</th><th>Email</th><th>Name</th><th>Profile Complete</th><th>Tokens</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <div id="detail"></div>
+
+  <script>
+    const loadBtn = document.getElementById('load');
+    const adminkeyInput = document.getElementById('adminkey');
+    const status = document.getElementById('status');
+    const usersTable = document.getElementById('usersTable');
+    const tbody = usersTable.querySelector('tbody');
+    const detail = document.getElementById('detail');
+
+    async function fetchUsers() {
+      status.textContent = 'Loading...';
+      const key = adminkeyInput.value.trim();
+      if (!key) { status.textContent = 'ADMIN_KEY required'; return; }
+      const limit = Number(document.getElementById('limit').value) || 200;
+      try {
+        const res = await fetch(`/api/admin/users?limit=${limit}`, { headers: { 'x-admin-key': key } });
+        if (!res.ok) {
+          const err = await res.json().catch(()=>({ error: res.statusText }));
+          status.textContent = 'Error: ' + (err && err.error ? err.error : res.statusText);
+          return;
+        }
+        const data = await res.json();
+        status.textContent = `Loaded ${data.users.length} users`;
+        tbody.innerHTML = '';
+        data.users.forEach(u => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${u.uid}</td><td>${u.email || ''}</td><td>${u.fullName || ''}</td><td>${u.profileComplete ? 'yes' : 'no'}</td><td>${u.tokenBalance || 0}</td>`;
+          tr.addEventListener('click', () => showDetail(u.uid, key));
+          tbody.appendChild(tr);
+        });
+        usersTable.style.display = '';
+      } catch (e) {
+        status.textContent = 'Fetch failed: ' + e.message;
+      }
+    }
+
+    async function showDetail(uid, key) {
+      detail.textContent = 'Loading...';
+      try {
+        const res = await fetch(`/api/admin/user/${encodeURIComponent(uid)}`, { headers: { 'x-admin-key': key } });
+        if (!res.ok) {
+          detail.textContent = 'Failed to load user: ' + res.statusText;
+          return;
+        }
+        const data = await res.json();
+        detail.textContent = JSON.stringify(data.user, null, 2);
+      } catch (e) {
+        detail.textContent = 'Request failed: ' + e.message;
+      }
+    }
+
+    loadBtn.addEventListener('click', fetchUsers);
+  </script>
+  <footer style="margin-top:24px;border-top:1px solid #ddd;padding:16px 0;color:#6b7280;font-size:12px;">
+    <div style="max-width:1000px;margin:0 auto;padding:0 12px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;">
+      <div>© 2026 Pickr. Free-to-play. 19+ only in Canada.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;">
+        <a href="contact.html" style="color:#374151;text-decoration:none;">Contact</a>
+        <a href="faq.html" style="color:#374151;text-decoration:none;">FAQ</a>
+        <a href="terms.html" style="color:#374151;text-decoration:none;">Terms</a>
+        <a href="careers.html" style="color:#374151;text-decoration:none;">Careers</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

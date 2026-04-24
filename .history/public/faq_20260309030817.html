@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>FAQ – Pickr</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink: #0b0f1a;
+        --ember: #ff7a1a;
+        --mint: #40d9b5;
+        --sky: #7aa7ff;
+        --card: rgba(17, 25, 40, 0.82);
+      }
+      body {
+        font-family: 'IBM Plex Sans', sans-serif;
+        background: radial-gradient(circle at top, rgba(122, 167, 255, 0.18), transparent 45%),
+          radial-gradient(circle at 10% 20%, rgba(64, 217, 181, 0.2), transparent 40%),
+          radial-gradient(circle at 90% 10%, rgba(255, 122, 26, 0.15), transparent 40%),
+          var(--ink);
+        color: #e5e7eb;
+      }
+      .hero-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+      .glass {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(12px);
+      }
+      .panel {
+        background: rgba(15, 23, 42, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1.25rem;
+      }
+      .faq-card {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1rem;
+        padding: 1.1rem 1.25rem;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <header class="glass mx-4 mt-4 rounded-2xl p-4 md:p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-4">
+        <img src="logo.png" alt="Pickr logo" class="h-[9rem] w-[9rem] sm:h-[11rem] sm:w-[11rem] object-contain" />
+        <div class="space-y-1">
+          <div class="text-xs uppercase tracking-[0.35em] text-slate-400">Help center</div>
+          <h1 class="hero-title text-2xl sm:text-3xl text-slate-100">Frequently asked questions</h1>
+          <p class="text-sm text-slate-300">Quick answers to common questions about Pickr features and rewards.</p>
+        </div>
+      </div>
+      <a href="contact.html" class="inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-slate-100 hover:bg-white/20">Contact support</a>
+    </header>
+
+    <main class="flex-1 px-4 pt-6">
+      <section class="panel p-6 max-w-4xl mx-auto space-y-4">
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">Is Pickr real-money betting?</h2>
+          <p class="text-sm text-slate-300 mt-2">No. Pickr is a free-to-play prediction app. No deposits are required. 100 Tokens = $1 Cash and 1 Cash = $1 Canadian Dollar. Winnings convert to Cash automatically.</p>
+        </div>
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">Who can use Pickr?</h2>
+          <p class="text-sm text-slate-300 mt-2">Pickr is available to users 19+ in Canada. You will be asked to verify your age during onboarding.</p>
+        </div>
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">How do daily and weekly tasks work?</h2>
+          <p class="text-sm text-slate-300 mt-2">Complete tasks to unlock claimable rewards. Daily tasks reset every 24 hours and weekly quests reset each week.</p>
+        </div>
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">What are streaks, XP, and levels?</h2>
+          <p class="text-sm text-slate-300 mt-2">Wins build streaks and XP. XP increases your level, and streaks boost your rewards and leaderboard points.</p>
+        </div>
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">How does the leaderboard work?</h2>
+          <p class="text-sm text-slate-300 mt-2">Rankings are based on combined points from wins, streaks, and XP momentum.</p>
+        </div>
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">Why is my bet pending?</h2>
+          <p class="text-sm text-slate-300 mt-2">Pending bets are waiting for game results or settlement. Once official scores are final, the status updates automatically.</p>
+        </div>
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">How do I withdraw cash?</h2>
+          <p class="text-sm text-slate-300 mt-2">Complete at least one verified partner task (example: sign up with an approved partner). Once verified, submit a withdrawal request from the Wallet page and support will email next steps.</p>
+        </div>
+        <div class="faq-card">
+          <h2 class="text-lg font-semibold text-white">How can I contact support?</h2>
+          <p class="text-sm text-slate-300 mt-2">Use the Contact Us form and include as much detail as possible. We respond within 1-2 business days.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="mt-14 border-t border-white/10 bg-white/5">
+      <div class="mx-auto w-full max-w-6xl px-4 py-10">
+        <div class="grid gap-8 md:grid-cols-3">
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Pickr</div>
+            <div class="text-xl font-semibold text-white">Stay in the know</div>
+            <p class="text-sm text-zinc-400">Free-to-play insights, daily tasks, and leaderboard updates.</p>
+            <div class="flex flex-wrap gap-2">
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.linkedin.com/in/pickr-picks-a654423b2/" target="_blank" rel="noopener">LinkedIn</a>
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.tiktok.com/@pickrpicks_?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener">TikTok</a>
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.instagram.com/pickrpicks/" target="_blank" rel="noopener">Instagram</a>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Support</div>
+            <div class="flex flex-col gap-2 text-sm">
+              <a class="text-zinc-200 hover:text-white" href="contact.html">Contact us</a>
+              <a class="text-zinc-200 hover:text-white" href="faq.html">FAQ</a>
+              <a class="text-zinc-200 hover:text-white" href="terms.html">Terms of Service</a>
+              <a class="text-zinc-200 hover:text-white" href="careers.html">Careers</a>
+            </div>
+            <div class="text-xs text-zinc-500">We reply within 1-2 business days.</div>
+          </div>
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Get help</div>
+            <p class="text-sm text-zinc-400">Need a hand with picks, rewards, or your account? Submit a support ticket any time.</p>
+            <a class="inline-flex items-center justify-center rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20" href="contact.html">Submit a ticket</a>
+          </div>
+        </div>
+        <div class="mt-8 flex flex-col gap-2 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+          <div>© 2026 Pickr. Free-to-play. 19+ only in Canada.</div>
+          <div class="flex flex-wrap gap-3">
+            <a class="hover:text-zinc-200" href="terms.html">Terms</a>
+            <a class="hover:text-zinc-200" href="faq.html">FAQ</a>
+            <a class="hover:text-zinc-200" href="careers.html">Careers</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

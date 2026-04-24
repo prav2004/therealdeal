@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Pickr – My Bets</title>
+    <!-- Firebase auth guard (keeps unauthenticated users on the login page) -->
+    <script src="config.js?v=20260410a"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+      (function () {
+        const firebaseConfig = {
+          apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+          authDomain: "pickr-d4d9b.firebaseapp.com",
+          projectId: "pickr-d4d9b",
+          storageBucket: "pickr-d4d9b.firebasestorage.app",
+          messagingSenderId: "972106331799",
+          appId: "1:972106331799:web:d261170267bbd7dfaf5bd2",
+          measurementId: "G-J0DC1K39NN"
+        };
+
+        if (!window.firebase) return;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        // Emulator opt-in: only point the client to the Auth emulator when
+        // explicitly requested (via ?emulator=1 or localStorage USE_FIREBASE_EMULATOR)
+        // to avoid sign-in state mismatches between pages during local dev.
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const useEmu = params.get('emulator') === '1' || localStorage.getItem('USE_FIREBASE_EMULATOR') === '1';
+          if (useEmu) {
+            auth.useEmulator && auth.useEmulator('http://localhost:9099/');
+            console.log('Auth client configured to use Auth emulator at http://localhost:9099');
+          }
+        } catch (e) {
+          console.warn('Failed to configure Auth emulator on client:', e && e.message);
+        }
+        async function enforceProfile(user) {
+          if (!user) {
+            window.location.replace('/login.html');
+            return;
+          }
+          try {
+            const idToken = await user.getIdToken();
+            const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
+            const resp = await fetch(apiBase + '/api/me', { headers: { Authorization: 'Bearer ' + idToken } });
+            if (!resp.ok) {
+              window.location.replace('/onboarding.html');
+              return;
+            }
+            const profile = await resp.json();
+            if (!profile || !profile.profileComplete || !profile.ageVerified) {
+              window.location.replace('/onboarding.html');
+              return;
+            }
+          } catch (e) {
+            window.location.replace('/onboarding.html');
+          }
+        }
+
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) {
+            window.location.replace('/login.html');
+            return;
+          }
+
+          // Keep compatibility cache for existing UI code
+          localStorage.setItem('pickrUser', JSON.stringify({
+            uid: user.uid,
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL
+          }));
+
+          enforceProfile(user);
+        });
+
+        window.addEventListener('pageshow', () => {
+          if (auth.currentUser) {
+            enforceProfile(auth.currentUser);
+            return;
+          }
+          const unsub = auth.onAuthStateChanged((user) => {
+            try { unsub && unsub(); } catch (e) {}
+            enforceProfile(user);
+          });
+        });
+      })();
+    </script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts for a bold, editorial feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink: #0b0f1a;
+        --ink-2: #111827;
+        --ember: #ff7a1a;
+        --mint: #40d9b5;
+        --sky: #7aa7ff;
+        --fog: rgba(255, 255, 255, 0.08);
+        --card: rgba(17, 25, 40, 0.82);
+      }
+      body {
+        font-family: 'IBM Plex Sans', sans-serif;
+        background: radial-gradient(circle at top, rgba(122, 167, 255, 0.18), transparent 45%),
+          radial-gradient(circle at 10% 20%, rgba(64, 217, 181, 0.2), transparent 40%),
+          radial-gradient(circle at 90% 10%, rgba(255, 122, 26, 0.15), transparent 40%),
+          var(--ink);
+        color: #e5e7eb;
+        overflow-x: hidden;
+      }
+      .hero-title {
+        font-family: 'Space Grotesk', sans-serif;
+        letter-spacing: -0.02em;
+      }
+
+      /* ── Redesigned header (matches leaderboard) ── */
+      .picks-header {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        padding: 1.75rem 1.5rem;
+        background: linear-gradient(145deg, rgba(17,25,40,0.92), rgba(30,41,59,0.85));
+        border: 1px solid rgba(255,122,26,0.15);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        backdrop-filter: blur(14px);
+        max-width: 64rem;
+        margin: 1rem auto 0;
+        box-sizing: border-box;
+      }
+      .picks-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(255,122,26,0.15), transparent 60%);
+        pointer-events: none;
+      }
+      .picks-header::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: -10%;
+        width: 250px;
+        height: 250px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(122,167,255,0.1), transparent 60%);
+        pointer-events: none;
+      }
+      .picks-header .header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .header-accent-line {
+        width: 48px;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--ember), #fbbf24);
+        margin-bottom: 0.75rem;
+      }
+      .header-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.65rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #f1f5f9;
+        line-height: 1.2;
+      }
+      @media (min-width: 640px) {
+        .header-title { font-size: 2rem; }
+        .picks-header { padding: 2rem 2rem; }
+      }
+      /* ── Desktop formatting ── */
+      @media (min-width: 1024px) {
+        .picks-header { margin-left: auto !important; margin-right: auto !important; max-width: 64rem; padding: 2.5rem 3rem; }
+        .header-title { font-size: 2.35rem; }
+        .header-sub { font-size: 0.95rem; max-width: 520px; }
+        .header-chip { font-size: 0.75rem; padding: 0.35rem 0.9rem; }
+        .stats-strip { grid-template-columns: repeat(6, 1fr); gap: 0.85rem; }
+        .stat-card { padding: 1.1rem 0.85rem; }
+        .stat-value { font-size: 1.4rem; }
+        .stat-label { font-size: 0.68rem; }
+        .stat-card .stat-icon { width: 30px; height: 30px; }
+        .stat-card .stat-icon svg { width: 16px; height: 16px; }
+        .bets-section { padding: 2.25rem; }
+        .bets-heading { font-size: 1.4rem; }
+        .bet-card { padding: 1.35rem 1.4rem; }
+        .bet-card__amount { font-size: 1.4rem; }
+        .bet-card__title { font-size: 1rem; }
+        .pill-tab { padding: 0.5rem 1rem; font-size: 0.78rem; }
+        main.page-main > section { padding-left: 0; padding-right: 0; }
+      }
+      @media (min-width: 1280px) {
+        .picks-header { padding: 2.75rem 3.5rem; }
+        .header-title { font-size: 2.6rem; }
+        .bet-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+        .bets-section { padding: 2.5rem; }
+      }
+      .header-sub {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-top: 0.35rem;
+        max-width: 480px;
+      }
+      .header-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        margin-top: 0.75rem;
+      }
+      .header-chip--ember {
+        background: rgba(255,122,26,0.14);
+        color: #ffb37a;
+        border: 1px solid rgba(255,122,26,0.35);
+      }
+      .header-chip--green {
+        background: rgba(64,217,181,0.12);
+        color: #7de6c9;
+        border: 1px solid rgba(64,217,181,0.3);
+      }
+      .header-chip .pulse-dot {
+        width: 6px; height: 6px;
+        border-radius: 999px;
+        background: currentColor;
+        animation: chip-pulse 2s ease-in-out infinite;
+      }
+      @keyframes chip-pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+
+      /* ── Stats strip ── */
+      .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+      }
+      .stat-card {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        transition: border-color 0.2s;
+      }
+      .stat-card:hover { border-color: rgba(255,255,255,0.14); }
+      .stat-card .stat-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.15rem;
+      }
+      .stat-card .stat-icon svg { width: 15px; height: 15px; }
+      .stat-icon--blue { background: rgba(122,167,255,0.15); color: #7aa7ff; }
+      .stat-icon--green { background: rgba(52,211,153,0.15); color: #34d399; }
+      .stat-icon--red { background: rgba(248,113,113,0.15); color: #f87171; }
+      .stat-icon--amber { background: rgba(251,191,36,0.15); color: #fbbf24; }
+      .stat-icon--mint { background: rgba(64,217,181,0.15); color: #40d9b5; }
+      .stat-label { color: #64748b; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }
+      .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.35rem; font-weight: 700; color: #f1f5f9; }
+      @media (max-width: 640px) {
+        .stats-strip { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+        .stat-card { padding: 0.7rem 0.6rem; }
+        .stat-value { font-size: 1.1rem; }
+        .stat-label { font-size: 0.6rem; }
+        .stat-card .stat-icon { width: 24px; height: 24px; }
+        .stat-card .stat-icon svg { width: 13px; height: 13px; }
+      }
+
+      /* ── Bets section ── */
+      .bets-section {
+        background: linear-gradient(145deg, rgba(17,25,40,0.88), rgba(30,41,59,0.78));
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+      }
+      .bets-section::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,122,26,0.3), rgba(122,167,255,0.2), transparent);
+      }
+      @media (min-width: 640px) { .bets-section { padding: 2rem; } }
+      .bets-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+      .bets-heading {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .bets-heading .bets-count-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: rgba(255,122,26,0.16);
+        color: #ffb37a;
+        border: 1px solid rgba(255,122,26,0.3);
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        letter-spacing: 0.06em;
+      }
+
+      /* ── Pill tabs ── */
+      .pill-tabs {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        padding: 3px;
+      }
+      .pill-tab {
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      .pill-tab:hover { color: #cbd5e1; }
+      .pill-tab.active {
+        background: rgba(255, 122, 26, 0.2);
+        color: #ffb37a;
+        box-shadow: 0 2px 8px rgba(255,122,26,0.15);
+      }
+      @media (max-width: 480px) {
+        .pill-tab { padding: 0.35rem 0.65rem; font-size: 0.65rem; }
+      }
+
+      /* ── Bet grid ── */
+      .bet-grid { display: grid; gap: 0.75rem; }
+      @media (min-width: 768px) { .bet-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+      /* ── Bet card ── */
+      .bet-card {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 1.1rem 1.15rem;
+        transition: transform 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .bet-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        width: 3px;
+        border-radius: 3px 0 0 3px;
+        background: var(--ember);
+      }
+      .bet-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.12); }
+      .bet-card--pending::before { background: #f59e0b; }
+      .bet-card--won::before { background: #34d399; }
+      .bet-card--lost::before { background: #f87171; }
+      .bet-card--void::before { background: #94a3b8; }
+      .bet-card__meta { display: flex; align-items: baseline; justify-content: space-between; }
+      .bet-card__amount { font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 700; color: #f8fafc; }
+      .bet-card__time { color: #64748b; font-size: 0.78rem; }
+      .bet-card__title { margin-top: 0.4rem; font-size: 0.92rem; color: #cbd5e1; line-height: 1.35; }
+      .bet-card__status {
+        margin-top: 0.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+      }
+      .bet-card__status-text { color: #64748b; font-size: 0.72rem; }
+      .bet-card__sub { margin-top: 0.5rem; display: flex; align-items: center; justify-content: space-between; color: #64748b; font-size: 0.72rem; }
+      .bet-card__sub span:last-child { color: #94a3b8; font-weight: 500; }
+      .bet-card__pill-row { display: inline-flex; align-items: center; gap: 0.35rem; }
+      .bet-card__pill {
+        background: rgba(122, 167, 255, 0.12);
+        color: #9fb8ff;
+        border: 1px solid rgba(122, 167, 255, 0.3);
+        padding: 0.18rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .bet-card__pill--pending { background: rgba(251, 191, 36, 0.14); color: #fcd34d; border-color: rgba(251, 191, 36, 0.35); }
+      .bet-card__pill--won { background: rgba(52, 211, 153, 0.15); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.35); }
+      .bet-card__pill--lost { background: rgba(248, 113, 113, 0.15); color: #fca5a5; border-color: rgba(248, 113, 113, 0.35); }
+      .bet-card__pill--void { background: rgba(148, 163, 184, 0.15); color: #cbd5f5; border-color: rgba(148, 163, 184, 0.35); }
+      .bet-card__pill--settled { background: rgba(94, 234, 212, 0.15); color: #5eead4; border-color: rgba(94, 234, 212, 0.35); }
+      .bet-card__pill--type {
+        background: rgba(64, 217, 181, 0.12);
+        color: #86efac;
+        border-color: rgba(52, 211, 153, 0.3);
+      }
+
+      /* ── Bet legs ── */
+      .bet-legs { margin-top: 0.6rem; display: grid; gap: 0.4rem; }
+      .bet-legs--stack { border-left: 2px solid rgba(64, 217, 181, 0.5); padding-left: 0.65rem; }
+      .bet-leg {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.55rem;
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .bet-leg--won { border-color: rgba(52, 211, 153, 0.3); }
+      .bet-leg--lost { border-color: rgba(248, 113, 113, 0.35); }
+      .bet-leg--pending { border-color: rgba(251, 191, 36, 0.25); }
+      .bet-leg__index {
+        font-size: 0.65rem;
+        color: #64748b;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        width: 1.35rem;
+        height: 1.35rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        font-weight: 600;
+      }
+      .bet-leg__logo {
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        object-fit: contain;
+        flex: none;
+      }
+      .bet-leg__text { display: flex; flex-direction: column; gap: 0.1rem; }
+      .bet-leg__name { font-size: 0.82rem; font-weight: 600; color: #e2e8f0; }
+      .bet-leg__meta { font-size: 0.68rem; color: #64748b; }
+      .bet-leg__status {
+        width: fit-content;
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .bet-leg__status--won { background: rgba(52, 211, 153, 0.15); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.35); }
+      .bet-leg__status--lost { background: rgba(248, 113, 113, 0.15); color: #fca5a5; border-color: rgba(248, 113, 113, 0.35); }
+      .bet-leg__status--void { background: rgba(148, 163, 184, 0.15); color: #cbd5f5; border-color: rgba(148, 163, 184, 0.35); }
+      .bet-leg__status--pending { background: rgba(251, 191, 36, 0.14); color: #fcd34d; border-color: rgba(251, 191, 36, 0.35); }
+
+      /* ── Empty state ── */
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        border-radius: 16px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+
+      /* ── Skeleton loading ── */
+      .skeleton { position: relative; overflow: hidden; }
+      .skeleton::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+        animation: shimmer 1.4s 1 forwards;
+      }
+      @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+      /* ── Toggle button (fallback, kept for JS) ── */
+      .toggle-button {
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #e2e8f0;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        background: rgba(15, 23, 42, 0.6);
+        transition: all 0.2s ease;
+        display: none; /* hidden, using pill-tabs instead */
+      }
+
+      .nav-link { color: #94a3b8; transition: color 0.2s ease; }
+      .nav-link:hover { color: #e2e8f0; }
+      .nav-link.active { color: var(--ember); }
+      .bottom-nav { padding-bottom: env(safe-area-inset-bottom); bottom: env(safe-area-inset-bottom); z-index: 50; }
+      .page-main { padding-bottom: calc(9rem + env(safe-area-inset-bottom)); }
+      @media (orientation: portrait) {
+        .page-main { padding-bottom: calc(10rem + env(safe-area-inset-bottom)); }
+      }
+      .footer-safe { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+      /* ── Sticky top banner ── */
+      .top-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: linear-gradient(135deg, rgba(35,48,72,0.72) 0%, rgba(50,65,88,0.72) 40%, rgba(62,56,48,0.72) 100%);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 1px 8px rgba(0,0,0,0.25);
+        padding: env(safe-area-inset-top, 0px) 16px 0 16px;
+        height: calc(67px + env(safe-area-inset-top, 0px));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        box-sizing: border-box;
+      }
+      .top-banner .banner-logo {
+        height: 43px;
+        width: auto;
+        object-fit: contain;
+        flex-shrink: 0;
+      }
+      .top-banner .banner-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        flex-shrink: 1;
+        overflow: hidden;
+      }
+      .top-banner .banner-player {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .top-banner .banner-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #cbd5e1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100px;
+      }
+      .top-banner .banner-balances {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 1;
+        min-width: 0;
+      }
+      .banner-bal {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 1.03rem;
+        line-height: 1;
+        position: relative;
+        overflow: hidden;
+      }
+      .banner-bal::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        padding: 1px;
+        background: var(--bal-border);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+      .banner-bal-token {
+        background: rgba(52,211,153,0.12);
+        color: #34d399;
+        --bal-border: linear-gradient(135deg, rgba(52,211,153,0.5), rgba(16,185,129,0.15));
+      }
+      .banner-bal-cash {
+        background: rgba(251,191,36,0.10);
+        color: #fbbf24;
+        --bal-border: linear-gradient(135deg, rgba(251,191,36,0.5), rgba(245,158,11,0.15));
+      }
+      .banner-bal .bal-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+      .banner-bal-token .bal-icon {
+        filter: drop-shadow(0 0 4px rgba(52,211,153,0.5));
+      }
+      .banner-bal-cash .bal-icon {
+        filter: drop-shadow(0 0 4px rgba(251,191,36,0.5));
+      }
+      @media (max-width: 400px) {
+        .top-banner { padding: env(safe-area-inset-top, 0px) 8px 0 8px; gap: 6px; height: calc(60px + env(safe-area-inset-top, 0px)); }
+        .top-banner .banner-logo { height: 32px; }
+        .banner-bal { padding: 4px 8px; font-size: 0.75rem; gap: 3px; }
+        .top-banner .banner-name { display: none; }
+        .top-banner .banner-player { gap: 0; }
+        .top-banner .banner-right { gap: 6px; }
+        .top-banner .banner-balances { gap: 4px; }
+      }
+      @media (min-width: 401px) and (max-width: 480px) {
+        .top-banner { padding: env(safe-area-inset-top, 0px) 10px 0 10px; gap: 8px; }
+        .top-banner .banner-logo { height: 36px; }
+        .banner-bal { padding: 5px 10px; font-size: 0.82rem; }
+        .top-banner .banner-name { max-width: 50px; font-size: 0.75rem; }
+      }
+      body { padding-top: calc(67px + env(safe-area-inset-top, 0px)); }
+      @media (min-width: 769px) {
+        .top-banner { height: calc(80px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 28px 0 28px; gap: 18px; }
+        .top-banner .banner-logo { height: 52px; }
+        .banner-bal { padding: 9px 18px; font-size: 1.15rem; gap: 6px; }
+        .top-banner .banner-name { font-size: 0.95rem; max-width: 140px; }
+        body { padding-top: calc(80px + env(safe-area-inset-top, 0px)); }
+      }
+      /* ── Page loader — bouncing ball ── */
+      #pageLoader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:#0b0f1a;transition:opacity .6s ease}
+      #pageLoader.loaded{opacity:0;pointer-events:none}
+      .loader-ball{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#ffb347 0%,#ff7a1a 45%,#c05600 100%);box-shadow:inset -4px -6px 10px rgba(0,0,0,.35),inset 2px 2px 6px rgba(255,220,160,.4);position:relative;animation:ballBounce 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+      .loader-ball::after{content:'';position:absolute;inset:6px;border-radius:50%;border:1.5px solid rgba(0,0,0,.18);border-top-color:transparent;border-left-color:transparent;transform:rotate(-35deg)}
+      .loader-ball::before{content:'';position:absolute;left:50%;top:4px;width:1.5px;height:28px;background:rgba(0,0,0,.15);transform:translateX(-50%) rotate(25deg);border-radius:2px}
+      .loader-shadow{width:38px;height:8px;border-radius:50%;background:rgba(255,122,26,.25);filter:blur(3px);margin-top:4px;animation:shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+      @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
+      @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
+    </style>
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <!-- Page loader -->
+    <div id="pageLoader"><div class="loader-ball"></div><div class="loader-shadow"></div></div>
+    <div class="pickr-page-content" style="visibility:hidden;">
+    <!-- Sticky top banner -->
+    <div class="top-banner">
+      <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Pickr" class="banner-logo" /></a>
+      <div class="banner-right">
+        <div class="banner-player">
+          <div class="pickr-avatar" data-size="30" aria-hidden="true"></div>
+          <div class="banner-name header-screen-name">—</div>
+        </div>
+        <div class="banner-balances">
+          <div class="banner-bal banner-bal-token">
+            <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#34d399" stroke-width="2"/><path d="M12 7v10" stroke="#34d399" stroke-width="2" stroke-linecap="round"/><path d="M9 9.5c0-1 1.3-1.5 3-1.5s3 .5 3 1.5-1.3 1.5-3 1.5-3 .5-3 1.5 1.3 1.5 3 1.5 3 .5 3 1.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="tokens">0</span>
+          </div>
+          <div class="banner-bal banner-bal-cash">
+            <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" stroke="#fbbf24" stroke-width="2"/><path d="M12 9v6" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/><path d="M10 10.5c0-.8 .9-1.2 2-1.2s2 .4 2 1.2-.9 1.2-2 1.2-2 .4-2 1.2.9 1.2 2 1.2 2 .4 2 1.2" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span class="cash">$0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page header -->
+    <header class="picks-header" style="margin-left:1rem;margin-right:1rem;" id="picksHeader">
+      <div class="header-content">
+        <div class="header-accent-line"></div>
+        <h1 class="header-title">My Picks</h1>
+        <p id="recentSummaryText" class="header-sub">Showing your bets from this week.</p>
+        <span id="recentChip" class="header-chip header-chip--ember"><span class="pulse-dot"></span>This week</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 px-4 pt-5 page-main">
+      <section class="max-w-5xl mx-auto space-y-5">
+
+        <!-- Stats strip -->
+        <div class="stats-strip">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--blue">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="9" y="3" width="6" height="4" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+            </div>
+            <div class="stat-label">Bets</div>
+            <div id="recentBetsCount" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--green">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="stat-label">Wins</div>
+            <div id="recentWins" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--red">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="stat-label">Losses</div>
+            <div id="recentLosses" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--amber">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 10.5c0-.8.9-1.2 2-1.2s2 .4 2 1.2-.9 1.2-2 1.2-2 .4-2 1.2.9 1.2 2 1.2 2 .4 2 1.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+            <div class="stat-label">Cash</div>
+            <div id="recentCashWagered" class="stat-value">$0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--mint">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 10c0-.7.9-1.2 2-1.2s2 .5 2 1.2-.9 1.2-2 1.2-2 .5-2 1.2.9 1.2 2 1.2 2 .5 2 1.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+            <div class="stat-label">Tokens</div>
+            <div id="recentTokensWagered" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--blue">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="stat-label">Window</div>
+            <div id="recentTimeRange" class="stat-value" style="font-size:1rem;">This week</div>
+          </div>
+        </div>
+
+        <!-- Bets section -->
+        <div class="bets-section">
+          <div class="bets-title-row">
+            <h3 class="bets-heading">My Bets</h3>
+            <div class="pill-tabs">
+              <button id="rangeWeek" class="pill-tab" type="button">Week</button>
+              <button id="rangeMonth" class="pill-tab" type="button">Month</button>
+              <button id="rangeYear" class="pill-tab" type="button">Year</button>
+            </div>
+          </div>
+          <div id="betHistoryLoader" class="hidden mb-4 rounded-full bg-white/5 border border-white/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300" style="text-align:center;">
+            Loading bets...
+          </div>
+          <div id="betHistoryContainer" class="bet-grid"></div>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- Bottom Navigation (standardized) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
+      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">⭐</span>
+        <span>Pickr Picks</span>
+      </a>
+      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">📝</span>
+        <span>Tasks</span>
+      </a>
+      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🏈</span>
+        <span>Sports</span>
+      </a>
+      <a href="casino.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🎰</span>
+        <span>Casino</span>
+      </a>
+      <a href="picks.html" class="nav-link active flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🎯</span>
+        <span>Picks</span>
+      </a>
+      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <div class="pickr-avatar" data-size="24" aria-hidden="true"></div>
+        <span>Wallet</span>
+      </a>
+    </nav>
+
+    <script src="script.js?v=20260327-spinfix"></script>
+    <footer class="mt-14 border-t border-white/10 bg-white/5 footer-safe">
+      <div class="mx-auto w-full max-w-6xl px-4 py-10">
+        <div class="grid gap-8 md:grid-cols-3">
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Pickr</div>
+            <div class="text-xl font-semibold text-white">Stay in the know</div>
+            <p class="text-sm text-zinc-400">Free-to-play insights, product updates, and community highlights.</p>
+            <div class="flex flex-wrap gap-2">
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.linkedin.com/in/pickr-picks-a654423b2/" target="_blank" rel="noopener">LinkedIn</a>
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.tiktok.com/@pickrpicks_?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener">TikTok</a>
+              <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.instagram.com/pickrpicks/" target="_blank" rel="noopener">Instagram</a>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Support</div>
+            <div class="flex flex-col gap-2 text-sm">
+              <a class="text-zinc-200 hover:text-white" href="contact.html">Contact us</a>
+              <a class="text-zinc-200 hover:text-white" href="faq.html">FAQ</a>
+              <a class="text-zinc-200 hover:text-white" href="terms.html">Terms of Service</a>
+              <a class="text-zinc-200 hover:text-white" href="about.html">About</a>
+              <a class="text-zinc-200 hover:text-white" href="careers.html">Careers</a>
+            </div>
+            <div class="text-xs text-zinc-500">We reply within 1-2 business days.</div>
+          </div>
+          <div class="space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Get help</div>
+            <p class="text-sm text-zinc-400">Need a hand with picks, rewards, or your account? Submit a support ticket any time.</p>
+            <a class="inline-flex items-center justify-center rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20" href="contact.html">Submit a ticket</a>
+          </div>
+        </div>
+        <div class="mt-8 flex flex-col gap-2 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+          <div>© 2026 Pickr. Free-to-play. 19+ only in Canada.</div>
+          <div class="flex flex-wrap gap-3">
+            <a class="hover:text-zinc-200" href="terms.html">Terms</a>
+            <a class="hover:text-zinc-200" href="faq.html">FAQ</a>
+            <a class="hover:text-zinc-200" href="about.html">About</a>
+            <a class="hover:text-zinc-200" href="careers.html">Careers</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    </div><!-- .pickr-page-content -->
+  </body>
+</html>

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "17f150fbae4abc7bb40c7b7a16e1ad08",
+    "commence_time": "2026-02-04T02:35:00Z",
+    "home_team": "UCLA Bruins",
+    "away_team": "Rutgers Scarlet Knights",
+    "sport_key": "basketball_ncaab",
+    "pickTeam": "Rutgers Scarlet Knights",
+    "pickTeamValue": 8.54,
+    "valueScore": 7.54
+  },
+  {
+    "id": "47875433d758e84eb2bdcbbf52066322",
+    "commence_time": "2026-02-04T04:00:00Z",
+    "home_team": "San Diego St Aztecs",
+    "away_team": "Wyoming Cowboys",
+    "sport_key": "basketball_ncaab",
+    "pickTeam": "Wyoming Cowboys",
+    "pickTeamValue": 7.5,
+    "valueScore": 6.5
+  },
+  {
+    "id": "b3edd94288c50752fc0b9bd809fd69cc",
+    "commence_time": "2026-02-04T03:10:00Z",
+    "home_team": "Golden State Warriors",
+    "away_team": "Philadelphia 76ers",
+    "sport_key": "basketball_nba",
+    "pickTeam": "Philadelphia 76ers",
+    "pickTeamValue": 2.65,
+    "valueScore": 1.65
+  },
+  {
+    "id": "7425cf0ca9c577fda5a641da18a31dae",
+    "commence_time": "2026-02-04T02:30:00Z",
+    "home_team": "Bakersfield Condors",
+    "away_team": "Calgary Wranglers",
+    "sport_key": "icehockey_ahl",
+    "pickTeam": "Calgary Wranglers",
+    "pickTeamValue": 2.45,
+    "valueScore": 1.45
+  },
+  {
+    "id": "cfcc28e0e3d0f2f69d73478862b011eb",
+    "commence_time": "2026-02-04T03:00:00Z",
+    "home_team": "Anaheim Ducks",
+    "away_team": "Seattle Kraken",
+    "sport_key": "icehockey_nhl",
+    "pickTeam": "Seattle Kraken",
+    "pickTeamValue": 2.18,
+    "valueScore": 1.18
+  },
+  {
+    "id": "ff5279040f75cf10c5c59c4cf1307667",
+    "commence_time": "2026-02-04T03:00:00Z",
+    "home_team": "USC Trojans",
+    "away_team": "Indiana Hoosiers",
+    "sport_key": "basketball_ncaab",
+    "pickTeam": "USC Trojans",
+    "pickTeamValue": 2.12,
+    "valueScore": 1.12
+  },
+  {
+    "id": "33ac17402975ecbb0b534539f9e09c7e",
+    "commence_time": "2026-02-04T04:00:00Z",
+    "home_team": "Fresno St Bulldogs",
+    "away_team": "UNLV Rebels",
+    "sport_key": "basketball_ncaab",
+    "pickTeam": "Fresno St Bulldogs",
+    "pickTeamValue": 2,
+    "valueScore": 1
+  },
+  {
+    "id": "52102a1529fdec6b41d6defcc3a8a208",
+    "commence_time": "2026-02-04T02:05:00Z",
+    "home_team": "SMU Mustangs",
+    "away_team": "NC State Wolfpack",
+    "sport_key": "basketball_ncaab",
+    "pickTeam": "SMU Mustangs",
+    "pickTeamValue": 1.95,
+    "valueScore": 0.95
+  }
+]

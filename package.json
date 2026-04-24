@@ -1,0 +1,33 @@
+{
+  "name": "pickr-app",
+  "version": "1.0.0",
+  "description": "Pickr game Node.js application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+  "start:dev": "set FIRESTORE_EMULATOR_HOST=localhost:8085 && set FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 && node server.js",
+  "dev:all": "concurrently \"npx firebase emulators:start --only firestore\" \"npm run start:dev\"",
+  "seed:firestore": "node tools/seedFirestore.js",
+  "seed:firestore:force": "set SEED_FORCE=1 && node tools/seedFirestore.js",
+    "test": "jest --runInBand",
+  "test:emulator": "set FIRESTORE_EMULATOR_HOST=localhost:8085 && npm test"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.1.0",
+    "axios": "^1.6.8",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^4.22.1",
+    "firebase-admin": "^11.11.1",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.2",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.7"
+  }
+  ,
+  "devDependencies": {
+    "jest": "^29.6.1",
+    "concurrently": "^8.2.0",
+    "firebase-tools": "^11.26.0"
+  }
+}

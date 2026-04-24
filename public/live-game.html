@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Live Game — Pickr</title>
+    <script src="config.js?v=20260410"></script>
+    <!-- Firebase auth guard -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script>
+      (function () {
+        const firebaseConfig = {
+          apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+          authDomain: "pickr-d4d9b.firebaseapp.com",
+          projectId: "pickr-d4d9b",
+          storageBucket: "pickr-d4d9b.firebasestorage.app",
+          messagingSenderId: "972106331799",
+          appId: "1:972106331799:web:d261170267bbd7dfaf5bd2"
+        };
+        if (!window.firebase) return;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        firebase.auth().onAuthStateChanged((user) => {
+          if (!user) window.location.replace('/login.html');
+        });
+      })();
+    </script>
+    <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink: #0b0f1a;
+        --ember: #ff7a1a;
+        --mint: #40d9b5;
+        --sky: #7aa7ff;
+        --fog: rgba(255, 255, 255, 0.08);
+        --card: rgba(17, 25, 40, 0.82);
+      }
+      body {
+        font-family: 'IBM Plex Sans', sans-serif;
+        background: radial-gradient(circle at top, rgba(122, 167, 255, 0.18), transparent 45%),
+          radial-gradient(circle at 10% 20%, rgba(64, 217, 181, 0.2), transparent 40%),
+          radial-gradient(circle at 90% 10%, rgba(255, 122, 26, 0.15), transparent 40%),
+          var(--ink);
+        color: #e5e7eb;
+        min-height: 100vh;
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+      }
+      .hero-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+      .glass { background: var(--card); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.35); backdrop-filter: blur(12px); }
+      .nav-link { color: #94a3b8; transition: color 0.2s ease; }
+      .nav-link:hover { color: #e2e8f0; }
+      .nav-link.active { color: var(--ember); }
+      .bottom-nav { padding-bottom: env(safe-area-inset-bottom); bottom: env(safe-area-inset-bottom); z-index: 50; }
+      .tab-chip {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #cbd5f5;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      .tab-chip:hover { border-color: rgba(255,255,255,0.3); color: #f8fafc; }
+      .tab-chip.active { background: rgba(16,185,129,0.2); color: #34d399; border-color: rgba(16,185,129,0.4); }
+      .info-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+      .diamond { position: relative; width: 80px; height: 80px; }
+      .diamond-base {
+        position: absolute;
+        width: 14px; height: 14px;
+        transform: rotate(45deg);
+        border: 2px solid rgba(255,255,255,0.2);
+        background: transparent;
+      }
+      .diamond-base.occupied { background: #fbbf24; border-color: #fbbf24; }
+      .diamond-1st { bottom: 18px; right: 8px; }
+      .diamond-2nd { top: 18px; right: 33px; }
+      .diamond-3rd { bottom: 18px; left: 8px; }
+      /* Safe-area for notch / Dynamic Island */
+      .safe-top { padding-top: max(1rem, env(safe-area-inset-top)); }
+      .safe-top-fixed { top: max(1rem, env(safe-area-inset-top)); }
+    </style>
+  </head>
+  <body>
+    <!-- Back Button -->
+    <div class="fixed safe-top-fixed right-4 z-50">
+      <button onclick="history.back()" class="rounded-full border border-white/10 bg-slate-900/80 backdrop-blur-sm px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-200 hover:border-white/30 hover:text-white shadow-lg">
+        &larr; Back
+      </button>
+    </div>
+
+    <main class="max-w-2xl mx-auto px-4 pb-24 safe-top">
+      <!-- Game Header -->
+      <div id="gameHeader" class="text-center py-6">
+        <div class="text-slate-400 text-sm animate-pulse">Loading game data...</div>
+      </div>
+
+      <!-- Info Tabs -->
+      <div id="gameTabs" class="flex flex-wrap gap-2 mb-5 justify-center"></div>
+
+      <!-- Tab Content -->
+      <div id="gameContent" class="space-y-4"></div>
+
+      <!-- Last Updated -->
+      <div id="lastUpdated" class="text-center mt-6 text-[10px] text-slate-500"></div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
+      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">⭐</span>
+        <span>Pickr Picks</span>
+      </a>
+      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">📝</span>
+        <span>Tasks</span>
+      </a>
+      <a href="index.html" class="nav-link active flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🏈</span>
+        <span>Sports</span>
+      </a>
+      <a href="casino.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🎰</span>
+        <span>Casino</span>
+      </a>
+      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🎯</span>
+        <span>Picks</span>
+      </a>
+      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span>💰</span>
+        <span>Wallet</span>
+      </a>
+    </nav>
+
+    <script>
+    (function() {
+      'use strict';
+
+      const params = new URLSearchParams(window.location.search);
+      const gameId = params.get('id');
+      const sport = (params.get('sport') || 'nba').toLowerCase();
+
+      const headerEl = document.getElementById('gameHeader');
+      const tabsEl = document.getElementById('gameTabs');
+      const contentEl = document.getElementById('gameContent');
+      const updatedEl = document.getElementById('lastUpdated');
+
+      if (!gameId) {
+        headerEl.innerHTML = '<div class="text-red-400 text-sm">No game ID provided. <a href="index.html" class="underline text-emerald-400">Go back</a></div>';
+        return;
+      }
+
+      function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+
+      function getAPIBase() {
+        const configured = window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL;
+        if (typeof configured === 'string') {
+          if (configured.length > 0) return configured;
+          if (['localhost', '127.0.0.1'].includes(window.location.hostname)) return '';
+        }
+        return 'https://pickr-backend-972106331799.us-central1.run.app';
+      }
+
+      // Determine sport category for tab config
+      function getSportCategory() {
+        if (sport.includes('mlb') || sport.includes('baseball')) return 'mlb';
+        if (sport.includes('nfl') || sport.includes('football')) return 'nfl';
+        if (sport.includes('nhl') || sport.includes('hockey')) return 'nhl';
+        if (sport.includes('nba') || sport.includes('basketball')) return 'nba';
+        if (sport.includes('soccer') || sport.includes('epl') || sport.includes('laliga') || sport.includes('bundesliga') || sport.includes('seriea') || sport.includes('ucl') || sport.includes('mls') || sport.includes('ligamx')) return 'soccer';
+        return 'nba';
+      }
+
+      const sportCat = getSportCategory();
+
+      // Tab configurations per sport
+      const tabConfigs = {
+        mlb: ['Situation', 'Box Score', 'Lineup', 'Live Action', 'Broadcast'],
+        nfl: ['Situation', 'Scoreboard', 'Lineup', 'Broadcast'],
+        nba: ['Scoreboard', 'Lineup', 'Broadcast'],
+        nhl: ['Scoreboard', 'Lineup', 'Broadcast'],
+        soccer: ['Status', 'Broadcast']
+      };
+
+      let activeTab = (tabConfigs[sportCat] || tabConfigs.nba)[0];
+      let gameData = null;
+
+      function renderTabs() {
+        const tabs = tabConfigs[sportCat] || tabConfigs.nba;
+        tabsEl.innerHTML = tabs.map(t =>
+          '<button class="tab-chip px-4 py-2 rounded-full text-xs font-semibold' + (t === activeTab ? ' active' : '') + '" data-tab="' + esc(t) + '">' + esc(t) + '</button>'
+        ).join('');
+        tabsEl.querySelectorAll('.tab-chip').forEach(btn => {
+          btn.addEventListener('click', () => {
+            activeTab = btn.dataset.tab;
+            renderTabs();
+            renderContent();
+          });
+        });
+      }
+
+      function renderHeader(g) {
+        if (!g) {
+          headerEl.innerHTML = '<div class="text-red-400 text-sm">Game not found. <a href="index.html" class="underline text-emerald-400">Go back</a></div>';
+          return;
+        }
+
+        const isLive = g.status && g.status.state === 'in';
+        const isFinal = g.status && g.status.state === 'post';
+
+        const statusHtml = isLive
+          ? '<div class="flex items-center justify-center gap-2 mb-2"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span><span class="text-sm font-bold uppercase tracking-widest text-emerald-400">LIVE</span></div>'
+          : isFinal
+          ? '<div class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-2">FINAL</div>'
+          : '<div class="text-sm font-semibold text-sky-400 mb-2">' + esc(g.status ? g.status.shortDetail || g.status.detail || 'Scheduled' : 'Scheduled') + '</div>';
+
+        const clockHtml = isLive && g.status ? '<div class="text-sm font-semibold text-emerald-300 mb-3">' + esc(g.status.shortDetail || g.status.detail || '') + '</div>' : '';
+
+        const aN = Number(g.awayTeam.score), hN = Number(g.homeTeam.score);
+        const awayBold = (isLive && aN > hN) || (isFinal && aN > hN);
+        const homeBold = (isLive && hN > aN) || (isFinal && hN > aN);
+        const awayColor = isLive && aN > hN ? 'text-emerald-400' : awayBold ? 'text-white' : 'text-slate-300';
+        const homeColor = isLive && hN > aN ? 'text-emerald-400' : homeBold ? 'text-white' : 'text-slate-300';
+
+        headerEl.innerHTML =
+          statusHtml + clockHtml +
+          (g.league ? '<div class="text-[10px] uppercase tracking-widest text-amber-400/70 font-semibold mb-4">' + esc(g.league) + '</div>' : '') +
+          '<div class="flex items-center justify-center gap-6">' +
+            '<div class="flex flex-col items-center gap-2 w-28">' +
+              (g.awayTeam.logo ? '<img src="' + esc(g.awayTeam.logo) + '" alt="" class="w-16 h-16 object-contain">' : '<div class="w-16 h-16 rounded-full bg-slate-700"></div>') +
+              '<div class="text-sm font-semibold ' + awayColor + ' text-center">' + esc(g.awayTeam.name) + '</div>' +
+              (g.awayTeam.record ? '<div class="text-[10px] text-slate-500">' + esc(g.awayTeam.record) + '</div>' : '') +
+            '</div>' +
+            '<div class="flex items-center gap-3">' +
+              '<span class="text-3xl font-bold ' + awayColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(g.awayTeam.score) + '</span>' +
+              '<span class="text-lg text-slate-500">-</span>' +
+              '<span class="text-3xl font-bold ' + homeColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(g.homeTeam.score) + '</span>' +
+            '</div>' +
+            '<div class="flex flex-col items-center gap-2 w-28">' +
+              (g.homeTeam.logo ? '<img src="' + esc(g.homeTeam.logo) + '" alt="" class="w-16 h-16 object-contain">' : '<div class="w-16 h-16 rounded-full bg-slate-700"></div>') +
+              '<div class="text-sm font-semibold ' + homeColor + ' text-center">' + esc(g.homeTeam.name) + '</div>' +
+              (g.homeTeam.record ? '<div class="text-[10px] text-slate-500">' + esc(g.homeTeam.record) + '</div>' : '') +
+            '</div>' +
+          '</div>';
+      }
+
+      function renderContent() {
+        if (!gameData) { contentEl.innerHTML = ''; return; }
+        const g = gameData;
+
+        switch (activeTab) {
+          case 'Situation': return renderSituation(g);
+          case 'Box Score':
+          case 'Scoreboard': return renderScoreboard(g);
+          case 'Status': return renderStatus(g);
+          case 'Lineup': return renderLeaders(g);
+          case 'Live Action': return renderLiveAction(g);
+          case 'Broadcast': return renderBroadcast(g);
+          default: contentEl.innerHTML = '';
+        }
+      }
+
+      // ── MLB Situation ──
+      function renderSituation(g) {
+        if (sportCat === 'nfl') return renderNFLSituation(g);
+
+        const s = g.situation;
+        if (!s) {
+          contentEl.innerHTML = '<div class="info-card text-center text-slate-400 text-sm py-6">No situation data available' + (g.status && g.status.state === 'pre' ? ' — game has not started yet.' : '.') + '</div>';
+          return;
+        }
+
+        let html = '';
+
+        // MLB: Batter/Pitcher/Count/Bases + On-Deck/In-Hole
+        if (sportCat === 'mlb') {
+          // Diamond bases visualization
+          const diamondHtml =
+            '<div class="diamond mx-auto mb-4">' +
+              '<div class="diamond-base diamond-2nd' + (s.onSecond ? ' occupied' : '') + '"></div>' +
+              '<div class="diamond-base diamond-3rd' + (s.onThird ? ' occupied' : '') + '"></div>' +
+              '<div class="diamond-base diamond-1st' + (s.onFirst ? ' occupied' : '') + '"></div>' +
+            '</div>';
+
+          // Count + Outs with visual dots
+          let countHtml = '';
+          if (s.balls != null || s.strikes != null || s.outs != null) {
+            const dotRow = (label, count, max, activeColor) => {
+              let dots = '';
+              for (let i = 0; i < max; i++) {
+                dots += '<span class="inline-block w-3 h-3 rounded-full border ' + (i < count ? activeColor + ' border-transparent' : 'border-slate-500 bg-transparent') + ' mr-1"></span>';
+              }
+              return '<div class="flex items-center gap-2"><span class="text-[10px] uppercase tracking-widest text-slate-400 w-10">' + label + '</span>' + dots + '</div>';
+            };
+            countHtml = '<div class="info-card mb-3 flex flex-col items-center gap-2 py-3">' +
+              (s.balls != null ? dotRow('B', s.balls, 4, 'bg-yellow-400') : '') +
+              (s.strikes != null ? dotRow('S', s.strikes, 3, 'bg-red-400') : '') +
+              (s.outs != null ? dotRow('O', s.outs, 3, 'bg-orange-400') : '') +
+            '</div>';
+          }
+
+          // Current batter card
+          const batterHtml = s.batter ?
+            '<div class="info-card mb-3">' +
+            '<div class="flex items-center gap-3">' +
+              (s.batter.headshot ? '<img src="' + esc(s.batter.headshot) + '" alt="" class="w-12 h-12 rounded-full object-cover bg-slate-700">' : '<div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-lg">⚾</div>') +
+              '<div class="flex-1">' +
+                '<div class="text-[10px] uppercase tracking-widest text-emerald-400 mb-0.5">At Bat</div>' +
+                '<div class="text-base font-semibold text-white">' + esc(s.batter.displayName) +
+                  (s.batter.jersey ? ' <span class="text-slate-400 text-xs">#' + esc(s.batter.jersey) + '</span>' : '') +
+                  (s.batter.position ? ' <span class="text-slate-500 text-xs">' + esc(s.batter.position) + '</span>' : '') +
+                '</div>' +
+                (s.batter.summary ? '<div class="text-xs text-slate-400 mt-0.5">' + esc(s.batter.summary) + '</div>' : '') +
+              '</div>' +
+            '</div></div>' : '';
+
+          // Current pitcher card
+          const pitcherHtml = s.pitcher ?
+            '<div class="info-card mb-3">' +
+            '<div class="flex items-center gap-3">' +
+              (s.pitcher.headshot ? '<img src="' + esc(s.pitcher.headshot) + '" alt="" class="w-12 h-12 rounded-full object-cover bg-slate-700">' : '<div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-lg">🔥</div>') +
+              '<div class="flex-1">' +
+                '<div class="text-[10px] uppercase tracking-widest text-sky-400 mb-0.5">Pitching</div>' +
+                '<div class="text-base font-semibold text-white">' + esc(s.pitcher.displayName) +
+                  (s.pitcher.jersey ? ' <span class="text-slate-400 text-xs">#' + esc(s.pitcher.jersey) + '</span>' : '') +
+                '</div>' +
+                (s.pitcher.summary ? '<div class="text-xs text-slate-400 mt-0.5">' + esc(s.pitcher.summary) + '</div>' : '') +
+              '</div>' +
+            '</div></div>' : '';
+
+          // Up Next section — on-deck + in-hole
+          let upNextHtml = '';
+          if (s.onDeck || s.inHole) {
+            upNextHtml = '<div class="info-card mb-3">' +
+              '<div class="text-[10px] uppercase tracking-widest text-amber-400 mb-2">Up Next</div>' +
+              '<div class="space-y-2">';
+            if (s.onDeck) {
+              upNextHtml += '<div class="flex items-center gap-3 bg-white/[0.03] rounded-lg px-3 py-2">' +
+                (s.onDeck.headshot ? '<img src="' + esc(s.onDeck.headshot) + '" alt="" class="w-9 h-9 rounded-full object-cover bg-slate-700">' : '<div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-sm">🏏</div>') +
+                '<div class="flex-1">' +
+                  '<div class="text-xs text-amber-300 font-semibold">On Deck</div>' +
+                  '<div class="text-sm font-semibold text-white">' + esc(s.onDeck.displayName) + '</div>' +
+                  (s.onDeck.summary ? '<div class="text-[11px] text-slate-400">' + esc(s.onDeck.summary) + '</div>' : '') +
+                '</div></div>';
+            }
+            if (s.inHole) {
+              upNextHtml += '<div class="flex items-center gap-3 bg-white/[0.03] rounded-lg px-3 py-2">' +
+                (s.inHole.headshot ? '<img src="' + esc(s.inHole.headshot) + '" alt="" class="w-9 h-9 rounded-full object-cover bg-slate-700">' : '<div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-sm">🏏</div>') +
+                '<div class="flex-1">' +
+                  '<div class="text-xs text-slate-400 font-semibold">In the Hole</div>' +
+                  '<div class="text-sm font-semibold text-white">' + esc(s.inHole.displayName) + '</div>' +
+                  (s.inHole.summary ? '<div class="text-[11px] text-slate-400">' + esc(s.inHole.summary) + '</div>' : '') +
+                '</div></div>';
+            }
+            upNextHtml += '</div></div>';
+          }
+
+          html = diamondHtml + countHtml + batterHtml + pitcherHtml + upNextHtml;
+        }
+
+        // Last play card (with scoring highlight)
+        if (s.lastPlay) {
+          const isScoring = s.lastPlayScoreValue && s.lastPlayScoreValue > 0;
+          html += '<div class="info-card' + (isScoring ? ' border-emerald-500/40' : '') + '">' +
+            '<div class="text-[10px] uppercase tracking-widest ' + (isScoring ? 'text-emerald-400' : 'text-amber-400') + ' mb-1">' +
+              (isScoring ? '🎯 Scoring Play' : 'Last Play') +
+              (s.lastPlayType ? ' — ' + esc(s.lastPlayType) : '') +
+            '</div>' +
+            '<div class="text-sm text-slate-200">' + esc(s.lastPlay) + '</div>' +
+          '</div>';
+        }
+
+        contentEl.innerHTML = html || '<div class="info-card text-center text-slate-400 text-sm py-6">No situation data available.</div>';
+      }
+
+      // ── NFL Situation ──
+      function renderNFLSituation(g) {
+        const s = g.situation;
+        if (!s) {
+          contentEl.innerHTML = '<div class="info-card text-center text-slate-400 text-sm py-6">No situation data available' + (g.status && g.status.state === 'pre' ? ' — game has not started yet.' : '.') + '</div>';
+          return;
+        }
+
+        let html = '';
+
+        // Down & Distance hero card
+        if (s.shortDownDistanceText || s.down) {
+          html += '<div class="info-card mb-3 text-center">' +
+            '<div class="text-2xl font-bold text-white" style="font-family:\'Space Grotesk\',sans-serif">' + esc(s.shortDownDistanceText || s.downDistanceText || (s.down + ' & ' + s.distance)) + '</div>' +
+            (s.yardLine ? '<div class="text-sm text-slate-400 mt-1">Ball on the <span class="text-white font-semibold">' + esc(String(s.yardLine)) + '</span>-yard line</div>' : '') +
+            (s.isRedZone ? '<div class="mt-2 inline-block px-3 py-1 bg-red-500/20 border border-red-500/30 rounded-full text-xs font-bold uppercase tracking-widest text-red-400">🔴 Red Zone</div>' : '') +
+            (s.possessionText ? '<div class="text-xs text-slate-400 mt-2">' + esc(s.possessionText) + '</div>' : '') +
+          '</div>';
+        }
+
+        // Last play (with scoring highlight)
+        if (s.lastPlay) {
+          const isScoring = s.lastPlayScoreValue && s.lastPlayScoreValue > 0;
+          html += '<div class="info-card mb-3' + (isScoring ? ' border-emerald-500/40' : '') + '">' +
+            '<div class="text-[10px] uppercase tracking-widest ' + (isScoring ? 'text-emerald-400' : 'text-amber-400') + ' mb-1">' +
+              (isScoring ? '🎯 Scoring Play' : 'Last Play') +
+              (s.lastPlayType ? ' — ' + esc(s.lastPlayType) : '') +
+            '</div>' +
+            '<div class="text-sm text-slate-200">' + esc(s.lastPlay) + '</div>' +
+          '</div>';
+        }
+
+        contentEl.innerHTML = html || '<div class="info-card text-center text-slate-400 text-sm py-6">No situation data available.</div>';
+      }
+
+      // ── Scoreboard / Box Score ──
+      function renderScoreboard(g) {
+        const awayLS = (g.awayTeam && g.awayTeam.linescores) || [];
+        const homeLS = (g.homeTeam && g.homeTeam.linescores) || [];
+        const maxPeriods = Math.max(awayLS.length, homeLS.length, 1);
+
+        if (maxPeriods === 0 && awayLS.length === 0) {
+          contentEl.innerHTML = '<div class="info-card text-center text-slate-400 text-sm py-6">Scoreboard not available yet.</div>';
+          return;
+        }
+
+        // Period labels
+        let periodLabels = [];
+        if (sportCat === 'mlb') {
+          for (let i = 1; i <= maxPeriods; i++) periodLabels.push(String(i));
+        } else if (sportCat === 'nfl' || sportCat === 'nba') {
+          const names = ['1st', '2nd', '3rd', '4th'];
+          for (let i = 0; i < maxPeriods; i++) periodLabels.push(i < 4 ? names[i] : 'OT' + (i - 3 > 1 ? (i - 3) : ''));
+        } else if (sportCat === 'nhl') {
+          const names = ['1st', '2nd', '3rd'];
+          for (let i = 0; i < maxPeriods; i++) periodLabels.push(i < 3 ? names[i] : 'OT' + (i - 2 > 1 ? (i - 2) : ''));
+        } else if (sportCat === 'soccer') {
+          periodLabels = maxPeriods >= 2 ? ['1H', '2H'] : ['1H'];
+          for (let i = 2; i < maxPeriods; i++) periodLabels.push('ET' + (i - 1));
+        } else {
+          for (let i = 1; i <= maxPeriods; i++) periodLabels.push('P' + i);
+        }
+
+        let tableHtml =
+          '<div class="info-card overflow-x-auto">' +
+          '<table class="w-full text-sm">' +
+          '<thead><tr><th class="text-left text-slate-400 text-xs font-medium pb-2 pr-3">Team</th>' +
+          periodLabels.map(l => '<th class="text-center text-slate-400 text-xs font-medium pb-2 px-2 min-w-[28px]">' + esc(l) + '</th>').join('') +
+          '<th class="text-center text-white text-xs font-bold pb-2 pl-3 border-l border-white/10">T</th>' +
+          '</tr></thead><tbody>';
+
+        // Away row
+        tableHtml += '<tr><td class="pr-3 py-1.5 font-semibold text-slate-200">' + esc(g.awayTeam.abbreviation || g.awayTeam.name) + '</td>';
+        for (let i = 0; i < maxPeriods; i++) {
+          const val = awayLS[i] ? awayLS[i].value : '-';
+          tableHtml += '<td class="text-center py-1.5 px-2 text-slate-300">' + esc(val) + '</td>';
+        }
+        tableHtml += '<td class="text-center py-1.5 pl-3 font-bold text-white border-l border-white/10">' + esc(g.awayTeam.score) + '</td></tr>';
+
+        // Home row
+        tableHtml += '<tr><td class="pr-3 py-1.5 font-semibold text-slate-200">' + esc(g.homeTeam.abbreviation || g.homeTeam.name) + '</td>';
+        for (let i = 0; i < maxPeriods; i++) {
+          const val = homeLS[i] ? homeLS[i].value : '-';
+          tableHtml += '<td class="text-center py-1.5 px-2 text-slate-300">' + esc(val) + '</td>';
+        }
+        tableHtml += '<td class="text-center py-1.5 pl-3 font-bold text-white border-l border-white/10">' + esc(g.homeTeam.score) + '</td></tr>';
+
+        tableHtml += '</tbody></table></div>';
+
+        // MLB: Hits / Runs / Errors summary row
+        if (sportCat === 'mlb' && (g.awayTeam.hits != null || g.homeTeam.hits != null)) {
+          tableHtml += '<div class="info-card mt-3">' +
+            '<table class="w-full text-sm">' +
+            '<thead><tr>' +
+            '<th class="text-left text-slate-400 text-xs font-medium pb-2 pr-3">Team</th>' +
+            '<th class="text-center text-slate-400 text-xs font-medium pb-2 px-3">R</th>' +
+            '<th class="text-center text-slate-400 text-xs font-medium pb-2 px-3">H</th>' +
+            '<th class="text-center text-slate-400 text-xs font-medium pb-2 px-3">E</th>' +
+            '</tr></thead><tbody>' +
+            '<tr><td class="pr-3 py-1.5 font-semibold text-slate-200">' + esc(g.awayTeam.abbreviation || g.awayTeam.name) + '</td>' +
+            '<td class="text-center py-1.5 px-3 font-bold text-white">' + esc(g.awayTeam.score) + '</td>' +
+            '<td class="text-center py-1.5 px-3 text-slate-300">' + esc(g.awayTeam.hits || '0') + '</td>' +
+            '<td class="text-center py-1.5 px-3 text-slate-300">' + esc(g.awayTeam.errors || '0') + '</td></tr>' +
+            '<tr><td class="pr-3 py-1.5 font-semibold text-slate-200">' + esc(g.homeTeam.abbreviation || g.homeTeam.name) + '</td>' +
+            '<td class="text-center py-1.5 px-3 font-bold text-white">' + esc(g.homeTeam.score) + '</td>' +
+            '<td class="text-center py-1.5 px-3 text-slate-300">' + esc(g.homeTeam.hits || '0') + '</td>' +
+            '<td class="text-center py-1.5 px-3 text-slate-300">' + esc(g.homeTeam.errors || '0') + '</td></tr>' +
+            '</tbody></table></div>';
+        }
+
+        // Game notes (e.g. "Series tied 2-2")
+        if (g.notes && g.notes.length > 0) {
+          tableHtml += '<div class="mt-3 text-center text-xs text-amber-400/70 italic">' + g.notes.map(n => esc(n)).join(' · ') + '</div>';
+        }
+
+        contentEl.innerHTML = tableHtml;
+      }
+
+      // ── Lineup (Betting-focused MLB/all sports) ──
+      let leaderTeamView = 'away';
+      let _lineupData = null;
+      let _lineupTs = 0;
+      let _lineupLoading = false;
+
+      async function fetchMLBLineup(eventId) {
+        const now = Date.now();
+        if (_lineupData && (now - _lineupTs) < 20000) return _lineupData;
+        if (_lineupLoading) return _lineupData;
+        _lineupLoading = true;
+        try {
+          const base = getAPIBase();
+          const resp = await fetch(base + '/api/mlb/lineup/' + encodeURIComponent(eventId));
+          if (resp.ok) {
+            _lineupData = await resp.json();
+            _lineupTs = Date.now();
+          }
+        } catch (e) {
+          console.warn('Lineup fetch failed:', e.message);
+          try {
+            const resp2 = await fetch(FALLBACK_BASE + '/api/mlb/lineup/' + encodeURIComponent(eventId));
+            if (resp2.ok) { _lineupData = await resp2.json(); _lineupTs = Date.now(); }
+          } catch (e2) { /* silent */ }
+        }
+        _lineupLoading = false;
+        return _lineupData;
+      }
+
+      function renderMLBLineup(g, data) {
+        if (!data || (!data.away && !data.home)) return '<div class="info-card text-center text-slate-400 text-xs py-4">Batting lineup not available yet.</div>';
+
+        const isLive = g.status && g.status.state === 'in';
+        const sit = g.situation;
+        let battingTeamAbbr = null;
+        if (isLive && sit) {
+          battingTeamAbbr = sit.isTopInning ? g.awayTeam.abbreviation : g.homeTeam.abbreviation;
+        }
+
+        const awayActive = leaderTeamView === 'away' ? ' active' : '';
+        const homeActive = leaderTeamView === 'home' ? ' active' : '';
+
+        let h = '<div class="flex justify-center gap-2 mb-3">' +
+          '<button class="tab-chip px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2' + awayActive + '" data-leader-team="away">' +
+            (g.awayTeam.logo ? '<img src="' + esc(g.awayTeam.logo) + '" class="w-5 h-5 object-contain">' : '') +
+            esc(g.awayTeam.abbreviation) +
+            (battingTeamAbbr === g.awayTeam.abbreviation ? ' <span class="text-amber-400 text-[10px] ml-1">AT BAT</span>' : '') +
+          '</button>' +
+          '<button class="tab-chip px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2' + homeActive + '" data-leader-team="home">' +
+            (g.homeTeam.logo ? '<img src="' + esc(g.homeTeam.logo) + '" class="w-5 h-5 object-contain">' : '') +
+            esc(g.homeTeam.abbreviation) +
+            (battingTeamAbbr === g.homeTeam.abbreviation ? ' <span class="text-amber-400 text-[10px] ml-1">AT BAT</span>' : '') +
+          '</button>' +
+        '</div>';
+
+        const teamData = leaderTeamView === 'home' ? data.home : data.away;
+        const teamInfo = leaderTeamView === 'home' ? g.homeTeam : g.awayTeam;
+        if (!teamData || !teamData.roster || teamData.roster.length === 0) {
+          return h + '<div class="info-card text-center text-slate-400 text-xs py-4">Batting lineup not available.</div>';
+        }
+
+        const roster = teamData.roster;
+        const gameStarted = isLive || (g.status && g.status.state === 'post');
+
+        h += '<div class="info-card mb-3">' +
+          '<div class="flex items-center justify-center gap-2 mb-3">' +
+            (teamInfo.logo ? '<img src="' + esc(teamInfo.logo) + '" class="w-5 h-5 object-contain">' : '') +
+            '<span class="text-[10px] uppercase tracking-widest text-sky-400">Batting Lineup — ' + esc(teamInfo.abbreviation) + '</span>' +
+          '</div>';
+
+        // Column header
+        h += '<div class="grid items-center mb-1 pb-1 border-b border-white/10 text-[9px] uppercase tracking-widest text-slate-500" style="grid-template-columns: 28px 40px 1fr 42px 42px 42px' + (gameStarted ? ' 52px' : '') + ';">' +
+          '<div class="text-center">#</div>' +
+          '<div></div>' +
+          '<div>Hitter</div>' +
+          '<div class="text-center">AVG</div>' +
+          '<div class="text-center">OBP</div>' +
+          '<div class="text-center">SLG</div>' +
+          (gameStarted ? '<div class="text-center">Today</div>' : '') +
+        '</div>';
+
+        roster.forEach((p, idx) => {
+          const hasStar = p.starAvg || p.starHR || p.starRBI;
+          const avgNum = parseFloat(p.avg);
+          const avgColor = p.avg === '-' ? 'text-slate-500' : avgNum >= .300 ? 'text-emerald-400 font-bold' : avgNum >= .250 ? 'text-white' : 'text-slate-400';
+          const rowBg = idx % 2 === 0 ? 'bg-white/[0.02]' : '';
+
+          // Star tooltip
+          let starTags = [];
+          if (p.starAvg) starTags.push('AVG');
+          if (p.starHR) starTags.push('HR');
+          if (p.starRBI) starTags.push('RBI');
+          const starTip = starTags.length > 0 ? 'Team leader: ' + starTags.join(', ') : '';
+
+          h += '<div class="grid items-center py-2 border-b border-white/[0.03] ' + rowBg + '" style="grid-template-columns: 28px 40px 1fr 42px 42px 42px' + (gameStarted ? ' 52px' : '') + ';">' +
+            '<div class="text-center text-[11px] text-slate-500 font-mono">' + esc(p.batOrder) + '</div>' +
+            '<div class="flex justify-center">' +
+              (p.headshot ? '<img src="' + esc(p.headshot) + '" class="w-8 h-8 rounded-full object-cover bg-slate-700">' : '<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs">⚾</div>') +
+            '</div>' +
+            '<div class="min-w-0 pl-1">' +
+              '<div class="flex items-center gap-1">' +
+                (hasStar ? '<span title="' + esc(starTip) + '">⭐</span>' : '') +
+                '<span class="text-[12px] font-semibold text-white truncate">' + esc(p.shortName || p.displayName) + '</span>' +
+              '</div>' +
+              '<div class="text-[10px] text-slate-500">' + esc(p.position) + '</div>' +
+            '</div>' +
+            '<div class="text-center text-[12px] ' + avgColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(p.avg) + '</div>' +
+            '<div class="text-center text-[12px] text-slate-400" style="font-family:\'Space Grotesk\',sans-serif">' + esc(p.obp) + '</div>' +
+            '<div class="text-center text-[12px] text-slate-400" style="font-family:\'Space Grotesk\',sans-serif">' + esc(p.slg) + '</div>' +
+            (gameStarted ? '<div class="text-center text-[11px] text-slate-300" style="font-family:\'Space Grotesk\',sans-serif">' + esc(p.hab) + '</div>' : '') +
+          '</div>';
+        });
+
+        h += '</div>';
+
+        // Legend
+        h += '<div class="text-center text-[9px] text-slate-600 mt-1">⭐ = Team leader &nbsp; AVG = Season Avg &nbsp; OBP = On-Base % &nbsp; SLG = Slugging %' + (gameStarted ? ' &nbsp; Today = H-AB' : '') + '</div>';
+
+        return h;
+      }
+
+      function wireLineupToggle(g) {
+        const section = document.getElementById('mlbLineupSection');
+        if (!section) return;
+        section.querySelectorAll('[data-leader-team]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            leaderTeamView = btn.dataset.leaderTeam;
+            section.innerHTML = renderMLBLineup(g, _lineupData);
+            wireLineupToggle(g);
+          });
+        });
+      }
+
+      function renderLeaders(g) {
+        const isMLB = sportCat === 'mlb';
+        const isLive = g.status && g.status.state === 'in';
+        const isPre = g.status && g.status.state === 'pre';
+        const sit = g.situation;
+        const awayP = g.awayTeam.probable;
+        const homeP = g.homeTeam.probable;
+        const awayStats = g.awayTeam.teamStats;
+        const homeStats = g.homeTeam.teamStats;
+        const awayLeaders = g.awayTeam && g.awayTeam.leaders;
+        const homeLeaders = g.homeTeam && g.homeTeam.leaders;
+        const combinedLeaders = g.leaders;
+
+        let html = '';
+
+        // ═══════════════════════════════════════════
+        // MLB-SPECIFIC BETTING LAYOUT
+        // ═══════════════════════════════════════════
+        if (isMLB) {
+
+          // ── 1. Starting Pitchers (side-by-side) ──
+          if (awayP || homeP) {
+            html += '<div class="info-card mb-3">' +
+              '<div class="text-[10px] uppercase tracking-widest text-emerald-400 mb-3 text-center">Starting Pitchers</div>' +
+              '<div class="grid grid-cols-2 gap-3">';
+
+            [{ team: g.awayTeam, p: awayP, side: 'away' }, { team: g.homeTeam, p: homeP, side: 'home' }].forEach(({ team, p, side }) => {
+              if (p) {
+                html += '<div class="text-center">' +
+                  (p.headshot ? '<img src="' + esc(p.headshot) + '" class="w-16 h-16 rounded-full object-cover bg-slate-700 mx-auto mb-2">' : '<div class="w-16 h-16 rounded-full bg-slate-700 mx-auto mb-2 flex items-center justify-center text-2xl">⚾</div>') +
+                  '<div class="text-xs font-semibold text-white">' + esc(p.displayName) + '</div>' +
+                  (p.jersey ? '<div class="text-[10px] text-slate-500">#' + esc(p.jersey) + '</div>' : '') +
+                  '<div class="mt-2 flex flex-col items-center gap-1">';
+
+                // ERA - big and prominent
+                if (p.era) {
+                  const eraNum = parseFloat(p.era);
+                  const eraColor = eraNum <= 3.0 ? 'text-emerald-400' : eraNum <= 4.0 ? 'text-sky-400' : eraNum <= 5.0 ? 'text-amber-400' : 'text-red-400';
+                  html += '<div class="text-2xl font-bold ' + eraColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(p.era) + '</div>' +
+                    '<div class="text-[10px] uppercase tracking-widest text-slate-500">ERA</div>';
+                }
+
+                // W-L Record
+                if (p.record) {
+                  html += '<div class="text-xs text-slate-300 mt-1">' + esc(p.record) + '</div>';
+                } else if (p.wins != null && p.losses != null) {
+                  html += '<div class="text-xs text-slate-300 mt-1">' + esc(p.wins) + 'W - ' + esc(p.losses) + 'L</div>';
+                }
+
+                html += '</div>' +
+                  '<div class="mt-2 flex items-center justify-center gap-1">' +
+                    (team.logo ? '<img src="' + esc(team.logo) + '" class="w-4 h-4 object-contain">' : '') +
+                    '<span class="text-[10px] text-slate-400">' + esc(team.abbreviation) + '</span>' +
+                  '</div>' +
+                '</div>';
+              } else {
+                html += '<div class="text-center text-slate-500 text-xs py-4">TBD</div>';
+              }
+            });
+
+            html += '</div></div>';
+          }
+
+          // ── 2. Live: Current pitcher + batter/on-deck/in-hole ──
+          if (isLive && sit) {
+            // Current pitcher on the mound
+            if (sit.pitcher) {
+              html += '<div class="info-card mb-3" style="border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.06);">' +
+                '<div class="text-[10px] uppercase tracking-widest text-emerald-400 mb-2">🔥 On the Mound</div>' +
+                '<div class="flex items-center gap-3">' +
+                  (sit.pitcher.headshot ? '<img src="' + esc(sit.pitcher.headshot) + '" class="w-14 h-14 rounded-full object-cover bg-slate-700">' : '<div class="w-14 h-14 rounded-full bg-emerald-900/40 flex items-center justify-center text-xl">🔥</div>') +
+                  '<div class="flex-1 min-w-0">' +
+                    '<div class="text-sm font-semibold text-white">' + esc(sit.pitcher.displayName) + '</div>' +
+                    '<div class="text-xs text-slate-400">' + esc(sit.pitcher.summary || '') + '</div>' +
+                  '</div>' +
+                '</div>' +
+              '</div>';
+            }
+
+            // Current batter + next up
+            html += '<div class="info-card mb-3" style="border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.06);">' +
+              '<div class="text-[10px] uppercase tracking-widest text-amber-400 mb-2">⚾ At the Plate</div>';
+
+            if (sit.batter) {
+              html += '<div class="flex items-center gap-3 mb-3">' +
+                (sit.batter.headshot ? '<img src="' + esc(sit.batter.headshot) + '" class="w-14 h-14 rounded-full object-cover bg-slate-700">' : '<div class="w-14 h-14 rounded-full bg-amber-900/40 flex items-center justify-center text-xl">⚾</div>') +
+                '<div class="flex-1 min-w-0">' +
+                  '<div class="text-sm font-semibold text-white">' + esc(sit.batter.displayName) + '</div>' +
+                  '<div class="text-xs text-slate-400">' + esc(sit.batter.summary || '') + '</div>' +
+                '</div>' +
+              '</div>';
+            }
+
+            // On Deck + In Hole side by side
+            if (sit.onDeck || sit.inHole) {
+              html += '<div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-white/5">';
+              if (sit.onDeck) {
+                html += '<div class="flex items-center gap-2">' +
+                  (sit.onDeck.headshot ? '<img src="' + esc(sit.onDeck.headshot) + '" class="w-8 h-8 rounded-full object-cover bg-slate-700">' : '<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs">🏏</div>') +
+                  '<div class="min-w-0">' +
+                    '<div class="text-[9px] uppercase tracking-widest text-yellow-500">On Deck</div>' +
+                    '<div class="text-[11px] font-semibold text-slate-200 truncate">' + esc(sit.onDeck.displayName) + '</div>' +
+                    '<div class="text-[10px] text-slate-500">' + esc(sit.onDeck.summary || '') + '</div>' +
+                  '</div>' +
+                '</div>';
+              }
+              if (sit.inHole) {
+                html += '<div class="flex items-center gap-2">' +
+                  (sit.inHole.headshot ? '<img src="' + esc(sit.inHole.headshot) + '" class="w-8 h-8 rounded-full object-cover bg-slate-700">' : '<div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs">🔜</div>') +
+                  '<div class="min-w-0">' +
+                    '<div class="text-[9px] uppercase tracking-widest text-slate-500">In the Hole</div>' +
+                    '<div class="text-[11px] font-semibold text-slate-300 truncate">' + esc(sit.inHole.displayName) + '</div>' +
+                    '<div class="text-[10px] text-slate-500">' + esc(sit.inHole.summary || '') + '</div>' +
+                  '</div>' +
+                '</div>';
+              }
+              html += '</div>';
+            }
+
+            html += '</div>';
+          }
+
+          // ── 3. Team Stats Comparison (ERA, AVG, etc.) ──
+          if (awayStats && homeStats) {
+            html += '<div class="info-card mb-3">' +
+              '<div class="text-[10px] uppercase tracking-widest text-slate-400 mb-3 text-center">Team Stats</div>';
+
+            // Header row
+            html += '<div class="grid grid-cols-3 text-center text-[10px] text-slate-500 mb-2 pb-1 border-b border-white/5">' +
+              '<div class="flex items-center justify-center gap-1">' +
+                (g.awayTeam.logo ? '<img src="' + esc(g.awayTeam.logo) + '" class="w-4 h-4 object-contain">' : '') +
+                esc(g.awayTeam.abbreviation) +
+              '</div>' +
+              '<div>STAT</div>' +
+              '<div class="flex items-center justify-center gap-1">' +
+                (g.homeTeam.logo ? '<img src="' + esc(g.homeTeam.logo) + '" class="w-4 h-4 object-contain">' : '') +
+                esc(g.homeTeam.abbreviation) +
+              '</div>' +
+            '</div>';
+
+            // Key stats for bettors
+            const statOrder = ['ERA', 'avg', 'runs', 'hits', 'homeRuns', 'errors', 'wins', 'losses'];
+            const statLabels = { 'ERA': 'ERA', 'avg': 'AVG', 'runs': 'Runs', 'hits': 'Hits', 'homeRuns': 'HR', 'errors': 'Errors', 'wins': 'Wins', 'losses': 'Losses', 'saves': 'Saves' };
+            const lowerIsBetter = { 'ERA': true, 'errors': true, 'losses': true };
+
+            const awayMap = {}; awayStats.forEach(s => { awayMap[s.name] = s; });
+            const homeMap = {}; homeStats.forEach(s => { homeMap[s.name] = s; });
+
+            statOrder.forEach(key => {
+              const a = awayMap[key];
+              const h = homeMap[key];
+              if (!a && !h) return;
+              const aVal = a ? parseFloat(a.value) : 0;
+              const hVal = h ? parseFloat(h.value) : 0;
+              const lib = lowerIsBetter[key];
+              const aBetter = lib ? aVal < hVal : aVal > hVal;
+              const hBetter = lib ? hVal < aVal : hVal > aVal;
+              const aColor = aBetter ? 'text-emerald-400 font-bold' : 'text-slate-300';
+              const hColor = hBetter ? 'text-emerald-400 font-bold' : 'text-slate-300';
+
+              html += '<div class="grid grid-cols-3 text-center py-1.5 border-b border-white/[0.03]">' +
+                '<div>' +
+                  '<span class="text-sm ' + aColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(a ? a.value : '-') + '</span>' +
+                  (a && a.rank ? '<div class="text-[9px] text-slate-600">' + esc(a.rank) + '</div>' : '') +
+                '</div>' +
+                '<div class="text-[10px] text-slate-400 uppercase tracking-wider self-center">' + esc(statLabels[key] || key) + '</div>' +
+                '<div>' +
+                  '<span class="text-sm ' + hColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(h ? h.value : '-') + '</span>' +
+                  (h && h.rank ? '<div class="text-[9px] text-slate-600">' + esc(h.rank) + '</div>' : '') +
+                '</div>' +
+              '</div>';
+            });
+
+            html += '</div>';
+          }
+
+          // ── 4. Batting Lineup (full 9-hitter lineup with stats) ──
+          // Fetch the full lineup asynchronously and render it
+          html += '<div id="mlbLineupSection">';
+          if (_lineupData) {
+            html += renderMLBLineup(g, _lineupData);
+          } else {
+            html += '<div class="info-card text-center text-slate-400 text-xs py-4"><div class="animate-pulse">Loading lineup...</div></div>';
+          }
+          html += '</div>';
+
+          // Kick off async fetch for lineup data
+          if (!_lineupData || (Date.now() - _lineupTs) > 20000) {
+            fetchMLBLineup(g.id).then(data => {
+              if (data) {
+                const section = document.getElementById('mlbLineupSection');
+                if (section) section.innerHTML = renderMLBLineup(g, data);
+                // Re-wire toggle buttons
+                wireLineupToggle(g);
+              }
+            });
+          }
+
+        } else {
+          // ═══════════════════════════════════════════
+          // NON-MLB SPORTS (NFL, NBA, NHL)
+          // ═══════════════════════════════════════════
+          const hasTeamLeaders = (awayLeaders && awayLeaders.length > 0) || (homeLeaders && homeLeaders.length > 0);
+          const allLeaders = hasTeamLeaders ? null : combinedLeaders;
+
+          if (!hasTeamLeaders && (!allLeaders || allLeaders.length === 0)) {
+            contentEl.innerHTML = '<div class="info-card text-center text-slate-400 text-sm py-6">No lineup data available' + (isPre ? ' — game has not started yet.' : '.') + '</div>';
+            return;
+          }
+
+          const categoryIcons = {
+            'passing': '🏈', 'passingYards': '🏈', 'Passing Leader': '🏈',
+            'rushing': '🏃', 'rushingYards': '🏃', 'Rushing Leader': '🏃',
+            'receiving': '🤲', 'receivingYards': '🤲', 'Receiving Leader': '🤲',
+            'points': '🏀', 'Rating': '⭐', 'Points': '🏀',
+            'rebounds': '📊', 'Rebounds': '📊',
+            'assists': '🎯', 'Assists': '🎯',
+            'goals': '⚽', 'Goals': '⚽',
+            'saves': '🧤', 'Saves': '🧤',
+            'default': '📈'
+          };
+
+          // Team toggle for non-MLB
+          if (hasTeamLeaders) {
+            const awayActive = leaderTeamView === 'away' ? ' active' : '';
+            const homeActive = leaderTeamView === 'home' ? ' active' : '';
+            html += '<div class="flex justify-center gap-2 mb-4">' +
+              '<button class="tab-chip px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2' + awayActive + '" data-leader-team="away">' +
+                (g.awayTeam.logo ? '<img src="' + esc(g.awayTeam.logo) + '" class="w-5 h-5 object-contain">' : '') +
+                esc(g.awayTeam.abbreviation || g.awayTeam.name) +
+              '</button>' +
+              '<button class="tab-chip px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2' + homeActive + '" data-leader-team="home">' +
+                (g.homeTeam.logo ? '<img src="' + esc(g.homeTeam.logo) + '" class="w-5 h-5 object-contain">' : '') +
+                esc(g.homeTeam.abbreviation || g.homeTeam.name) +
+              '</button>' +
+            '</div>';
+          }
+
+          const displayLeaders = hasTeamLeaders
+            ? ((leaderTeamView === 'home' && homeLeaders && homeLeaders.length > 0) ? homeLeaders : (awayLeaders || homeLeaders || []))
+            : (allLeaders || []);
+
+          if (displayLeaders.length > 0) {
+            html += '<div class="space-y-2">';
+            displayLeaders.forEach(l => {
+              const icon = categoryIcons[l.category] || categoryIcons[l.shortName] || categoryIcons['default'];
+              const ath = l.athlete || {};
+              html += '<div class="info-card">' +
+                '<div class="flex items-center gap-3">' +
+                  (ath.headshot ? '<img src="' + esc(ath.headshot) + '" alt="" class="w-11 h-11 rounded-full object-cover bg-slate-700">' : '<div class="w-11 h-11 rounded-full bg-slate-700 flex items-center justify-center text-lg">' + icon + '</div>') +
+                  '<div class="flex-1 min-w-0">' +
+                    '<div class="text-[10px] uppercase tracking-widest text-emerald-400">' + esc(l.category) + '</div>' +
+                    '<div class="text-sm font-semibold text-white truncate">' + esc(ath.displayName) +
+                      (ath.team ? ' <span class="text-slate-400 text-xs">' + esc(ath.team) + '</span>' : '') +
+                      (ath.jersey ? ' <span class="text-slate-500 text-xs">#' + esc(ath.jersey) + '</span>' : '') +
+                    '</div>' +
+                  '</div>' +
+                  '<div class="text-right">' +
+                    '<div class="text-lg font-bold text-white" style="font-family:\'Space Grotesk\',sans-serif">' + esc(l.displayValue) + '</div>' +
+                  '</div>' +
+                '</div>' +
+              '</div>';
+            });
+            html += '</div>';
+          }
+        }
+
+        // If nothing rendered at all
+        if (!html) {
+          html = '<div class="info-card text-center text-slate-400 text-sm py-6">No lineup data available' + (isPre ? ' — game has not started yet.' : '.') + '</div>';
+        }
+
+        contentEl.innerHTML = html;
+
+        // ── Wire up team toggle buttons (non-MLB + MLB lineup section) ──
+        contentEl.querySelectorAll('[data-leader-team]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            leaderTeamView = btn.dataset.leaderTeam;
+            // For MLB lineup section, just re-render that section
+            if (sportCat === 'mlb' && _lineupData) {
+              const section = document.getElementById('mlbLineupSection');
+              if (section) {
+                section.innerHTML = renderMLBLineup(g, _lineupData);
+                wireLineupToggle(g);
+                return;
+              }
+            }
+            renderLeaders(g);
+          });
+        });
+      }
+
+      // ── Live Action (MLB play-by-play with visuals) ──
+      let _playsData = null;
+      let _playsTs = 0;
+      let _playsLoading = false;
+
+      async function fetchMLBPlays(eventId) {
+        const now = Date.now();
+        if (_playsData && (now - _playsTs) < 12000) return _playsData;
+        if (_playsLoading) return _playsData;
+        _playsLoading = true;
+        try {
+          const base = getAPIBase();
+          const resp = await fetch(base + '/api/mlb/plays/' + encodeURIComponent(eventId));
+          if (resp.ok) { _playsData = await resp.json(); _playsTs = Date.now(); }
+        } catch (e) {
+          try {
+            const resp2 = await fetch(FALLBACK_BASE + '/api/mlb/plays/' + encodeURIComponent(eventId));
+            if (resp2.ok) { _playsData = await resp2.json(); _playsTs = Date.now(); }
+          } catch (e2) { /* silent */ }
+        }
+        _playsLoading = false;
+        return _playsData;
+      }
+
+      function drawStrikeZone(pitches) {
+        // Strike zone: SVG 200x260, zone area is roughly x:60-140, y:60-180
+        const zW = 200, zH = 260;
+        const zoneL = 60, zoneR = 140, zoneT = 60, zoneB = 180;
+        let svg = '<svg viewBox="0 0 ' + zW + ' ' + zH + '" class="w-full max-w-[200px] mx-auto" xmlns="http://www.w3.org/2000/svg">';
+        // Background
+        svg += '<rect x="0" y="0" width="' + zW + '" height="' + zH + '" fill="#0f172a" rx="8"/>';
+        // Strike zone box
+        svg += '<rect x="' + zoneL + '" y="' + zoneT + '" width="' + (zoneR - zoneL) + '" height="' + (zoneB - zoneT) + '" fill="none" stroke="rgba(148,163,184,0.3)" stroke-width="1.5" rx="2"/>';
+        // Grid lines (3x3)
+        for (let i = 1; i < 3; i++) {
+          const gx = zoneL + (zoneR - zoneL) * i / 3;
+          const gy = zoneT + (zoneB - zoneT) * i / 3;
+          svg += '<line x1="' + gx + '" y1="' + zoneT + '" x2="' + gx + '" y2="' + zoneB + '" stroke="rgba(148,163,184,0.1)" stroke-width="0.5"/>';
+          svg += '<line x1="' + zoneL + '" y1="' + gy + '" x2="' + zoneR + '" y2="' + gy + '" stroke="rgba(148,163,184,0.1)" stroke-width="0.5"/>';
+        }
+        // Home plate
+        svg += '<polygon points="90,230 80,240 90,250 100,250 110,240 100,230" fill="rgba(148,163,184,0.15)" stroke="rgba(148,163,184,0.3)" stroke-width="1"/>';
+
+        // Plot pitches (ESPN coords: x ~50-250, y ~50-250, zone center ~125-175,100-200)
+        if (pitches && pitches.length > 0) {
+          pitches.forEach((p, i) => {
+            // Map ESPN coords to our SVG: x maps [50,250]->[20,180], y maps [50,250]->[30,220] (inverted y for high pitches up)
+            const px = 20 + (p.x - 50) * (160 / 200);
+            const py = 30 + (p.y - 50) * (190 / 200);
+            const isStrike = p.type === 'Called Strike' || p.type === 'Swinging Strike' || p.type === 'Swinging Strike (Blocked)' || p.type === 'Foul' || p.type === 'Foul Ball' || p.type === 'Foul Tip' || p.type === 'Strike';
+            const isBall = p.type === 'Ball' || p.type === 'Ball In Dirt';
+            const isHit = p.type === 'Ball In Play' || p.type === 'In play' || p.type === 'Hit Into Play';
+            const color = isHit ? '#40d9b5' : isStrike ? '#ef4444' : isBall ? '#3b82f6' : '#f59e0b';
+            const isLast = i === pitches.length - 1;
+            const r = isLast ? 7 : 5;
+            svg += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="' + r + '" fill="' + color + '" opacity="' + (isLast ? '1' : '0.6') + '" stroke="' + (isLast ? 'white' : 'none') + '" stroke-width="' + (isLast ? '1.5' : '0') + '"/>';
+            svg += '<text x="' + px.toFixed(1) + '" y="' + (py + 3).toFixed(1) + '" text-anchor="middle" fill="white" font-size="7" font-weight="600">' + p.num + '</text>';
+          });
+        }
+        svg += '</svg>';
+        return svg;
+      }
+
+      function drawFieldDiamond(hit) {
+        // Baseball diamond: SVG 200x200, home at bottom center
+        const fW = 200, fH = 200;
+        let svg = '<svg viewBox="0 0 ' + fW + ' ' + fH + '" class="w-full max-w-[200px] mx-auto" xmlns="http://www.w3.org/2000/svg">';
+        // Outfield grass arc
+        svg += '<path d="M 10 190 Q 100 -20 190 190" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.2)" stroke-width="1"/>';
+        // Infield diamond
+        svg += '<polygon points="100,155 145,115 100,75 55,115" fill="rgba(194,163,110,0.1)" stroke="rgba(148,163,184,0.25)" stroke-width="1"/>';
+        // Base dots
+        svg += '<circle cx="100" cy="155" r="4" fill="#f59e0b"/>'; // Home
+        svg += '<circle cx="145" cy="115" r="3" fill="white" opacity="0.5"/>'; // 1B
+        svg += '<circle cx="100" cy="75" r="3" fill="white" opacity="0.5"/>'; // 2B
+        svg += '<circle cx="55" cy="115" r="3" fill="white" opacity="0.5"/>'; // 3B
+        // Mound
+        svg += '<circle cx="100" cy="120" r="2" fill="rgba(148,163,184,0.3)"/>';
+
+        if (hit) {
+          // ESPN hit coords: x ~0-500 (0=left foul, 250=center, 500=right foul), y ~0-500 (0=home, 500=deep outfield)
+          // Map to SVG: x [0,500]->[10,190], y [0,500]->[185,10] (invert y so deep is up)
+          const hx = 10 + (hit.x / 500) * 180;
+          const hy = 185 - (hit.y / 500) * 175;
+          // Line from home to hit
+          svg += '<line x1="100" y1="155" x2="' + hx.toFixed(1) + '" y2="' + hy.toFixed(1) + '" stroke="#40d9b5" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>';
+          // Hit marker
+          svg += '<circle cx="' + hx.toFixed(1) + '" cy="' + hy.toFixed(1) + '" r="6" fill="#40d9b5" stroke="white" stroke-width="1.5"/>';
+          svg += '<text x="' + hx.toFixed(1) + '" y="' + (hy + 3).toFixed(1) + '" text-anchor="middle" fill="white" font-size="8" font-weight="bold">●</text>';
+        }
+
+        svg += '</svg>';
+        return svg;
+      }
+
+      function renderLiveAction(g) {
+        const isLive = g.status && g.status.state === 'in';
+        const isPre = g.status && g.status.state === 'pre';
+
+        let html = '';
+
+        // Show loading while fetching
+        if (!_playsData) {
+          html = '<div class="info-card text-center text-slate-400 text-xs py-6"><div class="animate-pulse">Loading live action data...</div></div>';
+          contentEl.innerHTML = html;
+          fetchMLBPlays(g.id).then(data => {
+            if (data && activeTab === 'Live Action') renderLiveAction(g);
+          });
+          return;
+        }
+
+        const atBats = _playsData.atBats || [];
+        if (atBats.length === 0) {
+          contentEl.innerHTML = '<div class="info-card text-center text-slate-400 text-sm py-6">No play data available' + (isPre ? ' — game has not started yet.' : '.') + '</div>';
+          // Keep fetching
+          fetchMLBPlays(g.id);
+          return;
+        }
+
+        // Get latest at-bat (last in array)
+        const latest = atBats[atBats.length - 1];
+        const prevAtBats = atBats.slice(-6, -1).reverse();
+
+        // ── Current / Latest At-Bat ──
+        html += '<div class="info-card mb-3" style="border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.04);">';
+        html += '<div class="flex items-center justify-between mb-3">';
+        html += '<div class="text-[10px] uppercase tracking-widest text-emerald-400">' + (isLive && !latest.result ? '⚾ Current At-Bat' : '⚾ Last At-Bat') + '</div>';
+        html += '<div class="text-[10px] text-slate-500">' + esc(latest.inning) + '</div>';
+        html += '</div>';
+
+        // Batter vs Pitcher
+        html += '<div class="flex items-center justify-between mb-3">';
+        html += '<div><div class="text-[10px] text-slate-500 uppercase">Batter</div><div class="text-sm font-semibold text-white">' + esc(latest.batter) + '</div></div>';
+        html += '<div class="text-slate-600 text-xs">vs</div>';
+        html += '<div class="text-right"><div class="text-[10px] text-slate-500 uppercase">Pitcher</div><div class="text-sm font-semibold text-white">' + esc(latest.pitcher) + '</div></div>';
+        html += '</div>';
+
+        // Strike zone + Field side by side
+        if (latest.pitches.length > 0 || latest.hit) {
+          html += '<div class="grid grid-cols-2 gap-2 mb-3">';
+          // Strike zone
+          html += '<div class="text-center">';
+          html += '<div class="text-[9px] uppercase tracking-widest text-slate-500 mb-1">Pitch Location</div>';
+          html += drawStrikeZone(latest.pitches);
+          html += '</div>';
+          // Field
+          html += '<div class="text-center">';
+          html += '<div class="text-[9px] uppercase tracking-widest text-slate-500 mb-1">Ball in Play</div>';
+          html += drawFieldDiamond(latest.hit);
+          html += '</div>';
+          html += '</div>';
+        }
+
+        // Pitch-by-pitch sequence
+        if (latest.pitches.length > 0) {
+          html += '<div class="mb-2">';
+          html += '<div class="text-[9px] uppercase tracking-widest text-slate-500 mb-2">Pitch Sequence</div>';
+          html += '<div class="flex flex-wrap gap-1">';
+          latest.pitches.forEach(p => {
+            const isStrike = p.type.includes('Strike') || p.type === 'Foul' || p.type === 'Foul Ball' || p.type === 'Foul Tip';
+            const isBall = p.type === 'Ball' || p.type === 'Ball In Dirt';
+            const isHit = p.type.includes('In Play') || p.type.includes('Hit');
+            const bg = isHit ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : isStrike ? 'bg-red-500/20 text-red-300 border-red-500/30' : isBall ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+            const vel = p.velocity ? p.velocity + ' mph' : '';
+            const label = p.pitchType || p.type.charAt(0);
+            html += '<div class="inline-flex flex-col items-center px-2 py-1 rounded-md border text-[10px] ' + bg + '" title="' + esc(p.type + (p.pitchName ? ' (' + p.pitchName + ')' : '') + (vel ? ' ' + vel : '')) + '">';
+            html += '<span class="font-bold text-[11px]">' + esc(label) + '</span>';
+            if (vel) html += '<span class="text-[8px] opacity-70">' + esc(vel) + '</span>';
+            html += '</div>';
+          });
+          html += '</div>';
+        }
+
+        // Result
+        if (latest.result) {
+          const isScoring = latest.scoringPlay;
+          const rBg = isScoring ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' : 'bg-white/5 border-white/10 text-slate-300';
+          html += '<div class="mt-3 px-3 py-2 rounded-lg border text-xs ' + rBg + '">' +
+            (isScoring ? '🏃 ' : '') + esc(latest.result) +
+          '</div>';
+        }
+
+        html += '</div>';
+
+        // ── Legend ──
+        html += '<div class="flex justify-center gap-4 mb-3 text-[9px] text-slate-500">' +
+          '<div class="flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-red-500"></span> Strike</div>' +
+          '<div class="flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-blue-500"></span> Ball</div>' +
+          '<div class="flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span> In Play</div>' +
+          '<div class="flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span> Other</div>' +
+        '</div>';
+
+        // ── Recent At-Bats Feed ──
+        if (prevAtBats.length > 0) {
+          html += '<div class="info-card">';
+          html += '<div class="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Recent At-Bats</div>';
+          html += '<div class="space-y-2">';
+
+          prevAtBats.forEach(ab => {
+            const isScoring = ab.scoringPlay;
+            const borderCol = isScoring ? 'border-l-emerald-500' : 'border-l-slate-700';
+            html += '<div class="border-l-2 ' + borderCol + ' pl-3 py-1">';
+            html += '<div class="flex items-center justify-between">';
+            html += '<div class="text-xs font-semibold text-white">' + esc(ab.batter) + ' <span class="text-slate-500 font-normal">vs</span> ' + esc(ab.pitcher) + '</div>';
+            html += '<div class="text-[10px] text-slate-600">' + esc(ab.inning) + '</div>';
+            html += '</div>';
+            if (ab.result) {
+              html += '<div class="text-[11px] mt-0.5 ' + (isScoring ? 'text-emerald-400' : 'text-slate-400') + '">' + (isScoring ? '🏃 ' : '') + esc(ab.result) + '</div>';
+            }
+            // Mini pitch dots
+            if (ab.pitches.length > 0) {
+              html += '<div class="flex gap-0.5 mt-1">';
+              ab.pitches.forEach(p => {
+                const isS = p.type.includes('Strike') || p.type === 'Foul' || p.type === 'Foul Ball' || p.type === 'Foul Tip';
+                const isB = p.type === 'Ball' || p.type === 'Ball In Dirt';
+                const isH = p.type.includes('In Play') || p.type.includes('Hit');
+                const c = isH ? 'bg-emerald-500' : isS ? 'bg-red-500' : isB ? 'bg-blue-500' : 'bg-amber-500';
+                html += '<span class="inline-block w-1.5 h-1.5 rounded-full ' + c + '" title="' + esc(p.type) + '"></span>';
+              });
+              html += '</div>';
+            }
+            html += '</div>';
+          });
+
+          html += '</div></div>';
+        }
+
+        contentEl.innerHTML = html;
+
+        // Keep refreshing plays data
+        if (isLive) {
+          fetchMLBPlays(g.id);
+        }
+      }
+
+      // ── Status (Soccer generic) ──
+      function renderStatus(g) {
+        let html = '';
+        if (g.status) {
+          html += '<div class="info-card mb-3 text-center">' +
+            '<div class="text-lg font-semibold text-white">' + esc(g.status.detail || g.status.shortDetail || 'In Progress') + '</div>' +
+            (g.status.clock ? '<div class="text-sm text-emerald-300 mt-1">' + esc(g.status.clock) + '</div>' : '') +
+          '</div>';
+        }
+        if (g.venue) {
+          html += '<div class="info-card mb-3"><div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Venue</div>' +
+            '<div class="text-sm font-semibold text-white">' + esc(g.venue.name) + '</div>' +
+            (g.venue.city ? '<div class="text-xs text-slate-400">' + esc(g.venue.city) + (g.venue.state ? ', ' + esc(g.venue.state) : '') + '</div>' : '') +
+          '</div>';
+        }
+        contentEl.innerHTML = html || '<div class="info-card text-center text-slate-400 text-sm py-6">No status data available.</div>';
+      }
+
+      // ── Odds ──
+      function renderOdds(g) {
+        const o = g.odds;
+        if (!o) {
+          contentEl.innerHTML = '<div class="info-card text-center text-slate-400 text-sm py-6">No odds data available for this game.</div>';
+          return;
+        }
+
+        let html = '<div class="info-card space-y-3">';
+        html += '<div class="text-[10px] uppercase tracking-widest text-emerald-400 mb-2">Game Odds</div>';
+
+        if (o.details) {
+          html += '<div class="flex items-center justify-between"><span class="text-sm text-slate-400">Spread</span><span class="text-sm font-semibold text-white">' + esc(o.details) + '</span></div>';
+        }
+        if (o.overUnder != null) {
+          html += '<div class="flex items-center justify-between"><span class="text-sm text-slate-400">Over/Under</span><span class="text-sm font-semibold text-white">' + esc(String(o.overUnder)) + '</span></div>';
+        }
+        if (o.awayMoneyLine != null) {
+          html += '<div class="flex items-center justify-between"><span class="text-sm text-slate-400">' + esc(g.awayTeam.abbreviation || g.awayTeam.name) + ' ML</span><span class="text-sm font-semibold text-white">' + esc(String(o.awayMoneyLine)) + '</span></div>';
+        }
+        if (o.homeMoneyLine != null) {
+          html += '<div class="flex items-center justify-between"><span class="text-sm text-slate-400">' + esc(g.homeTeam.abbreviation || g.homeTeam.name) + ' ML</span><span class="text-sm font-semibold text-white">' + esc(String(o.homeMoneyLine)) + '</span></div>';
+        }
+
+        html += '</div>';
+        contentEl.innerHTML = html;
+      }
+
+      // ── Broadcast ──
+      function renderBroadcast(g) {
+        if (!g.broadcasts || !g.broadcasts.length) {
+          let html = '<div class="info-card text-center text-slate-400 text-sm py-6">No broadcast info available.</div>';
+          if (g.venue) {
+            html += '<div class="info-card mt-3"><div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Venue</div>' +
+              '<div class="text-sm font-semibold text-white">' + esc(g.venue.name) + '</div>' +
+              (g.venue.city ? '<div class="text-xs text-slate-400">' + esc(g.venue.city) + (g.venue.state ? ', ' + esc(g.venue.state) : '') + '</div>' : '') +
+            '</div>';
+          }
+          contentEl.innerHTML = html;
+          return;
+        }
+
+        let html = '<div class="info-card space-y-3">';
+        html += '<div class="text-[10px] uppercase tracking-widest text-emerald-400 mb-2">Broadcasts</div>';
+        g.broadcasts.forEach(b => {
+          const names = (b.names || []).join(', ');
+          html += '<div class="flex items-center justify-between">' +
+            (b.type ? '<span class="text-xs text-slate-400 uppercase">' + esc(b.type) + '</span>' : '<span></span>') +
+            '<span class="text-sm font-semibold text-white">' + esc(names || 'N/A') + '</span></div>';
+        });
+        html += '</div>';
+
+        if (g.venue) {
+          html += '<div class="info-card mt-3"><div class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Venue</div>' +
+            '<div class="text-sm font-semibold text-white">' + esc(g.venue.name) + '</div>' +
+            (g.venue.city ? '<div class="text-xs text-slate-400">' + esc(g.venue.city) + (g.venue.state ? ', ' + esc(g.venue.state) : '') + '</div>' : '') +
+          '</div>';
+        }
+
+        contentEl.innerHTML = html;
+      }
+
+      // ── Fetch & render ──
+      const FALLBACK_BASE = 'https://pickr-backend-972106331799.us-central1.run.app';
+
+      async function fetchGameDetail(base) {
+        const sportParam = encodeURIComponent(sport);
+        const url = base + '/api/scores/live/detail?sport=' + sportParam + '&id=' + encodeURIComponent(gameId);
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status + ' from ' + base);
+        return await resp.json();
+      }
+
+      async function loadGameData() {
+        try {
+          let data;
+          const base = getAPIBase();
+          try {
+            data = await fetchGameDetail(base);
+          } catch (e1) {
+            // If configured base fails, try the known-good fallback
+            if (base !== FALLBACK_BASE) {
+              console.warn('Primary API failed, trying fallback:', e1.message);
+              data = await fetchGameDetail(FALLBACK_BASE);
+            } else {
+              throw e1;
+            }
+          }
+
+          if (!data.game) {
+            headerEl.innerHTML = '<div class="text-red-400 text-sm">Game not found. It may have ended. <a href="index.html" class="underline text-emerald-400">Go back</a></div>';
+            return;
+          }
+
+          gameData = data.game;
+          renderHeader(gameData);
+          renderTabs();
+          renderContent();
+
+          if (updatedEl) {
+            const d = new Date(data.lastUpdated || Date.now());
+            updatedEl.textContent = 'Updated ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          }
+        } catch (err) {
+          console.error('Failed to load game data:', err);
+          // Only show error on first load, not on refresh failures
+          if (!gameData) {
+            headerEl.innerHTML = '<div class="text-red-400 text-sm">Failed to load game data. <a href="index.html" class="underline text-emerald-400">Go back</a></div>';
+          }
+        }
+      }
+
+      // Initial load
+      loadGameData();
+
+      // Auto-refresh every 3 seconds for real-time live updates
+      setInterval(() => {
+        loadGameData();
+      }, 3 * 1000);
+
+    })();
+    </script>
+  </body>
+</html>

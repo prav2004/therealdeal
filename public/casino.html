@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Casino — Pickr</title>
+    <script src="config.js?v=20260410"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script>
+      (function () {
+        const firebaseConfig = {
+          apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+          authDomain: "pickr-d4d9b.firebaseapp.com",
+          projectId: "pickr-d4d9b",
+          storageBucket: "pickr-d4d9b.firebasestorage.app",
+          messagingSenderId: "972106331799",
+          appId: "1:972106331799:web:d261170267bbd7dfaf5bd2"
+        };
+        if (!window.firebase) return;
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        firebase.auth().onAuthStateChanged((user) => {
+          if (!user) window.location.replace('/login.html');
+        });
+      })();
+    </script>
+    <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink: #0b0f1a;
+        --ember: #ff7a1a;
+        --mint: #40d9b5;
+        --sky: #7aa7ff;
+        --fog: rgba(255, 255, 255, 0.08);
+        --card: rgba(17, 25, 40, 0.82);
+      }
+      body {
+        font-family: 'IBM Plex Sans', sans-serif;
+        background: radial-gradient(circle at 30% 20%, rgba(255, 122, 26, 0.2), transparent 40%),
+          radial-gradient(circle at 70% 80%, rgba(64, 217, 181, 0.15), transparent 40%),
+          radial-gradient(circle at 50% 50%, rgba(122, 167, 255, 0.12), transparent 50%),
+          var(--ink);
+        color: #e5e7eb;
+        min-height: 100vh;
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+      }
+      .hero-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+      .glass { background: var(--card); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.35); backdrop-filter: blur(12px); }
+      .nav-link { color: #94a3b8; transition: color 0.2s ease; }
+      .nav-link:hover { color: #e2e8f0; }
+      .nav-link.active { color: var(--ember); }
+      .bottom-nav { padding-bottom: env(safe-area-inset-bottom); bottom: env(safe-area-inset-bottom); z-index: 50; }
+      .game-card {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+      .game-card:hover {
+        border-color: rgba(255, 122, 26, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+      }
+      .game-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--ember), var(--mint));
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .game-card:hover::before { opacity: 1; }
+      .coming-soon-badge {
+        background: rgba(255, 122, 26, 0.15);
+        border: 1px solid rgba(255, 122, 26, 0.3);
+        color: var(--ember);
+      }
+      /* Safe-area for notch / Dynamic Island */
+      .safe-top { padding-top: max(2rem, env(safe-area-inset-top)); }
+    </style>
+  </head>
+  <body>
+    <main class="max-w-2xl mx-auto px-4 pb-24 safe-top">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="hero-title text-3xl font-bold text-white mb-2">🎰 Casino</h1>
+        <p class="text-slate-400 text-sm">Play classic casino games — for fun, powered by Pickr.</p>
+      </div>
+
+      <!-- Game Cards Grid -->
+      <div class="grid grid-cols-2 gap-4">
+
+        <!-- Blackjack — LIVE -->
+        <a href="blackjack.html" class="game-card p-5 flex flex-col items-center text-center">
+          <div class="text-5xl mb-3">🃏</div>
+          <div class="hero-title text-lg font-bold text-white mb-1">Blackjack</div>
+          <div class="text-xs text-slate-400 mb-3">Beat the dealer to 21</div>
+          <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">Play Now</span>
+        </a>
+
+        <!-- Roulette — Coming Soon -->
+        <div class="game-card p-5 flex flex-col items-center text-center opacity-60 cursor-default hover:transform-none" style="pointer-events:none;">
+          <div class="text-5xl mb-3">🎡</div>
+          <div class="hero-title text-lg font-bold text-white mb-1">Roulette</div>
+          <div class="text-xs text-slate-400 mb-3">Spin the wheel</div>
+          <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest coming-soon-badge">Coming Soon</span>
+        </div>
+
+        <!-- Slots — Coming Soon -->
+        <div class="game-card p-5 flex flex-col items-center text-center opacity-60 cursor-default" style="pointer-events:none;">
+          <div class="text-5xl mb-3">🎰</div>
+          <div class="hero-title text-lg font-bold text-white mb-1">Slots</div>
+          <div class="text-xs text-slate-400 mb-3">Classic slot machine</div>
+          <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest coming-soon-badge">Coming Soon</span>
+        </div>
+
+        <!-- Poker — Coming Soon -->
+        <div class="game-card p-5 flex flex-col items-center text-center opacity-60 cursor-default" style="pointer-events:none;">
+          <div class="text-5xl mb-3">♠️</div>
+          <div class="hero-title text-lg font-bold text-white mb-1">Poker</div>
+          <div class="text-xs text-slate-400 mb-3">Texas Hold'em</div>
+          <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest coming-soon-badge">Coming Soon</span>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
+      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">⭐</span>
+        <span>Pickr Picks</span>
+      </a>
+      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">📝</span>
+        <span>Tasks</span>
+      </a>
+      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🏈</span>
+        <span>Sports</span>
+      </a>
+      <a href="casino.html" class="nav-link active flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🎰</span>
+        <span>Casino</span>
+      </a>
+      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span class="text-xl">🎯</span>
+        <span>Picks</span>
+      </a>
+      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
+        <span>💰</span>
+        <span>Wallet</span>
+      </a>
+    </nav>
+  </body>
+</html>

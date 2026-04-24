@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Signing Out - Pickr</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <h1>Signing out...</h1>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+      authDomain: "pickr-d4d9b.firebaseapp.com",
+      projectId: "pickr-d4d9b",
+      storageBucket: "pickr-d4d9b.firebasestorage.app",
+      messagingSenderId: "972106331799",
+      appId: "1:972106331799:web:d261170267bbd7dfaf5bd2",
+      measurementId: "G-J0DC1K39NN"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    firebase.auth().signOut().then(() => {
+      console.log('Signed out successfully');
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/login.html';
+    }).catch((error) => {
+      console.error('Sign out error:', error);
+      window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>

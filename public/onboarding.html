@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Finish Setup – Pickr</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8b5cf6'
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase (Compat only) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="config.js"></script>
+  <style>
+    /* ── Page loader — bouncing ball ── */
+    #pageLoader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:#0b0f1a;transition:opacity .6s ease}
+    #pageLoader.loaded{opacity:0;pointer-events:none}
+    .loader-ball{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#ffb347 0%,#ff7a1a 45%,#c05600 100%);box-shadow:inset -4px -6px 10px rgba(0,0,0,.35),inset 2px 2px 6px rgba(255,220,160,.4);position:relative;animation:ballBounce 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+    .loader-ball::after{content:'';position:absolute;inset:6px;border-radius:50%;border:1.5px solid rgba(0,0,0,.18);border-top-color:transparent;border-left-color:transparent;transform:rotate(-35deg)}
+    .loader-ball::before{content:'';position:absolute;left:50%;top:4px;width:1.5px;height:28px;background:rgba(0,0,0,.15);transform:translateX(-50%) rotate(25deg);border-radius:2px}
+    .loader-shadow{width:38px;height:8px;border-radius:50%;background:rgba(255,122,26,.25);filter:blur(3px);margin-top:4px;animation:shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+    @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
+    @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
+    .pickr-page-content{transition:visibility 0s}
+  </style>
+</head>
+  <body class="min-h-screen bg-gradient-to-br from-zinc-950 via-slate-950 to-zinc-900 text-zinc-100">
+  <!-- Page loader -->
+  <div id="pageLoader"><div class="loader-ball"></div><div class="loader-shadow"></div></div>
+  <div class="pickr-page-content" style="visibility:hidden;">
+  <div class="mx-auto max-w-2xl px-4 py-10">
+    <div class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+        <img src="logo.png" alt="Pickr" class="h-[9rem] w-[9rem] sm:h-[11rem] sm:w-[11rem] object-contain" />
+        <div class="space-y-2">
+          <div class="text-xs uppercase tracking-[0.3em] text-purple-300">Account setup</div>
+          <div class="text-2xl font-semibold tracking-tight">Finish setting up your account</div>
+          <div class="text-sm text-zinc-400">Canada only. Must be 19+.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 shadow">
+      <div id="who" class="text-sm text-zinc-300 mb-4"></div>
+
+  <form id="profileForm" class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1 text-zinc-300">Full legal name</label>
+          <input id="fullName" type="text" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="Your name" />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1 text-zinc-300">Screen name</label>
+          <input id="screenName" type="text" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="YOUR_NAME" />
+          <p class="text-xs text-zinc-500 mt-1">A-Z, 0-9, _ or . only. No spaces. This name will show on the public leaderboard.</p>
+        </div>
+
+        <div>
+          <label class="block text-sm mb-2 text-zinc-300">Choose an avatar</label>
+          <div id="avatarGrid" class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+            <label class="cursor-pointer">
+              <input class="peer sr-only" type="radio" name="avatarId" value="avatar-1" />
+              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-1" data-size="64" aria-hidden="true"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input class="peer sr-only" type="radio" name="avatarId" value="avatar-2" />
+              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-2" data-size="64" aria-hidden="true"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input class="peer sr-only" type="radio" name="avatarId" value="avatar-3" />
+              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-3" data-size="64" aria-hidden="true"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input class="peer sr-only" type="radio" name="avatarId" value="avatar-4" />
+              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-4" data-size="64" aria-hidden="true"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input class="peer sr-only" type="radio" name="avatarId" value="avatar-5" />
+              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-5" data-size="64" aria-hidden="true"></div>
+            </label>
+            <label class="cursor-pointer">
+              <input class="peer sr-only" type="radio" name="avatarId" value="avatar-6" />
+              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-6" data-size="64" aria-hidden="true"></div>
+            </label>
+          </div>
+          <p class="text-xs text-zinc-500 mt-2">Pick one avatar to represent you.</p>
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1 text-zinc-300">Date of birth</label>
+          <input id="dob" type="date" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600" />
+          <p class="text-xs text-zinc-500 mt-1">You must be 19+ to use Pickr.</p>
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1 text-zinc-300">Street address</label>
+          <input id="street" type="text" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="Street address" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm mb-1 text-zinc-300">City</label>
+            <input id="city" type="text" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="City" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1 text-zinc-300">Province</label>
+            <select id="region" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600">
+              <option value="">Select province</option>
+              <option value="AB">Alberta</option>
+              <option value="BC">British Columbia</option>
+              <option value="MB">Manitoba</option>
+              <option value="NB">New Brunswick</option>
+              <option value="NL">Newfoundland and Labrador</option>
+              <option value="NT">Northwest Territories</option>
+              <option value="NS">Nova Scotia</option>
+              <option value="NU">Nunavut</option>
+              <option value="ON">Ontario</option>
+              <option value="PE">Prince Edward Island</option>
+              <option value="QC">Quebec</option>
+              <option value="SK">Saskatchewan</option>
+              <option value="YT">Yukon</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm mb-1 text-zinc-300">Postal code</label>
+            <input id="postal" type="text" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="K1A 0B1" />
+            <p class="text-xs text-zinc-500 mt-1">Format: A1A 1A1</p>
+          </div>
+          <div>
+            <label class="block text-sm mb-1 text-zinc-300">Country</label>
+            <select id="country" required class="w-full rounded-lg bg-zinc-950 border border-zinc-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600" disabled>
+              <option value="Canada">Canada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="terms" type="checkbox" />
+          <label for="terms" class="text-sm text-zinc-300">I accept the <a href="terms.html?from=onboarding" class="text-primary underline">Terms and Conditions</a> (required)</label>
+        </div>
+
+        <div id="err" class="text-sm text-red-400"></div>
+
+        <button id="submitBtn" type="submit" disabled class="w-full rounded-lg bg-red-600/60 hover:bg-red-700 transition px-4 py-2 font-semibold">Save & continue</button>
+        <button id="signOutBtn" type="button" class="w-full rounded-lg bg-zinc-800 hover:bg-zinc-700 transition px-4 py-2 font-semibold">Sign out</button>
+      </form>
+    </div>
+
+    <p class="text-xs text-zinc-500 mt-6">
+      Pickr is a free-to-play prediction app. No real-money wagering occurs in-app.
+    </p>
+  </div>
+
+  <footer class="mt-14 border-t border-white/10 bg-white/5">
+    <div class="mx-auto w-full max-w-6xl px-4 py-10">
+      <div class="grid gap-8 md:grid-cols-3">
+        <div class="space-y-3">
+          <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Pickr</div>
+          <div class="text-xl font-semibold text-white">Stay in the know</div>
+          <p class="text-sm text-zinc-400">Free-to-play insights, product updates, and community highlights.</p>
+          <div class="flex flex-wrap gap-2">
+            <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.linkedin.com/in/pickr-picks-a654423b2/" target="_blank" rel="noopener">LinkedIn</a>
+            <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.tiktok.com/@pickrpicks_?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener">TikTok</a>
+            <a class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-widest text-zinc-200 hover:border-white/30 hover:text-white" href="https://www.instagram.com/pickrpicks/" target="_blank" rel="noopener">Instagram</a>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Support</div>
+          <div class="flex flex-col gap-2 text-sm">
+            <a class="text-zinc-200 hover:text-white" href="contact.html">Contact us</a>
+            <a class="text-zinc-200 hover:text-white" href="faq.html">FAQ</a>
+            <a class="text-zinc-200 hover:text-white" href="terms.html">Terms of Service</a>
+            <a class="text-zinc-200 hover:text-white" href="careers.html">Careers</a>
+          </div>
+          <div class="text-xs text-zinc-500">We reply within 1-2 business days.</div>
+        </div>
+        <div class="space-y-3">
+          <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Get help</div>
+          <p class="text-sm text-zinc-400">Need a hand with picks, rewards, or your account? Submit a support ticket any time.</p>
+          <a class="inline-flex items-center justify-center rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20" href="contact.html">Submit a ticket</a>
+        </div>
+      </div>
+      <div class="mt-8 flex flex-col gap-2 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+        <div>© 2026 Pickr. Free-to-play. 19+ only in Canada.</div>
+        <div class="flex flex-wrap gap-3">
+          <a class="hover:text-zinc-200" href="terms.html">Terms</a>
+          <a class="hover:text-zinc-200" href="faq.html">FAQ</a>
+          <a class="hover:text-zinc-200" href="careers.html">Careers</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  </div><!-- /.pickr-page-content -->
+
+  <script src="script.js"></script>
+  <script>
+    /* Reveal onboarding page once auth & profile check are done */
+    (function(){
+      var revealed = false;
+      function revealOnboarding(){
+        if (revealed) return;
+        revealed = true;
+        document.querySelectorAll('.pickr-page-content').forEach(function(el){ el.style.visibility='visible'; });
+        var pl=document.getElementById('pageLoader');
+        if(pl){pl.classList.add('loaded');setTimeout(function(){pl.remove();},800);}
+      }
+      window.__revealOnboarding = revealOnboarding;
+      /* Safety — never leave it stuck */
+      setTimeout(revealOnboarding, 6000);
+    })();
+  </script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+      authDomain: "pickr-d4d9b.firebaseapp.com",
+      projectId: "pickr-d4d9b",
+      storageBucket: "pickr-d4d9b.firebasestorage.app",
+      messagingSenderId: "972106331799",
+      appId: "1:972106331799:web:d261170267bbd7dfaf5bd2",
+      measurementId: "G-J0DC1K39NN"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    // Emulator opt-in: only point the client to the Auth emulator when
+    // explicitly requested (via ?emulator=1 or localStorage USE_FIREBASE_EMULATOR)
+    // to avoid sign-in state mismatches between pages during local dev.
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const useEmu = isLocalhost && (params.get('emulator') === '1' || localStorage.getItem('USE_FIREBASE_EMULATOR') === '1');
+      if (useEmu) {
+        auth.useEmulator && auth.useEmulator('http://localhost:9099/');
+        console.log('Auth client configured to use Auth emulator at http://localhost:9099');
+      }
+    } catch (e) {
+      console.warn('Failed to configure Auth emulator on client:', e && e.message);
+    }
+    const whoEl = document.getElementById('who');
+    const errEl = document.getElementById('err');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function getSelectedAvatarId() {
+      const selected = document.querySelector('input[name="avatarId"]:checked');
+      return selected ? selected.value : '';
+    }
+
+    // Helper to enable/disable submit button based on validity
+    function validateFormState() {
+      const fullName = document.getElementById('fullName').value.trim();
+      const screenName = document.getElementById('screenName').value.trim();
+      const dob = document.getElementById('dob').value;
+      const street = document.getElementById('street').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const region = document.getElementById('region').value.trim();
+      const postal = document.getElementById('postal').value.trim();
+      const country = document.getElementById('country').value.trim();
+      const terms = document.getElementById('terms').checked;
+      const avatarId = getSelectedAvatarId();
+      const snOk = typeof screenNameAvailable !== 'undefined' ? screenNameAvailable : true;
+      const ok = fullName && screenName && dob && street && city && region && postal && country && terms && avatarId && snOk;
+      submitBtn.disabled = !ok;
+      submitBtn.classList.toggle('opacity-60', !ok);
+      return ok;
+    }
+
+    function normalizeScreenName(value) {
+      return String(value || '')
+        .toUpperCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^A-Z0-9_.]/g, '');
+    }
+
+    function calcAge(dobStr) {
+      const dob = new Date(dobStr + 'T00:00:00');
+      const now = new Date();
+      let age = now.getFullYear() - dob.getFullYear();
+      const m = now.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+      return age;
+    }
+
+    async function ensureSignedIn() {
+      return new Promise((resolve) => {
+        auth.onAuthStateChanged((user) => resolve(user));
+      });
+    }
+
+    (async () => {
+  const user = await ensureSignedIn();
+  if (!user) {
+    window.location.replace('/login');
+    return;
+  }
+
+  whoEl.textContent = `Signed in as ${user.email || ''}`;
+
+  const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
+
+  // Prefill if any saved draft exists in memory (do not use localStorage as permanent storage)
+  // Attempt to fetch existing server profile to prefill fields
+  try {
+    const idToken = await user.getIdToken();
+    const resp = await fetch(apiBase + '/api/me', { headers: { Authorization: 'Bearer ' + idToken } });
+    if (resp.ok) {
+      const profile = await resp.json();
+      if (profile && profile.profileComplete && profile.ageVerified) {
+        window.location.replace('/index.html');
+        return;
+      }
+      if (profile && profile.fullName) document.getElementById('fullName').value = profile.fullName;
+      if (profile && profile.screenName) {
+        const sn = document.getElementById('screenName');
+        if (sn) {
+          sn.value = String(profile.screenName).toUpperCase();
+          sn.setAttribute('readonly', 'readonly');
+          sn.classList.add('opacity-70', 'cursor-not-allowed');
+        }
+      }
+      if (profile && profile.dateOfBirth) document.getElementById('dob').value = profile.dateOfBirth;
+      if (profile && profile.address) {
+        document.getElementById('street').value = profile.address.street || '';
+        document.getElementById('city').value = profile.address.city || '';
+        document.getElementById('region').value = profile.address.region || '';
+        document.getElementById('postal').value = profile.address.postalCode || '';
+        document.getElementById('country').value = profile.address.country || '';
+      }
+      if (profile && profile.avatarId) {
+        const avatarInput = document.querySelector(`input[name="avatarId"][value="${profile.avatarId}"]`);
+        if (avatarInput) avatarInput.checked = true;
+      }
+    }
+  } catch (e) {
+    // ignore and let user fill the form
+  }
+
+  // Onboarding form is ready — reveal the page
+  if (window.__revealOnboarding) window.__revealOnboarding();
+
+  // wire validation listeners
+  ['fullName','screenName','dob','street','city','region','postal','country','terms'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', validateFormState);
+    el.addEventListener('change', validateFormState);
+  });
+  document.querySelectorAll('input[name="avatarId"]').forEach((el) => {
+    el.addEventListener('change', validateFormState);
+  });
+
+  const screenNameInput = document.getElementById('screenName');
+  let screenNameAvailable = false;
+  let screenNameCheckTimer = null;
+
+  // Create availability indicator element
+  const snStatus = document.createElement('div');
+  snStatus.className = 'text-xs mt-1 h-4';
+  snStatus.id = 'snStatus';
+  if (screenNameInput) screenNameInput.parentNode.appendChild(snStatus);
+
+  async function checkScreenNameAvailability(name) {
+    if (!name || name.length < 2) {
+      snStatus.textContent = '';
+      screenNameAvailable = false;
+      validateFormState();
+      return;
+    }
+    snStatus.textContent = 'Checking...';
+    snStatus.className = 'text-xs mt-1 h-4 text-zinc-400';
+    try {
+      const idToken = await auth.currentUser.getIdToken();
+      const resp = await fetch(apiBase + '/api/check-screenname?name=' + encodeURIComponent(name), {
+        headers: { Authorization: 'Bearer ' + idToken }
+      });
+      const data = await resp.json();
+      // Only update if the input still matches (user may have typed more)
+      if (normalizeScreenName(screenNameInput.value) !== name) return;
+      if (data.available) {
+        snStatus.textContent = '\u2713 Available';
+        snStatus.className = 'text-xs mt-1 h-4 text-green-400';
+        screenNameAvailable = true;
+      } else {
+        snStatus.textContent = '\u2717 ' + (data.reason || 'Already taken');
+        snStatus.className = 'text-xs mt-1 h-4 text-red-400';
+        screenNameAvailable = false;
+      }
+    } catch (e) {
+      snStatus.textContent = '';
+      screenNameAvailable = true; // allow submit on network error, server will enforce
+    }
+    validateFormState();
+  }
+
+  if (screenNameInput) {
+    screenNameInput.addEventListener('input', () => {
+      const next = normalizeScreenName(screenNameInput.value);
+      if (screenNameInput.value !== next) screenNameInput.value = next;
+      // Debounce availability check
+      clearTimeout(screenNameCheckTimer);
+      screenNameAvailable = false;
+      snStatus.textContent = '';
+      validateFormState();
+      if (next.length >= 2) {
+        screenNameCheckTimer = setTimeout(() => checkScreenNameAvailability(next), 400);
+      }
+    });
+  }
+
+  const dobInput = document.getElementById('dob');
+  if (dobInput) {
+    dobInput.addEventListener('input', () => {
+      const value = dobInput.value;
+      if (!value) return;
+      const parts = value.split('-');
+      if (parts[0] && parts[0].length > 4) {
+        parts[0] = parts[0].slice(0, 4);
+        dobInput.value = parts.join('-');
+      }
+    });
+  }
+
+  document.getElementById('signOutBtn').addEventListener('click', async () => {
+    await auth.signOut();
+    window.location.replace('/login');
+  });
+
+  document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errEl.textContent = '';
+
+    e.preventDefault();
+    errEl.textContent = '';
+    const fullName = document.getElementById('fullName').value.trim();
+    const screenName = normalizeScreenName(document.getElementById('screenName').value.trim());
+    const dob = document.getElementById('dob').value;
+    const street = document.getElementById('street').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const region = document.getElementById('region').value.trim();
+    const postal = document.getElementById('postal').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const terms = document.getElementById('terms').checked;
+    const avatarId = getSelectedAvatarId();
+
+    if (!screenName) {
+      errEl.textContent = 'Please enter a screen name.';
+      return;
+    }
+    if (!/^[A-Z0-9_.]+$/.test(screenName)) {
+      errEl.textContent = 'Screen name can only use A-Z, 0-9, _ or . (no spaces).';
+      return;
+    }
+    if (typeof screenNameAvailable !== 'undefined' && !screenNameAvailable) {
+      errEl.textContent = 'That screen name is already taken. Please choose another.';
+      return;
+    }
+
+    if (!avatarId) {
+      errEl.textContent = 'Please choose an avatar.';
+      return;
+    }
+
+    const age = calcAge(dob);
+    if (!Number.isFinite(age) || age < 0) {
+      errEl.textContent = 'Please enter a valid birthday.';
+      return;
+    }
+    const MIN_AGE = 19;
+    if (age < MIN_AGE) {
+      errEl.textContent = `You must be ${MIN_AGE}+ to use Pickr.`;
+      await auth.signOut();
+      setTimeout(() => window.location.replace('/login'), 800);
+      return;
+    }
+
+    const normalizedCountry = country.toLowerCase();
+    if (normalizedCountry !== 'canada') {
+      errEl.textContent = 'Pickr is available in Canada only.';
+      return;
+    }
+
+    const postalNormalized = postal.toUpperCase().replace(/\s+/g, '');
+    if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(postalNormalized)) {
+      errEl.textContent = 'Please enter a valid Canadian postal code (A1A 1A1).';
+      return;
+    }
+
+    if (!terms) { errEl.textContent = 'You must accept the terms to continue.'; return; }
+
+    try {
+      // Send profile to server for validation and persistence
+      const idToken = await auth.currentUser.getIdToken();
+      const body = {
+        fullName,
+        screenName,
+        avatarId,
+        dateOfBirth: dob,
+        address: { street, city, region, postalCode: postalNormalized.replace(/(.{3})/, '$1 '), country },
+        termsAccepted: true
+      };
+      const resp = await fetch(apiBase + '/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + idToken }, body: JSON.stringify(body) });
+      if (!resp.ok) {
+        const errBody = await resp.json().catch(()=>({ error: 'unknown' }));
+        errEl.textContent = errBody && errBody.error ? String(errBody.error) : 'Could not save your profile. Please try again.';
+        return;
+      }
+
+      // Success — persist a local draft so other pages can immediately show
+      // the just-saved profile while the authoritative /api/me is fetched.
+      try {
+        // Include the current user's email (if available) so other pages
+        // can show the email immediately as well.
+        const savedProfile = Object.assign({}, { fullName, screenName, avatarId, dateOfBirth: dob, address: { street, city, region, postalCode: postal, country }, termsAccepted: true });
+        try { if (auth && auth.currentUser && auth.currentUser.email) savedProfile.email = auth.currentUser.email; } catch (e) { /* ignore */ }
+        localStorage.setItem('LAST_PROFILE_DRAFT', JSON.stringify(savedProfile));
+      } catch (e) {
+        // ignore localStorage failures
+      }
+      // Redirect to main app
+      window.location.replace('/index.html');
+    } catch (err) {
+      console.error('Profile submission failed', err);
+      errEl.textContent = 'Could not save your profile. Please try again.';
+    }
+  });
+})();
+  </script>
+</body>
+</html>

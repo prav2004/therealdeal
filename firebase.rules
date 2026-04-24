@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection: clients may read their own document, but writes
+    // must be performed by the server via the Admin SDK. This rule
+    // denies client-side writes to users documents to ensure server-side
+    // validation and KYC enforcement.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Deny all client writes — server must use the Admin SDK to write.
+      allow write: if false;
+    }
+
+    // Other collections (picks, bets) should be restricted similarly in
+    // production. For local development with emulators you may loosen
+    // rules, but never allow public writes in production.
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}

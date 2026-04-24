@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login – Pickr</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0b0f1a;
+      --accent: #ff7a1a;
+      --card: rgba(12, 18, 32, 0.82);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--ink);
+      color: #e5e7eb;
+      overflow-x: hidden;
+    }
+    .mobile-login {
+      display: none;
+    }
+    .slogan-float {
+      position: absolute;
+      left: clamp(1rem, 4vw, 3.5rem);
+      bottom: clamp(1.5rem, 5vw, 3rem);
+      max-width: min(480px, 40vw);
+      text-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+      z-index: 2;
+    }
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+      font-size: clamp(2.9rem, 4.4vw, 3.8rem);
+      margin: 0.2rem 0 0;
+    }
+    .login-page {
+      position: relative;
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(1rem, 3vw, 2.5rem);
+      background: url('vlad.png') left 40% top 60% / 120% no-repeat,
+        radial-gradient(circle at 20% 20%, rgba(122, 167, 255, 0.18), transparent 45%),
+        radial-gradient(circle at 90% 10%, rgba(255, 122, 26, 0.15), transparent 40%),
+        var(--ink);
+      overflow: hidden;
+    }
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11, 15, 26, 0.15), rgba(11, 15, 26, 0.55));
+    }
+    .bg-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(255, 122, 26, 0.18), transparent 45%),
+        radial-gradient(circle at 80% 10%, rgba(122, 167, 255, 0.2), transparent 40%);
+      pointer-events: none;
+    }
+    .player {
+      position: absolute;
+      left: clamp(1rem, 4vw, 4rem);
+      bottom: 0;
+      width: min(50vw, 560px);
+      max-height: 90vh;
+      object-fit: contain;
+      z-index: 1;
+      filter: drop-shadow(0 30px 60px rgba(0, 0, 0, 0.45));
+      pointer-events: none;
+    }
+    .login-card {
+      position: relative;
+      z-index: 2;
+      width: min(820px, 94vw);
+      margin-left: auto;
+      margin-right: 0;
+      padding: clamp(2rem, 3.6vw, 3.4rem);
+      max-height: calc(100vh - 2rem);
+      transform: translateY(-18px);
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      text-align: center;
+    }
+    .card-logo {
+      width: clamp(240px, 50vw, 520px);
+      max-width: 100%;
+      display: block;
+      margin: 0 auto 1.6rem;
+      object-fit: contain;
+    }
+    .subtitle {
+      color: rgba(226, 232, 240, 0.82);
+      font-size: 1.35rem;
+      line-height: 1.6;
+      margin: 0.8rem auto 2.2rem;
+      max-width: 28ch;
+    }
+    .slogan-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.52rem;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      margin: 0 0 0.35rem;
+      white-space: nowrap;
+    }
+    .slogan-copy {
+      font-size: 2.28rem;
+      color: rgba(226, 232, 240, 0.9);
+      margin: 0;
+      white-space: nowrap;
+    }
+    .google-btn {
+      width: 100%;
+      padding: 1.35rem 1.6rem;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #ff7a1a, #ffb15a);
+      color: #0b0f1a;
+      font-weight: 600;
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 14px 30px rgba(255, 122, 26, 0.32);
+    }
+    .google-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 18px 36px rgba(255, 122, 26, 0.45);
+    }
+    .google-icon {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+    }
+    .error {
+      margin-top: 0.75rem;
+      min-height: 1rem;
+      font-size: 0.85rem;
+      color: #f87171;
+    }
+    .auth-links {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: rgba(226, 232, 240, 0.7);
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .auth-links a {
+      color: rgba(226, 232, 240, 0.9);
+      text-decoration: none;
+    }
+    .auth-links a:hover {
+      color: #ffffff;
+    }
+    @media (max-width: 900px) {
+      .login-page {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding-top: clamp(1rem, 6vh, 3rem);
+        background: url('vlad.png') left 40% top 60% / 120% no-repeat,
+          radial-gradient(circle at 20% 20%, rgba(122, 167, 255, 0.18), transparent 45%),
+          radial-gradient(circle at 90% 10%, rgba(255, 122, 26, 0.15), transparent 40%),
+          var(--ink);
+      }
+      .player {
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(70vw, 480px);
+        opacity: 0.65;
+      }
+      .login-card {
+        margin-left: auto;
+        margin-right: 0;
+        transform: none;
+      }
+      .slogan-float {
+        left: 1.2rem;
+        bottom: 1.6rem;
+        max-width: min(520px, 60vw);
+      }
+    }
+    @media (max-width: 520px) {
+      body {
+        height: 100vh;
+        overflow: hidden;
+      }
+      .login-page {
+        padding: 1.4rem 1.2rem 1.8rem;
+        align-items: center;
+        justify-content: center;
+        background: url('iphone.png') center top / cover no-repeat,
+          var(--ink);
+      }
+      .login-page::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(7, 11, 22, 0.25), rgba(7, 11, 22, 0.9));
+        pointer-events: none;
+      }
+      .login-page::after {
+        background: linear-gradient(180deg, rgba(7, 11, 22, 0.25), rgba(7, 11, 22, 0.9));
+      }
+      .login-card {
+        display: none;
+      }
+      .slogan-float {
+        display: none;
+      }
+      .mobile-login {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: min(360px, 92vw);
+        gap: 1rem;
+      }
+      .mobile-logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .mobile-logo img {
+        width: auto;
+        max-width: 90vw;
+        height: auto;
+        display: block;
+      }
+      .mobile-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.55rem;
+        line-height: 1.25;
+        color: #ffffff;
+      }
+      .mobile-title em {
+        color: #f9b44a;
+        font-style: normal;
+      }
+      .mobile-copy {
+        font-size: 1rem;
+        color: rgba(226, 232, 240, 0.85);
+        margin: 0;
+      }
+      .mobile-btn {
+        width: 100%;
+        padding: 0.95rem 1.2rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ff8a1c, #f7c15a);
+        color: #0b0f1a;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+      }
+      .mobile-checks {
+        width: 100%;
+        text-align: left;
+        font-size: 0.95rem;
+        color: rgba(226, 232, 240, 0.9);
+        display: grid;
+        gap: 0.5rem;
+      }
+      .mobile-checks span {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .mobile-terms {
+        font-size: 0.8rem;
+        color: rgba(226, 232, 240, 0.65);
+      }
+      .mobile-terms a {
+        color: rgba(226, 232, 240, 0.9);
+        text-decoration: underline;
+      }
+      .mobile-logo-fixed {
+        position: absolute;
+        top: calc(18vh - 15px);
+        left: calc(60% + 15px);
+        transform: translateX(-50%);
+        z-index: 3;
+      }
+      .mobile-login {
+        padding-top: 4rem;
+        margin-top: 20rem;
+      }
+      .mobile-title {
+        margin-top: -0.35rem;
+      }
+      .hero-title {
+        font-size: 1.1rem;
+      }
+      .card-logo {
+        width: min(160px, 42vw);
+        margin-bottom: 0.3rem;
+      }
+      .subtitle {
+        font-size: 0.72rem;
+        margin: 0.25rem auto 0.5rem;
+      }
+      .slogan-float {
+        display: none;
+      }
+      .slogan-title {
+        font-size: 1.2rem;
+      }
+      .slogan-copy {
+        font-size: 1.05rem;
+      }
+      .google-btn {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.82rem;
+      }
+    }
+    @media (min-width: 521px) {
+      .mobile-login,
+      .mobile-logo-fixed {
+        display: none;
+      }
+      .login-card {
+        display: block;
+      }
+    }
+    /* ── Page loader — bouncing ball ── */
+    #pageLoader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:#0b0f1a;transition:opacity .6s ease}
+    #pageLoader.loaded{opacity:0;pointer-events:none}
+    .loader-ball{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#ffb347 0%,#ff7a1a 45%,#c05600 100%);box-shadow:inset -4px -6px 10px rgba(0,0,0,.35),inset 2px 2px 6px rgba(255,220,160,.4);position:relative;animation:ballBounce 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+    .loader-ball::after{content:'';position:absolute;inset:6px;border-radius:50%;border:1.5px solid rgba(0,0,0,.18);border-top-color:transparent;border-left-color:transparent;transform:rotate(-35deg)}
+    .loader-ball::before{content:'';position:absolute;left:50%;top:4px;width:1.5px;height:28px;background:rgba(0,0,0,.15);transform:translateX(-50%) rotate(25deg);border-radius:2px}
+    .loader-shadow{width:38px;height:8px;border-radius:50%;background:rgba(255,122,26,.25);filter:blur(3px);margin-top:4px;animation:shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
+    @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
+    @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
+  </style>
+
+  <!-- Firebase (COMPAT versions — IMPORTANT) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="config.js"></script>
+</head>
+
+<body>
+  <!-- Page loader -->
+  <div id="pageLoader"><div class="loader-ball"></div><div class="loader-shadow"></div></div>
+  <main class="login-page" style="visibility:hidden;">
+    <div class="bg-overlay"></div>
+    <div class="mobile-logo mobile-logo-fixed" aria-hidden="true">
+      <img src="logo.png" alt="Pickr logo" />
+    </div>
+    <div class="mobile-login" aria-hidden="true">
+      <div class="mobile-title">100% Free. <em>100% Fun.</em><br>Zero Deposits Needed.</div>
+      <p class="mobile-copy">Get free picks powered by our consistency algorithm.</p>
+      <button id="loginBtnMobile" class="mobile-btn">
+        <svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.749 32.657 29.319 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.269 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20c10.493 0 19-8.507 19-19 0-1.341-.138-2.651-.389-3.917z"/>
+          <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.657 16.108 18.979 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.269 4 24 4c-7.682 0-14.386 4.11-18.0 10.691z"/>
+          <path fill="#4CAF50" d="M24 44c5.188 0 9.932-1.983 13.511-5.207l-6.233-5.277C29.271 35.091 26.787 36 24 36c-5.298 0-9.71-3.324-11.299-7.946l-6.51 5.02C9.821 39.931 16.477 44 24 44z"/>
+          <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-1.067 3.008-3.214 5.5-6.025 6.95l.003-.002 6.233 5.277C34.08 39.297 39 35 41.11 28.0c.478-1.402.75-2.905.75-4.5 0-1.341-.138-2.651-.389-3.917z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="mobile-checks">
+        <span>✓ No deposit ever required</span>
+        <span>✓ Daily free picks</span>
+        <span>✓ Smart data-driven insights</span>
+      </div>
+    </div>
+    <div class="login-card">
+      <img src="logo.png" alt="Pickr logo" class="card-logo" />
+      <h1 class="hero-title">Welcome Back</h1>
+      <p class="subtitle">Where sports knowledge pays</p>
+      <button id="loginBtn" class="google-btn">
+        <svg class="google-icon" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.749 32.657 29.319 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.269 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20c10.493 0 19-8.507 19-19 0-1.341-.138-2.651-.389-3.917z"/>
+          <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.657 16.108 18.979 12 24 12c3.059 0 5.842 1.154 7.957 3.043l5.657-5.657C34.046 6.053 29.269 4 24 4c-7.682 0-14.386 4.11-18.0 10.691z"/>
+          <path fill="#4CAF50" d="M24 44c5.188 0 9.932-1.983 13.511-5.207l-6.233-5.277C29.271 35.091 26.787 36 24 36c-5.298 0-9.71-3.324-11.299-7.946l-6.51 5.02C9.821 39.931 16.477 44 24 44z"/>
+          <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-1.067 3.008-3.214 5.5-6.025 6.95l.003-.002 6.233 5.277C34.08 39.297 39 35 41.11 28.0c.478-1.402.75-2.905.75-4.5 0-1.341-.138-2.651-.389-3.917z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <div class="auth-links">
+        <button id="signupBtn" type="button">Sign up</button>
+      </div>
+      <div id="error" class="error"></div>
+    </div>
+      <div class="slogan-float" aria-hidden="true">
+        <div class="slogan-title">100% Free. 100% Fun. Zero Deposits Needed.</div>
+        <p class="slogan-copy">Unlock free daily consistent picks.</p>
+      </div>
+  </main>
+
+
+  <script>
+    // ✅ EXACT Firebase Web Config (from your console)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
+      authDomain: "pickr-d4d9b.firebaseapp.com",
+      projectId: "pickr-d4d9b",
+      storageBucket: "pickr-d4d9b.firebasestorage.app",
+      messagingSenderId: "972106331799",
+      appId: "1:972106331799:web:d261170267bbd7dfaf5bd2",
+      measurementId: "G-J0DC1K39NN"
+    };
+
+    // Initialize Firebase once
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    // Emulator opt-in: do NOT automatically point auth to the emulator
+    // on every localhost load — that causes the Google popup to fail when
+    // the emulator isn't running. Instead opt-in via URL `?emulator=1`
+    // or localStorage key `USE_FIREBASE_EMULATOR=1` when you intentionally
+    // want the client to use the Auth emulator.
+    // Determine emulator opt-in in a way other scripts can read.
+    let useEmu = false;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      useEmu = isLocalhost && (params.get('emulator') === '1' || localStorage.getItem('USE_FIREBASE_EMULATOR') === '1');
+      if (useEmu) {
+        auth.useEmulator && auth.useEmulator('http://localhost:9099/');
+        console.log('Auth client configured to use Auth emulator at http://localhost:9099');
+      }
+    } catch (e) {
+      console.warn('Failed to configure Auth emulator on client:', e && e.message);
+    }
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// Ensure local persistence for auth state.
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+
+let authRedirecting = false;
+
+async function handleSignedIn(user) {
+  if (!user || authRedirecting) return;
+  authRedirecting = true;
+  console.log('User signed in:', user.email);
+  try {
+    // Obtain a fresh ID token and send it to the server so it can ensure
+    // a Firestore user document exists for this uid. Include the user's
+    // email and allow a devUid URL parameter to be passed during local testing.
+    const idToken = await user.getIdToken();
+    const params = new URLSearchParams(window.location.search);
+    const devUid = params.get('devUid') || null;
+    const body = { idToken, email: user.email };
+    if (devUid) body.devUid = devUid;
+    const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
+
+    console.log('Calling backend at:', apiBase);
+
+    // Send the ID token to the server auth endpoint. Server will create
+    // a users/{uid} doc if missing and indicate whether onboarding is
+    // required.
+    const authResp = await fetch(apiBase + '/api/auth/google', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    console.log('Auth response status:', authResp.status);
+
+    // Now fetch the authoritative profile from the server
+    const resp = await fetch(apiBase + '/api/me', { headers: { Authorization: 'Bearer ' + idToken } });
+    console.log('Profile response status:', resp.status);
+
+    if (!resp.ok) {
+      console.warn('Profile fetch failed, redirecting to onboarding');
+      // If profile is missing or something went wrong, send to onboarding
+      return window.location.replace('/onboarding.html');
+    }
+    const profile = await resp.json();
+    console.log('Profile:', profile);
+    if (profile && profile.profileComplete) {
+      return window.location.replace('/index.html');
+    }
+    return window.location.replace('/onboarding.html');
+  } catch (err) {
+    console.error('Auth redirect error:', err);
+    document.getElementById('error').innerText = 'Backend connection failed: ' + err.message;
+    authRedirecting = false;
+    // Don't redirect on error - let user see the error
+  }
+}
+
+// ── Reveal login page helper ──
+var __loginRevealed = false;
+function revealLogin() {
+  if (__loginRevealed) return;
+  __loginRevealed = true;
+  document.querySelector('main.login-page').style.visibility = 'visible';
+  var pl = document.getElementById('pageLoader');
+  if (pl) { pl.classList.add('loaded'); setTimeout(function(){ pl.remove(); }, 800); }
+}
+
+// When the auth state changes (e.g. after sign‑in) we decide where to send the user.
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    // Not signed in — show the login form
+    revealLogin();
+    return;
+  }
+  // User is signed in — keep ball bouncing while we redirect
+  handleSignedIn(user);
+});
+// Safety — never leave it stuck
+setTimeout(revealLogin, 5000);
+
+// Ensure BFCache restores re-run the redirect logic.
+window.addEventListener('pageshow', () => {
+  if (auth.currentUser) handleSignedIn(auth.currentUser);
+});
+
+async function handleGoogleSignIn() {
+  try {
+    document.getElementById('error').innerText = '';
+    // Open the Google sign‑in popup. Once the user completes the flow
+    // successfully, onAuthStateChanged will fire and handle the redirect.
+    await auth.signInWithPopup(provider);
+  } catch (err) {
+    document.getElementById("error").innerText = err.message;
+  }
+}
+
+document.getElementById("loginBtn").onclick = handleGoogleSignIn;
+const mobileLoginBtn = document.getElementById("loginBtnMobile");
+if (mobileLoginBtn) mobileLoginBtn.onclick = handleGoogleSignIn;
+document.getElementById("signupBtn").onclick = handleGoogleSignIn;
+
+// If the client is explicitly opted-in to the Auth emulator, show the
+// email/password UI so users can sign in locally without Google popups
+// (the Auth emulator does not validate Google-signed JWTs).
+if (useEmu) {
+  const emuAuth = document.getElementById('emuAuth');
+  const emuSignIn = document.getElementById('emuSignIn');
+  const emuCreate = document.getElementById('emuCreate');
+  const emuEmail = document.getElementById('emuEmail');
+  const emuPassword = document.getElementById('emuPassword');
+
+  if (emuAuth) {
+    emuAuth.classList.remove('hidden');
+  }
+
+  if (emuSignIn && emuEmail && emuPassword) {
+    emuSignIn.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      document.getElementById('error').innerText = '';
+      const email = emuEmail.value.trim();
+      const password = emuPassword.value;
+      if (!email || !password) { document.getElementById('error').innerText = 'Enter email and password'; return; }
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (err) {
+        document.getElementById('error').innerText = err && err.message || 'Sign in failed';
+      }
+    });
+  }
+
+  if (emuCreate && emuEmail && emuPassword) {
+    emuCreate.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      document.getElementById('error').innerText = '';
+      const email = emuEmail.value.trim();
+      const password = emuPassword.value;
+      if (!email || !password) { document.getElementById('error').innerText = 'Enter email and password'; return; }
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        // user will be signed in and onAuthStateChanged will handle redirect
+      } catch (err) {
+        document.getElementById('error').innerText = err && err.message || 'Create account failed';
+      }
+    });
+  }
+}
+
+// The app will redirect new users to /profile to complete onboarding and will store profile
+// information in Firestore (users collection).
+</script>
+</body>
+</html>
+
