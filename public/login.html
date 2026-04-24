@@ -533,8 +533,10 @@ auth.onAuthStateChanged(async (user) => {
   // User is signed in — keep ball bouncing while we redirect
   handleSignedIn(user);
 });
-// Safety — never leave it stuck
-setTimeout(revealLogin, 5000);
+// Safety — never leave it stuck, but don't reveal while redirect check is running
+setTimeout(() => {
+  if (!authRedirecting && !auth.currentUser) revealLogin();
+}, 12000);
 
 // Ensure BFCache restores re-run the redirect logic.
 window.addEventListener('pageshow', () => {

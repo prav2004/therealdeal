@@ -2634,10 +2634,13 @@
   // Hides spinner + makes .pickr-page-content visible in one shot.
   // Called after syncUserProfile so real data is in the header.
   window.__pickrPageRevealed = false;
+  window.__pickrAuthGatePending = false;
   function revealPage() {
     if (window.__pickrPageRevealed) return;
     // Don't reveal if we're mid-redirect to onboarding — keep ball bouncing
     if (window.__pickrOnboardingRedirect) return;
+    // Keep loader visible while initial auth/profile gate is still running
+    if (window.__pickrAuthGatePending) return;
     window.__pickrPageRevealed = true;
     // Show page content
     document.querySelectorAll('.pickr-page-content').forEach(function(el) {
@@ -2650,11 +2653,25 @@
 
   // Setup page interactions when DOM ready
   document.addEventListener('DOMContentLoaded', async () => {
-    // Safety timeout — never leave the page stuck on a spinner
-    setTimeout(revealPage, 6000);
+    // Safety timeout — avoid flash while auth gate is pending, but never hang forever
+    const gateStart = Date.now();
+    const gateSafetyMs = 15000;
+    const gatePoll = setInterval(() => {
+      if (window.__pickrPageRevealed || window.__pickrOnboardingRedirect) {
+        clearInterval(gatePoll);
+        return;
+      }
+      if (!window.__pickrAuthGatePending || (Date.now() - gateStart) > gateSafetyMs) {
+        clearInterval(gatePoll);
+        revealPage();
+      }
+    }, 400);
+
+    window.__pickrAuthGatePending = true;
     // Ensure we synchronise the authoritative profile first so token/cash
     // values are available to all pages (sports, wallet, picks).
     try { await syncUserProfile(); } catch (e) { console.warn('syncUserProfile failed on load', e); }
+    window.__pickrAuthGatePending = false;
     refreshHeaders(); updateQuestTasks(userProfile); renderBetSlip(); setupConfirmBet(); setupBetSlipMobile();
     // ── Reveal page now that data is loaded ──
     revealPage();
