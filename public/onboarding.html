@@ -42,6 +42,13 @@
     @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
     @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
     .pickr-page-content{transition:visibility 0s}
+    .avatar-choice{position:relative;display:flex;flex-direction:column;align-items:center;gap:.45rem;padding:.6rem .35rem .5rem;border:1px solid rgba(255,255,255,.08);border-radius:1rem;background:rgba(255,255,255,.025);transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+    .avatar-choice:hover{transform:translateY(-2px);border-color:rgba(122,167,255,.34);background:rgba(122,167,255,.06)}
+    .avatar-choice:has(input:checked){border-color:rgba(255,122,26,.7);background:linear-gradient(145deg,rgba(255,122,26,.16),rgba(122,167,255,.08));box-shadow:0 10px 24px rgba(0,0,0,.2),0 0 0 1px rgba(255,122,26,.16)}
+    .avatar-choice:has(input:focus-visible){outline:2px solid #7aa7ff;outline-offset:3px}
+    .avatar-choice-name{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#94a3b8}
+    .avatar-choice:has(input:checked) .avatar-choice-name{color:#ffb37a}
+    @media (prefers-reduced-motion:reduce){.avatar-choice,.avatar-choice:hover{transition:none;transform:none}}
   </style>
   <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
 </head>
@@ -77,31 +84,31 @@
         </div>
 
         <div>
-          <label class="block text-sm mb-2 text-zinc-300">Choose an avatar</label>
+          <label class="block text-sm mb-2 text-zinc-300">Choose your player identity</label>
           <div id="avatarGrid" class="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            <label class="cursor-pointer">
+            <label class="avatar-choice cursor-pointer">
               <input class="peer sr-only" type="radio" name="avatarId" value="avatar-1" />
-              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-1" data-size="64" aria-hidden="true"></div>
+              <div class="pickr-avatar" data-avatar-id="avatar-1" data-size="64" aria-hidden="true"></div><span class="avatar-choice-name">Skyline</span>
             </label>
-            <label class="cursor-pointer">
+            <label class="avatar-choice cursor-pointer">
               <input class="peer sr-only" type="radio" name="avatarId" value="avatar-2" />
-              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-2" data-size="64" aria-hidden="true"></div>
+              <div class="pickr-avatar" data-avatar-id="avatar-2" data-size="64" aria-hidden="true"></div><span class="avatar-choice-name">Evergreen</span>
             </label>
-            <label class="cursor-pointer">
+            <label class="avatar-choice cursor-pointer">
               <input class="peer sr-only" type="radio" name="avatarId" value="avatar-3" />
-              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-3" data-size="64" aria-hidden="true"></div>
+              <div class="pickr-avatar" data-avatar-id="avatar-3" data-size="64" aria-hidden="true"></div><span class="avatar-choice-name">Ember</span>
             </label>
-            <label class="cursor-pointer">
+            <label class="avatar-choice cursor-pointer">
               <input class="peer sr-only" type="radio" name="avatarId" value="avatar-4" />
-              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-4" data-size="64" aria-hidden="true"></div>
+              <div class="pickr-avatar" data-avatar-id="avatar-4" data-size="64" aria-hidden="true"></div><span class="avatar-choice-name">Violet</span>
             </label>
-            <label class="cursor-pointer">
+            <label class="avatar-choice cursor-pointer">
               <input class="peer sr-only" type="radio" name="avatarId" value="avatar-5" />
-              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-5" data-size="64" aria-hidden="true"></div>
+              <div class="pickr-avatar" data-avatar-id="avatar-5" data-size="64" aria-hidden="true"></div><span class="avatar-choice-name">Rose</span>
             </label>
-            <label class="cursor-pointer">
+            <label class="avatar-choice cursor-pointer">
               <input class="peer sr-only" type="radio" name="avatarId" value="avatar-6" />
-              <div class="pickr-avatar ring-1 ring-white/10 peer-checked:ring-2 peer-checked:ring-red-500" data-avatar-id="avatar-6" data-size="64" aria-hidden="true"></div>
+              <div class="pickr-avatar" data-avatar-id="avatar-6" data-size="64" aria-hidden="true"></div><span class="avatar-choice-name">Gold</span>
             </label>
           </div>
           <p class="text-xs text-zinc-500 mt-2">Pick one avatar to represent you.</p>
