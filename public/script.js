@@ -58,7 +58,8 @@
     style.textContent = `
       .pickr-avatar{--size:40px;width:var(--size);height:var(--size);min-width:var(--size);min-height:var(--size);max-width:var(--size);max-height:var(--size);aspect-ratio:1/1;display:inline-flex;flex:0 0 var(--size);align-items:center;justify-content:center;border-radius:999px;background:#162135;position:relative;overflow:hidden;box-sizing:border-box;border:1px solid rgba(255,255,255,0.25);box-shadow:0 8px 18px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.25);transform:translateZ(0);will-change:transform;contain:layout style size;isolation:isolate;}
       .pickr-avatar::before{content:'';position:absolute;inset:1px;border-radius:inherit;border:1px solid rgba(255,255,255,0.08);pointer-events:none;z-index:2;}
-      .pickr-avatar .avatar-art{display:block;width:100%;height:100%;}
+      .pickr-avatar .avatar-art,.pickr-avatar .avatar-portrait{display:block;width:100%;height:100%;}
+      .pickr-avatar .avatar-portrait{object-fit:cover;transform:scale(1.04);}
       .pickr-avatar:not(.avatar-compact):hover{transform:translateY(-1px) scale(1.025);box-shadow:0 11px 24px rgba(0,0,0,0.36),0 0 0 3px rgba(122,167,255,0.1);}
       @media (prefers-reduced-motion:reduce){.pickr-avatar:not(.avatar-compact):hover{transform:none;}}
     `;
@@ -123,6 +124,20 @@
     '</svg>';
   }
 
+  function getIllustratedAvatarUrl(avatarId) {
+    const normalized = normalizeAvatarId(avatarId) || 'avatar-1';
+    const options = {
+      'avatar-1': { seed: 'pickr-skyline', bg: 'b6e3f4' },
+      'avatar-2': { seed: 'pickr-evergreen', bg: 'c0f2d8' },
+      'avatar-3': { seed: 'pickr-ember', bg: 'ffd5b5' },
+      'avatar-4': { seed: 'pickr-violet', bg: 'e6d8ff' },
+      'avatar-5': { seed: 'pickr-rose', bg: 'ffd6e2' },
+      'avatar-6': { seed: 'pickr-gold', bg: 'fff0b6' }
+    };
+    const option = options[normalized] || options['avatar-1'];
+    return 'https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=' + encodeURIComponent(option.seed) + '&backgroundColor=' + option.bg + '&radius=50&scale=95';
+  }
+
   function renderAvatar(el, avatarId) {
     if (!el) return;
     ensureAvatarStyles();
@@ -140,7 +155,17 @@
     el.style.minHeight = `${size}px`;
     el.style.flexShrink = '0';
     if (Number.isFinite(size) && size <= 32) el.classList.add('avatar-compact');
-    el.innerHTML = buildAvatarArt(preset);
+    const portraitUrl = getIllustratedAvatarUrl(avatarId);
+    const fallback = buildAvatarArt(preset);
+    el.innerHTML = '<img class="avatar-portrait" src="' + portraitUrl + '" alt="" referrerpolicy="no-referrer">';
+    const portrait = el.querySelector('.avatar-portrait');
+    if (portrait) {
+      portrait.addEventListener('error', () => {
+        // Keep an offline local portrait available if the illustration service
+        // cannot be reached on a particular network.
+        el.innerHTML = fallback;
+      }, { once: true });
+    }
   }
 
   function refreshAvatars() {
