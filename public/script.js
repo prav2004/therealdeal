@@ -127,15 +127,15 @@
   function getIllustratedAvatarUrl(avatarId) {
     const normalized = normalizeAvatarId(avatarId) || 'avatar-1';
     const options = {
-      'avatar-1': { seed: 'pickr-skyline', bg: 'b6e3f4' },
-      'avatar-2': { seed: 'pickr-evergreen', bg: 'c0f2d8' },
-      'avatar-3': { seed: 'pickr-ember', bg: 'ffd5b5' },
-      'avatar-4': { seed: 'pickr-violet', bg: 'e6d8ff' },
-      'avatar-5': { seed: 'pickr-rose', bg: 'ffd6e2' },
-      'avatar-6': { seed: 'pickr-gold', bg: 'fff0b6' }
+      'avatar-1': { seed: 'Davi', bg: 'b6e3f4' },
+      'avatar-2': { seed: 'Ingrid', bg: 'c0f2d8' },
+      'avatar-3': { seed: 'Carla', bg: 'ffd5b5' },
+      'avatar-4': { seed: 'Evren', bg: 'e6d8ff' },
+      'avatar-5': { seed: 'Bram', bg: 'ffd6e2' },
+      'avatar-6': { seed: 'Emil', bg: 'fff0b6' }
     };
     const option = options[normalized] || options['avatar-1'];
-    return 'https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=' + encodeURIComponent(option.seed) + '&backgroundColor=' + option.bg + '&radius=50&scale=95';
+    return 'https://api.dicebear.com/10.x/adventurer/svg?seed=' + encodeURIComponent(option.seed) + '&backgroundColor=' + option.bg + '&borderRadius=50&scale=1.08&glassesProbability=0&detailsProbability=0';
   }
 
   function renderAvatar(el, avatarId) {
