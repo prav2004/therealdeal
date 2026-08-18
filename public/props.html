@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Player Props - Pickr</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/pickr-ui.css?v=1"/>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="/config.js"></script>
+  <style>
+    :root{--ink:#0b0f1a;--surface:#131825;--card:#1a2133;--border:rgba(255,255,255,0.07);--ember:#ff7a1a;--mint:#40d9b5;--sky:#7aa7ff;--fire:#ff4d00;--gold:#ffd166;--text:#e8eaf0;--muted:#7a8499;--pill:#1e2a3a;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{height:100%;background:var(--ink);color:var(--text);font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none;}
+    #pageLoader{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s ease;}
+    #pageLoader.loaded{opacity:0;pointer-events:none;}
+    .loader-ring{width:44px;height:44px;border:3px solid rgba(255,122,26,.15);border-top-color:var(--ember);border-radius:50%;animation:spin .75s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    #toastEl{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);background:#1e2a3a;border:1px solid rgba(255,255,255,.1);color:var(--text);padding:10px 20px;border-radius:40px;font-size:.82rem;font-weight:600;opacity:0;pointer-events:none;transition:all .25s ease;z-index:5000;white-space:nowrap;}
+    #toastEl.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .top-banner{position:sticky;top:0;z-index:400;background:rgba(11,15,26,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:10px;min-height:54px;}
+    .banner-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+    .banner-back{width:32px;height:32px;border-radius:50%;background:var(--pill);border:none;color:var(--text);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .banner-back:hover{background:rgba(255,122,26,.2);}
+    .banner-title{font-size:.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .banner-sub{font-size:.72rem;color:var(--muted);margin-top:1px;}
+    .banner-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .odds-toggle{display:none;}
+    @supports(padding-top:env(safe-area-inset-top)){
+      .top-banner{padding-top:calc(12px + env(safe-area-inset-top));}
+      .bottom-nav{height:calc(56px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);}
+    }
+    @media(max-width:390px){
+      .banner-title{font-size:.85rem;}
+      .banner-sub{font-size:.68rem;}
+      .hero-logo-wrap{width:52px;height:52px;}
+      .hero-logo-wrap img{width:42px;height:42px;}
+      .hero-team-name{font-size:.72rem;}
+      .stat-val{font-size:.85rem;}
+    }
+    #pageContent{visibility:hidden;padding-bottom:80px;}
+    .game-hero{background:linear-gradient(160deg,#131825 0%,#0d1523 100%);border-bottom:1px solid var(--border);padding:20px 16px 16px;}
+    .hero-sport-label{display:flex;align-items:center;gap:6px;justify-content:center;font-size:.72rem;font-weight:700;color:var(--ember);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;}
+    .hero-teams{display:flex;align-items:center;justify-content:center;}
+    .hero-team{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;}
+    .hero-logo-wrap{width:64px;height:64px;border-radius:50%;background:var(--pill);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--border);}
+    .hero-logo-wrap img{width:52px;height:52px;object-fit:contain;}
+    .hero-logo-emoji{font-size:2rem;}
+    .hero-team-name{font-size:.8rem;font-weight:700;text-align:center;max-width:90px;line-height:1.2;}
+    .hero-vs{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 12px;gap:4px;}
+    .hero-vs-text{font-size:.65rem;font-weight:800;color:var(--muted);letter-spacing:.12em;}
+    .hero-date{font-size:.72rem;color:var(--sky);font-weight:600;text-align:center;}
+    .hero-meta{margin-top:14px;text-align:center;font-size:.72rem;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;}
+    .hero-meta-dot{width:3px;height:3px;background:var(--muted);border-radius:50%;}
+    .data-badge{display:inline-flex;align-items:center;gap:4px;border-radius:8px;padding:2px 8px;font-size:.68rem;font-weight:700;}
+    .data-badge.live{background:rgba(64,217,181,.12);color:var(--mint);border:1px solid rgba(64,217,181,.3);}
+    .data-badge.est{background:rgba(122,167,255,.1);color:var(--sky);border:1px solid rgba(122,167,255,.2);}
+    .heat-ticker{display:none;margin:12px 16px 0;background:linear-gradient(90deg,rgba(255,77,0,.12),rgba(255,122,26,.08));border:1px solid rgba(255,77,0,.25);border-radius:12px;padding:10px 14px;align-items:center;gap:10px;}
+    .heat-icon{font-size:1.2rem;flex-shrink:0;}
+    .heat-count{font-size:1.4rem;font-weight:800;color:var(--fire);line-height:1;}
+    .heat-desc{font-size:.75rem;color:var(--muted);margin-top:2px;}
+    .filter-row{display:flex;align-items:center;gap:8px;padding:12px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .filter-row::-webkit-scrollbar{display:none;}
+    .filter-tab{flex-shrink:0;border:1px solid var(--border);border-radius:20px;background:var(--pill);color:var(--muted);font-size:.75rem;font-weight:700;padding:6px 14px;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit;}
+    .filter-tab.active{background:var(--ember);color:#fff;border-color:var(--ember);}
+    .filter-tab:hover:not(.active){color:var(--text);border-color:rgba(255,255,255,.2);}
+    .filter-spacer{flex:1;}
+    .sort-select{flex-shrink:0;background:var(--pill);border:1px solid var(--border);color:var(--text);font-size:.75rem;font-weight:600;padding:6px 10px;border-radius:10px;cursor:pointer;outline:none;font-family:inherit;}
+    .section-header{display:flex;align-items:center;gap:8px;padding:10px 16px 6px;margin-top:4px;}
+    .section-icon{font-size:1rem;}
+    .section-title{font-size:.8rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;}
+    .section-count{font-size:.7rem;font-weight:700;background:var(--pill);border-radius:10px;padding:2px 8px;color:var(--muted);}
+    .section-header.fire .section-title{color:#ff6b35;}
+    .section-header.value .section-title{color:var(--mint);}
+    .section-header.watch .section-title{color:var(--sky);}
+    .prop-card{margin:0 12px 10px;background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;transition:transform .2s,box-shadow .2s;}
+    .prop-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
+    .prop-card.tier-FIRE{border-top:2px solid rgba(255,77,0,.6);}
+    .prop-card.tier-VALUE{border-top:2px solid rgba(64,217,181,.4);}
+    .prop-card.tier-WATCH{border-top:2px solid rgba(122,167,255,.3);}
+    .card-top{display:flex;align-items:center;gap:12px;padding:14px 14px 10px;}
+    .player-avatar{width:52px;height:52px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;overflow:hidden;position:relative;}
+    .player-avatar img{width:100%;height:100%;object-fit:cover;border-radius:14px;}
+    .avatar-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;}
+    .player-info{flex:1;min-width:0;}
+    .player-name{font-size:.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .player-meta{font-size:.72rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+    .player-team-logo{width:16px;height:16px;object-fit:contain;vertical-align:middle;border-radius:2px;}
+    .player-pos-badge{display:inline-block;background:var(--pill);border-radius:4px;padding:1px 5px;font-size:.65rem;font-weight:700;color:var(--muted);}
+    .card-odds{flex-shrink:0;text-align:right;}
+    .odds-main{font-size:1.25rem;font-weight:800;line-height:1;}
+    .odds-main.pos{color:#6ee7b7;}
+    .odds-main.neg{color:var(--sky);}
+    .odds-sub{font-size:.72rem;color:var(--muted);margin-top:3px;}
+    .card-line{display:flex;align-items:center;margin:0 14px 10px;background:rgba(255,255,255,.04);border-radius:12px;padding:10px 14px;border:1px solid var(--border);}
+    .line-label{font-size:.65rem;font-weight:800;letter-spacing:.1em;color:var(--ember);text-transform:uppercase;margin-right:8px;}
+    .line-number{font-size:1.5rem;font-weight:800;line-height:1;margin-right:6px;}
+    .line-type{font-size:.85rem;font-weight:600;color:var(--muted);flex:1;}
+    .line-avg{font-size:.75rem;color:var(--muted);text-align:right;line-height:1.5;}
+    .line-avg span{color:var(--text);font-weight:700;display:block;}
+    .card-stats-row{display:flex;align-items:center;gap:0;margin:0 14px 10px;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+    .stat-cell{flex:1;padding:8px 10px;text-align:center;border-right:1px solid var(--border);}
+    .stat-cell:last-child{border-right:none;}
+    .stat-val{font-size:.95rem;font-weight:800;line-height:1;}
+    .stat-lbl{font-size:.6rem;font-weight:600;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;}
+    .stat-cell.highlight .stat-val{color:var(--mint);}
+    .card-edge{display:flex;align-items:center;gap:8px;padding:6px 14px 8px;}
+    .edge-label{font-size:.7rem;font-weight:700;color:var(--muted);}
+    .edge-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+    .edge-bar-fill{height:100%;border-radius:4px;transition:width .8s ease;}
+    .edge-pct{font-size:.82rem;font-weight:800;min-width:42px;text-align:right;}
+    .edge-pct.fire-edge{color:#ff6b35;}
+    .edge-pct.value-edge{color:var(--mint);}
+    .edge-pct.watch-edge{color:var(--sky);}
+    .card-prob{display:flex;align-items:center;gap:8px;padding:0 14px 8px;}
+    .prob-label{font-size:.7rem;font-weight:700;color:var(--muted);}
+    .prob-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;position:relative;}
+    .prob-bar-fill{height:100%;border-radius:4px;transition:width .8s ease;}
+    .prob-market-line{position:absolute;top:-2px;bottom:-2px;width:2px;background:rgba(255,255,255,.3);border-radius:1px;}
+    .prob-pct{font-size:.82rem;font-weight:800;min-width:34px;text-align:right;}
+    .prob-pct.hot{color:#4ade80;}
+    .prob-pct.warm{color:var(--gold);}
+    .prob-pct.cold{color:var(--muted);}
+    .card-dots{display:flex;align-items:center;gap:4px;padding:0 14px 10px;flex-wrap:wrap;}
+    .prop-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .prop-dot.hit{background:#4ade80;}
+    .prop-dot.miss{background:rgba(255,255,255,.12);}
+    .streak-badge{margin-left:4px;font-size:.68rem;font-weight:700;color:var(--fire);background:rgba(255,77,0,.12);border-radius:8px;padding:2px 7px;white-space:nowrap;}
+    .card-reason{font-size:.75rem;color:var(--muted);line-height:1.5;padding:0 14px 12px;font-family:'IBM Plex Sans',sans-serif;}
+    #skeleton{padding:0 12px;}
+    .skel-card{background:var(--card);border-radius:16px;height:180px;margin-bottom:10px;overflow:hidden;position:relative;}
+    .skel-card::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);animation:shimmer 1.4s infinite;}
+    @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+    #emptyState{display:none;text-align:center;padding:60px 24px;color:var(--muted);}
+    #emptyState .empty-icon{font-size:3rem;margin-bottom:12px;}
+    #emptyState p{font-size:.9rem;line-height:1.6;}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(11,15,26,.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;height:56px;}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:var(--muted);font-size:.62rem;font-weight:600;transition:color .2s;}
+    .nav-item.active{color:var(--ember);}
+    .nav-item svg{width:20px;height:20px;}
+  </style>
+</head>
+<body>
+  <div id="pageLoader"><div class="loader-ring"></div></div>
+  <div id="toastEl"></div>
+  <div class="top-banner">
+    <div class="banner-left">
+      <button class="banner-back" onclick="history.back()">&#8592;</button>
+      <div>
+        <div class="banner-title" id="bannerTitle">Player Props</div>
+        <div class="banner-sub" id="propsLoadedAt">Fetching live data&#8230;</div>
+      </div>
+    </div>
+  </div>
+  <div id="pageContent">
+    <div class="game-hero">
+      <div class="hero-sport-label" id="heroSport"><span>&#127936;</span><span>NBA &#183; Player Props</span></div>
+      <div class="hero-teams">
+        <div class="hero-team">
+          <div class="hero-logo-wrap" id="awayLogoWrap"><span class="hero-logo-emoji" id="awayLogoEmoji">&#127936;</span></div>
+          <div class="hero-team-name" id="awayName">Away</div>
+        </div>
+        <div class="hero-vs"><div class="hero-vs-text">@</div><div class="hero-date" id="gameDate">Today</div></div>
+        <div class="hero-team">
+          <div class="hero-logo-wrap" id="homeLogoWrap"><span class="hero-logo-emoji" id="homeLogoEmoji">&#127936;</span></div>
+          <div class="hero-team-name" id="homeName">Home</div>
+        </div>
+      </div>
+      <div class="hero-meta"><span id="dataSourceLabel">Fetching ESPN data&#8230;</span><div class="hero-meta-dot"></div><span>Informational only</span></div>
+    </div>
+    <div id="skeleton"><div class="skel-card"></div><div class="skel-card"></div><div class="skel-card"></div><div class="skel-card"></div></div>
+    <div id="propsContainer"></div>
+    <div id="disclaimerBanner" style="display:none;margin:8px 12px 80px;background:rgba(122,167,255,.08);border:1px solid rgba(122,167,255,.2);border-radius:10px;padding:8px 14px;font-size:.72rem;color:var(--muted);text-align:center;"></div>
+    <div id="emptyState" style="display:none;text-align:center;padding:60px 24px;color:var(--muted);"></div>
+  </div>
+  <nav class="pk-tabbar" aria-label="Primary">
+    <a href="index.html" class="pk-tab" aria-label="Sports"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg><span>Sports</span></a>
+    <a href="leaderboard.html" class="pk-tab" aria-label="Insights"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg><span>Insights</span></a>
+    <a href="tasks.html" class="pk-tab" aria-label="Perks"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span>Perks</span></a>
+    <a href="picks.html" class="pk-tab" aria-label="My Picks"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>My Picks</span></a>
+    <a href="wallet.html" class="pk-tab" aria-label="Profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Profile</span></a>
+  </nav>
+  <script>
+  (function(){
+    'use strict';
+    /* ── Firebase ── */
+    var firebaseConfig={apiKey:"AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",authDomain:"pickr-d4d9b.firebaseapp.com",projectId:"pickr-d4d9b",storageBucket:"pickr-d4d9b.firebasestorage.app",messagingSenderId:"972106331799",appId:"1:972106331799:web:d261170267bbd7dfaf5bd2"};
+    if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+    var auth=firebase.auth();
+
+    /* ── Odds format: always American ── */
+    function fmtOdds(am){return(am>0?'+':'')+am;}
+
+    /* ── Team logo helpers ── */
+    var NBA={'Atlanta Hawks':'atl','Boston Celtics':'bos','Brooklyn Nets':'bkn','Charlotte Hornets':'cha','Chicago Bulls':'chi','Cleveland Cavaliers':'cle','Dallas Mavericks':'dal','Denver Nuggets':'den','Detroit Pistons':'det','Golden State Warriors':'gsw','Houston Rockets':'hou','Indiana Pacers':'ind','Los Angeles Clippers':'lac','Los Angeles Lakers':'lal','Memphis Grizzlies':'mem','Miami Heat':'mia','Milwaukee Bucks':'mil','Minnesota Timberwolves':'min','New Orleans Pelicans':'no','New York Knicks':'ny','Oklahoma City Thunder':'okc','Orlando Magic':'orl','Philadelphia 76ers':'phi','Phoenix Suns':'phx','Portland Trail Blazers':'por','Sacramento Kings':'sac','San Antonio Spurs':'sa','Toronto Raptors':'tor','Utah Jazz':'utah','Washington Wizards':'wsh'};
+    var NHL={'Boston Bruins':'bos','Buffalo Sabres':'buf','Calgary Flames':'cgy','Carolina Hurricanes':'car','Chicago Blackhawks':'chi','Colorado Avalanche':'col','Dallas Stars':'dal','Detroit Red Wings':'det','Edmonton Oilers':'edm','Florida Panthers':'fla','Los Angeles Kings':'lak','Minnesota Wild':'min','Montreal Canadiens':'mtl','Nashville Predators':'nsh','New Jersey Devils':'njd','New York Rangers':'nyr','Ottawa Senators':'ott','Philadelphia Flyers':'phi','Pittsburgh Penguins':'pit','Seattle Kraken':'sea','St. Louis Blues':'stl','Tampa Bay Lightning':'tb','Toronto Maple Leafs':'tor','Vancouver Canucks':'van','Vegas Golden Knights':'vgk','Washington Capitals':'wsh','Winnipeg Jets':'wpg'};
+    var NFL={'Arizona Cardinals':'ari','Atlanta Falcons':'atl','Baltimore Ravens':'bal','Buffalo Bills':'buf','Carolina Panthers':'car','Chicago Bears':'chi','Cincinnati Bengals':'cin','Cleveland Browns':'cle','Dallas Cowboys':'dal','Denver Broncos':'den','Detroit Lions':'det','Green Bay Packers':'gb','Houston Texans':'hou','Indianapolis Colts':'ind','Jacksonville Jaguars':'jax','Kansas City Chiefs':'kc','Las Vegas Raiders':'lv','Los Angeles Chargers':'lac','Los Angeles Rams':'lar','Miami Dolphins':'mia','Minnesota Vikings':'min','New England Patriots':'ne','New Orleans Saints':'no','New York Giants':'nyg','New York Jets':'nyj','Philadelphia Eagles':'phi','Pittsburgh Steelers':'pit','San Francisco 49ers':'sf','Seattle Seahawks':'sea','Tampa Bay Buccaneers':'tb','Tennessee Titans':'ten','Washington Commanders':'wsh'};
+    var MLB={'Arizona Diamondbacks':'ari','Atlanta Braves':'atl','Baltimore Orioles':'bal','Boston Red Sox':'bos','Chicago Cubs':'chc','Chicago White Sox':'cws','Cincinnati Reds':'cin','Cleveland Guardians':'cle','Colorado Rockies':'col','Detroit Tigers':'det','Houston Astros':'hou','Kansas City Royals':'kc','Los Angeles Angels':'laa','Los Angeles Dodgers':'lad','Miami Marlins':'mia','Milwaukee Brewers':'mil','Minnesota Twins':'min','New York Mets':'nym','New York Yankees':'nyy','Philadelphia Phillies':'phi','Pittsburgh Pirates':'pit','San Diego Padres':'sd','San Francisco Giants':'sf','Seattle Mariners':'sea','St. Louis Cardinals':'stl','Tampa Bay Rays':'tb','Texas Rangers':'tex','Toronto Blue Jays':'tor','Washington Nationals':'wsh'};
+    function getAbbr(name,sp){return({nba:NBA,nhl:NHL,nfl:NFL,mlb:MLB}[sp]||NBA)[name]||null;}
+    function getLogoUrl(name,sp){var a=getAbbr(name,sp);return a?'https://a.espncdn.com/i/teamlogos/'+sp+'/500/'+a+'.png':null;}
+    function setTeamLogo(wrapId,emojiId,teamName,sp){
+      var url=getLogoUrl(teamName,sp);if(!url)return;
+      var img=document.createElement('img');img.src=url;img.alt=teamName;
+      img.onerror=function(){img.remove();};
+      img.onload=function(){var e=document.getElementById(emojiId);if(e)e.style.display='none';document.getElementById(wrapId).appendChild(img);};
+    }
+
+    /* ── Avatar helpers ── */
+    var AV_COLORS=[['#ff7a1a','#3a1a06'],['#7aa7ff','#0d1a3a'],['#40d9b5','#062e2a'],['#ffd166','#2e2200'],['#ff4d6d','#2e0011'],['#a78bfa','#150833']];
+    function avStyle(name){var h=0;for(var i=0;i<name.length;i++)h=(Math.imul(31,h)+name.charCodeAt(i))|0;var p=AV_COLORS[Math.abs(h)%AV_COLORS.length];return{color:p[0],bg:p[1]};}
+    function initials(name){var p=name.trim().split(' ');return(p[0][0]+(p[p.length-1][0]||'')).toUpperCase();}
+    /* ESPN athlete IDs — used for headshots + gamelog fetching */
+    var ESPN_IDS={
+      'Shai Gilgeous-Alexander':4278086,'Nikola Jokic':3112335,'Giannis Antetokounmpo':3032977,
+      'Victor Wembanyama':4606640,'Jayson Tatum':4065670,'Anthony Edwards':4395725,
+      'Luka Doncic':4065648,'LeBron James':1966,'Stephen Curry':3975,'Kevin Durant':3202,
+      'Kawhi Leonard':6450,'Anthony Davis':6583,'Karl-Anthony Towns':3136779,'Tyrese Haliburton':4431681,
+      'Ja Morant':4279888,'Damian Lillard':6606,'Devin Booker':3136193,'Joel Embiid':3059318,
+      'Donovan Mitchell':3155535,'Bam Adebayo':3133586,'Trae Young':4277905,'De\'Aaron Fox':4066697,
+      'Zion Williamson':4395628,'Paolo Banchero':4432574,'Evan Mobley':4432835,
+      'Connor McDavid':3895074,'Nathan MacKinnon':3114727,'Patrick Mahomes':3139477,
+      'Josh Allen':3918298,'Lamar Jackson':3916387,'Justin Jefferson':4262921,
+      'Tyreek Hill':3054211,'Shohei Ohtani':39949,'Mookie Betts':33039,'Freddie Freeman':30836
+    };
+    function buildAvatar(name,sport,directEspnId){
+      var wrap=document.createElement('div');wrap.className='player-avatar';
+      var st=avStyle(name);wrap.style.background=st.bg;
+      function addInit(){var s=document.createElement('span');s.className='avatar-initials';s.textContent=initials(name);s.style.color=st.color;wrap.appendChild(s);}
+      var eid=directEspnId||ESPN_IDS[name]||null;
+      if(eid){
+        var sp2=sport==='nba'?'nba':sport==='nfl'?'nfl':sport==='mlb'?'mlb':sport==='nhl'?'nhl':'nba';
+        var img=document.createElement('img');
+        img.src='https://a.espncdn.com/i/headshots/'+sp2+'/players/full/'+eid+'.png';
+        img.alt=name;img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:14px;';
+        img.onerror=function(){img.remove();addInit();};wrap.appendChild(img);
+      } else{addInit();}
+      return wrap;
+    }
+
+    /* ─── Compute streak of hits from end of trend array ─── */
+    function streak(trendArr){
+      var s=0;for(var i=(trendArr||[]).length-1;i>=0;i--){if(trendArr[i]===1)s++;else break;}return s;
+    }
+
+    var params=new URLSearchParams(location.search);
+    var sport=(params.get('sport')||'nba').toLowerCase();
+    var home=decodeURIComponent(params.get('home')||'');
+    var away=decodeURIComponent(params.get('away')||'');
+    var SE={nba:'\uD83C\uDFC0',nhl:'\uD83C\uDFD2',nfl:'\uD83C\uDFC8',mlb:'\u26BE',soccer:'\u26BD'};
+    var SL={nba:'NBA',nhl:'NHL',nfl:'NFL',mlb:'MLB',soccer:'Soccer'};
+    var se=SE[sport]||'\uD83C\uDFC6';
+    document.getElementById('heroSport').innerHTML='<span>'+se+'</span><span>'+(SL[sport]||sport.toUpperCase())+' \u00B7 Player Props</span>';
+    document.getElementById('homeLogoEmoji').textContent=se;
+    document.getElementById('awayLogoEmoji').textContent=se;
+    document.getElementById('homeName').textContent=home||'\u2014';
+    document.getElementById('awayName').textContent=away||'\u2014';
+    document.getElementById('bannerTitle').textContent=(away&&home)?away+' @ '+home:'Player Props';
+    var now=new Date();
+    document.getElementById('gameDate').textContent=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    if(home)setTeamLogo('homeLogoWrap','homeLogoEmoji',home,sport);
+    if(away)setTeamLogo('awayLogoWrap','awayLogoEmoji',away,sport);
+
+    /* ── Normalise API response — handles both old server format and new engine format ── */
+    function normaliseProp(p){
+      /* Tier: new engine sends label/confidenceScore; old server sends tier/score */
+      var tier='WATCH';
+      if(p.tier==='FIRE'||(p.label==='High Confidence')||(p.confidenceScore>=80))tier='FIRE';
+      else if(p.tier==='VALUE'||(p.label==='Recommended')||(p.confidenceScore>=68))tier='VALUE';
+      /* Trend: new engine uses trend5; old server uses trend (binary 0/1) */
+      var trendArr=p.trend5||p.trend||[];
+      /* Hit rate: new engine uses last10HitRate; old uses hitRate */
+      var hr=p.last10HitRate||p.hitRate||0;
+      /* Average: new engine uses recentAvg; old uses avg */
+      var avg=p.recentAvg||p.avg||0;
+      /* True prob: new engine provides it; old doesn't — estimate from hitRate */
+      var tp=p.trueProb||(hr*0.9+0.05);
+      /* Market implied from -110 */
+      var mk=100/210;
+      var ev=parseFloat(((tp-mk)*100).toFixed(1));
+      /* Edge */
+      var edge=p.edge||parseFloat((tp-mk).toFixed(4));
+      /* Label */
+      var label=p.label||(tier==='FIRE'?'High Confidence':tier==='VALUE'?'Recommended':'Trend-Based Pick');
+      /* Confidence */
+      var conf=p.confidenceScore||(tier==='FIRE'?85:tier==='VALUE'?72:60);
+      /* Reason text */
+      var reason=p.explanation||p.reasoning||p.reason||'';
+      return {
+        playerName:p.playerName,team:p.team||'',position:p.position||p.pos||'',
+        propType:p.propType||'',line:p.line||0,avg:parseFloat((avg||0).toFixed(1)),
+        hitRate:hr,
+        trend:trendArr.slice(-12),
+        gameLog:trendArr.map(function(v){return v===1?(p.line||0)+0.5:(p.line||0)-0.5;}),
+        trueProb:tp,marketImplied:mk,edge:edge,
+        decimalOdds:p.decimalOdds||1.909,
+        americanOdds:p.americanOdds||-110,
+        ev:ev,score:p.score||conf/100,
+        tier:tier,label:label,riskLevel:p.riskLevel||'Medium',
+        reasoning:reason,
+        dataSource:p.dataSource||'estimated',
+        espnId:p.espnId||null,
+        confidenceScore:conf,
+      };
+    }
+
+    /* ── Static fallback player data — espnId embedded per player for correct headshots ── */
+    var STATIC_PROPS={
+      nba:[
+        /* OKC */
+        {playerName:'Shai Gilgeous-Alexander',espnId:4278086,team:'Oklahoma City Thunder',position:'PG',propType:'Points',line:30.5,avg:31.4,hitRate:0.74,trueProb:0.74,edge:0.26,decimalOdds:1.72,americanOdds:-138,trend:[1,1,0,1,1,1,0,1,1,1,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 31.4 pts — hits 74% over last 12 games',dataSource:'estimated',confidenceScore:82},
+        {playerName:'Jalen Williams',espnId:4432166,team:'Oklahoma City Thunder',position:'SG',propType:'Points',line:23.5,avg:24.8,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,0,1,1,0,1,1,1,0,1,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 24.8 pts · 68% hit rate last 12',dataSource:'estimated',confidenceScore:71},
+        {playerName:'Chet Holmgren',espnId:4432161,team:'Oklahoma City Thunder',position:'C',propType:'Points',line:16.5,avg:17.4,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,0,1,1,1,0,1,1,0,1,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 17.4 pts · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Denver */
+        {playerName:'Nikola Jokic',espnId:3112335,team:'Denver Nuggets',position:'C',propType:'Points',line:27.5,avg:28.8,hitRate:0.71,trueProb:0.71,edge:0.23,decimalOdds:1.78,americanOdds:-128,trend:[1,0,1,1,1,0,1,1,1,0,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 28.8 pts · 71% hit rate last 12',dataSource:'estimated',confidenceScore:80},
+        {playerName:'Nikola Jokic',espnId:3112335,team:'Denver Nuggets',position:'C',propType:'Rebounds',line:11.5,avg:12.9,hitRate:0.72,trueProb:0.72,edge:0.24,decimalOdds:1.76,americanOdds:-131,trend:[1,1,1,0,1,1,1,0,1,1,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 12.9 reb · 72% hit rate last 12',dataSource:'estimated',confidenceScore:81},
+        {playerName:'Jamal Murray',espnId:3936299,team:'Denver Nuggets',position:'PG',propType:'Points',line:21.5,avg:22.4,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[0,1,1,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 22.4 pts · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        /* Boston */
+        {playerName:'Jayson Tatum',espnId:4065670,team:'Boston Celtics',position:'SF',propType:'Points',line:26.5,avg:27.1,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[1,0,0,1,1,1,0,1,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 27.1 pts · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        {playerName:'Jaylen Brown',espnId:3917376,team:'Boston Celtics',position:'SG',propType:'Points',line:23.5,avg:24.2,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,1,0,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 24.2 pts · 65% hit rate last 12',dataSource:'estimated',confidenceScore:68},
+        /* Milwaukee */
+        {playerName:'Giannis Antetokounmpo',espnId:3032977,team:'Milwaukee Bucks',position:'PF',propType:'Points',line:29.5,avg:30.4,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,0,1,1,0,1,1,1,0,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 30.4 pts · 68% hit rate last 12',dataSource:'estimated',confidenceScore:72},
+        {playerName:'Damian Lillard',espnId:6606,team:'Milwaukee Bucks',position:'PG',propType:'Points',line:24.5,avg:25.1,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,0,1,1,0,1,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 25.1 pts · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Minnesota */
+        {playerName:'Anthony Edwards',espnId:4395725,team:'Minnesota Timberwolves',position:'SG',propType:'Points',line:26.5,avg:27.6,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[0,1,1,1,0,0,1,1,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 27.6 pts · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        {playerName:'Karl-Anthony Towns',espnId:3136779,team:'New York Knicks',position:'C',propType:'Points',line:23.5,avg:24.6,hitRate:0.64,trueProb:0.64,edge:0.16,decimalOdds:1.89,americanOdds:-112,trend:[1,1,0,0,1,1,0,1,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 24.6 pts · 64% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Golden State */
+        {playerName:'Stephen Curry',espnId:3975,team:'Golden State Warriors',position:'PG',propType:'3-Pointers Made',line:4.5,avg:4.8,hitRate:0.63,trueProb:0.63,edge:0.15,decimalOdds:1.91,americanOdds:-110,trend:[1,0,1,1,0,1,0,1,1,0,1,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 4.8 threes · 63% hit rate last 12',dataSource:'estimated',confidenceScore:65},
+        /* Lakers */
+        {playerName:'LeBron James',espnId:1966,team:'Los Angeles Lakers',position:'SF',propType:'Points',line:24.5,avg:25.2,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 25.2 pts · 65% hit rate last 12',dataSource:'estimated',confidenceScore:68},
+        {playerName:'Luka Doncic',espnId:4065648,team:'Los Angeles Lakers',position:'PG',propType:'Assists',line:7.5,avg:8.4,hitRate:0.64,trueProb:0.64,edge:0.16,decimalOdds:1.89,americanOdds:-112,trend:[1,1,0,0,1,1,0,1,1,0,1,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 8.4 ast · 64% hit rate last 12',dataSource:'estimated',confidenceScore:66},
+        /* San Antonio */
+        {playerName:'Victor Wembanyama',espnId:4606640,team:'San Antonio Spurs',position:'C',propType:'Points',line:24.5,avg:25.2,hitRate:0.62,trueProb:0.62,edge:0.14,decimalOdds:1.92,americanOdds:-109,trend:[0,1,0,1,1,1,0,1,0,1,1,1],tier:'WATCH',label:'Trend-Based Pick',riskLevel:'High',reasoning:'Averaging 25.2 pts · 62% hit rate last 12',dataSource:'estimated',confidenceScore:63},
+        /* Miami */
+        {playerName:'Bam Adebayo',espnId:3133586,team:'Miami Heat',position:'C',propType:'Points',line:19.5,avg:20.4,hitRate:0.64,trueProb:0.64,edge:0.16,decimalOdds:1.89,americanOdds:-112,trend:[1,0,1,1,0,1,1,0,1,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 20.4 pts · 64% hit rate last 12',dataSource:'estimated',confidenceScore:66},
+        /* Philadelphia */
+        {playerName:'Joel Embiid',espnId:3059318,team:'Philadelphia 76ers',position:'C',propType:'Points',line:33.5,avg:34.7,hitRate:0.70,trueProb:0.70,edge:0.22,decimalOdds:1.80,americanOdds:-125,trend:[1,1,0,1,1,0,1,1,1,0,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 34.7 pts · 70% hit rate last 12',dataSource:'estimated',confidenceScore:78},
+        /* Cleveland */
+        {playerName:'Donovan Mitchell',espnId:3155535,team:'Cleveland Cavaliers',position:'SG',propType:'Points',line:26.5,avg:27.8,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[1,0,1,1,0,1,1,1,0,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 27.8 pts · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        {playerName:'Evan Mobley',espnId:4432835,team:'Cleveland Cavaliers',position:'C',propType:'Rebounds',line:8.5,avg:9.4,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,1,0,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 9.4 reb · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* New York */
+        {playerName:'Jalen Brunson',espnId:4066421,team:'New York Knicks',position:'PG',propType:'Points',line:27.5,avg:28.4,hitRate:0.69,trueProb:0.69,edge:0.21,decimalOdds:1.82,americanOdds:-122,trend:[1,1,0,1,1,1,0,1,1,0,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 28.4 pts · 69% hit rate last 12',dataSource:'estimated',confidenceScore:75},
+        /* Orlando */
+        {playerName:'Paolo Banchero',espnId:4432574,team:'Orlando Magic',position:'PF',propType:'Points',line:23.5,avg:24.6,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[0,1,1,0,1,1,0,1,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 24.6 pts · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Indiana */
+        {playerName:'Tyrese Haliburton',espnId:4431681,team:'Indiana Pacers',position:'PG',propType:'Assists',line:9.5,avg:10.6,hitRate:0.70,trueProb:0.70,edge:0.22,decimalOdds:1.80,americanOdds:-125,trend:[1,1,1,0,1,1,1,0,1,1,0,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 10.6 ast · 70% hit rate last 12',dataSource:'estimated',confidenceScore:77},
+        /* Sacramento */
+        {playerName:"De'Aaron Fox",espnId:4066697,team:'Sacramento Kings',position:'PG',propType:'Points',line:25.5,avg:26.4,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[1,0,1,1,0,1,1,0,1,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 26.4 pts · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        /* Dallas */
+        {playerName:'Kyrie Irving',espnId:6442,team:'Dallas Mavericks',position:'PG',propType:'Points',line:24.5,avg:25.6,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,1,0,1,0,1,0,1,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 25.6 pts · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Phoenix */
+        {playerName:'Kevin Durant',espnId:3202,team:'Phoenix Suns',position:'PF',propType:'Points',line:27.5,avg:28.4,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[1,0,1,1,0,1,1,1,0,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 28.4 pts · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        /* Atlanta */
+        {playerName:'Trae Young',espnId:4277905,team:'Atlanta Hawks',position:'PG',propType:'Points',line:25.5,avg:26.8,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[0,1,1,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 26.8 pts · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        /* New Orleans */
+        {playerName:'Zion Williamson',espnId:4395628,team:'New Orleans Pelicans',position:'PF',propType:'Points',line:24.5,avg:25.8,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,1,0,1,1,0,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 25.8 pts · 65% hit rate last 12',dataSource:'estimated',confidenceScore:68},
+        /* Memphis */
+        {playerName:'Ja Morant',espnId:4279888,team:'Memphis Grizzlies',position:'PG',propType:'Points',line:25.5,avg:26.8,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[0,1,1,0,1,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 26.8 pts · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+      ],
+      nhl:[
+        /* Edmonton */
+        {playerName:'Connor McDavid',espnId:3895074,team:'Edmonton Oilers',position:'C',propType:'Points',line:0.5,avg:1.06,hitRate:0.78,trueProb:0.78,edge:0.30,decimalOdds:1.62,americanOdds:-156,trend:[1,1,0,1,1,1,1,0,1,1,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 1.06 pts/game · 78% hit rate last 12',dataSource:'estimated',confidenceScore:85},
+        {playerName:'Leon Draisaitl',espnId:3151699,team:'Edmonton Oilers',position:'LW',propType:'Points',line:0.5,avg:0.94,hitRate:0.72,trueProb:0.72,edge:0.24,decimalOdds:1.76,americanOdds:-131,trend:[1,1,0,1,1,1,0,1,1,0,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 0.94 pts/game · 72% hit rate last 12',dataSource:'estimated',confidenceScore:80},
+        /* Colorado */
+        {playerName:'Nathan MacKinnon',espnId:3020401,team:'Colorado Avalanche',position:'C',propType:'Points',line:0.5,avg:0.98,hitRate:0.75,trueProb:0.75,edge:0.27,decimalOdds:1.67,americanOdds:-150,trend:[1,1,1,0,1,1,1,1,0,1,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 0.98 pts/game · 75% hit rate last 12',dataSource:'estimated',confidenceScore:82},
+        {playerName:'Mikko Rantanen',espnId:3904173,team:'Colorado Avalanche',position:'RW',propType:'Points',line:0.5,avg:0.86,hitRate:0.69,trueProb:0.69,edge:0.21,decimalOdds:1.82,americanOdds:-122,trend:[1,0,1,1,1,0,1,1,0,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.86 pts/game · 69% hit rate last 12',dataSource:'estimated',confidenceScore:73},
+        /* Tampa Bay */
+        {playerName:'Nikita Kucherov',espnId:3900144,team:'Tampa Bay Lightning',position:'RW',propType:'Points',line:0.5,avg:1.02,hitRate:0.73,trueProb:0.73,edge:0.25,decimalOdds:1.71,americanOdds:-142,trend:[1,0,1,1,1,1,0,1,1,1,0,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 1.02 pts/game · 73% hit rate last 12',dataSource:'estimated',confidenceScore:80},
+        {playerName:'Brayden Point',espnId:3149600,team:'Tampa Bay Lightning',position:'C',propType:'Points',line:0.5,avg:0.82,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,1,0,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.82 pts/game · 68% hit rate last 12',dataSource:'estimated',confidenceScore:71},
+        /* Boston */
+        {playerName:'David Pastrnak',espnId:3114728,team:'Boston Bruins',position:'RW',propType:'Points',line:0.5,avg:0.88,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,1,0,1,1,0,1,0,1,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.88 pts/game · 68% hit rate last 12',dataSource:'estimated',confidenceScore:71},
+        /* Florida */
+        {playerName:'Aleksander Barkov',espnId:2976854,team:'Florida Panthers',position:'C',propType:'Points',line:0.5,avg:0.88,hitRate:0.70,trueProb:0.70,edge:0.22,decimalOdds:1.80,americanOdds:-125,trend:[1,0,1,1,1,0,1,1,0,1,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 0.88 pts/game · 70% hit rate last 12',dataSource:'estimated',confidenceScore:76},
+        /* Vegas */
+        {playerName:'Jack Eichel',espnId:3042058,team:'Vegas Golden Knights',position:'C',propType:'Points',line:0.5,avg:0.84,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,1,0,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.84 pts/game · 68% hit rate last 12',dataSource:'estimated',confidenceScore:71},
+        /* Carolina */
+        {playerName:'Sebastian Aho',espnId:3899965,team:'Carolina Hurricanes',position:'C',propType:'Points',line:0.5,avg:0.80,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[1,0,1,0,1,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.80 pts/game · 67% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        /* New York Rangers */
+        {playerName:'Artemi Panarin',espnId:3151808,team:'New York Rangers',position:'LW',propType:'Points',line:0.5,avg:0.90,hitRate:0.70,trueProb:0.70,edge:0.22,decimalOdds:1.80,americanOdds:-125,trend:[1,1,0,1,1,0,1,1,0,1,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 0.90 pts/game · 70% hit rate last 12',dataSource:'estimated',confidenceScore:76},
+        /* Pittsburgh */
+        {playerName:'Sidney Crosby',espnId:3266,team:'Pittsburgh Penguins',position:'C',propType:'Points',line:0.5,avg:0.84,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[0,1,1,0,1,1,0,1,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.84 pts/game · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        /* Toronto */
+        {playerName:'Mitch Marner',espnId:3942310,team:'Toronto Maple Leafs',position:'RW',propType:'Points',line:0.5,avg:0.86,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,1,0,1,0,1,1,1,0,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.86 pts/game · 68% hit rate last 12',dataSource:'estimated',confidenceScore:71},
+        {playerName:'Auston Matthews',espnId:4024121,team:'Toronto Maple Leafs',position:'C',propType:'Points',line:0.5,avg:0.91,hitRate:0.71,trueProb:0.71,edge:0.23,decimalOdds:1.78,americanOdds:-128,trend:[1,0,1,1,1,0,1,1,1,0,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 0.91 pts/game · 71% hit rate last 12',dataSource:'estimated',confidenceScore:78},
+        /* Washington */
+        {playerName:'Alex Ovechkin',espnId:3308,team:'Washington Capitals',position:'LW',propType:'Shots on Goal',line:3.5,avg:4.2,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[1,0,1,1,0,1,1,0,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 4.2 SOG · 66% hit rate last 12',dataSource:'estimated',confidenceScore:68},
+      ],
+      nfl:[
+        /* Kansas City */
+        {playerName:'Patrick Mahomes',espnId:3139477,team:'Kansas City Chiefs',position:'QB',propType:'Pass Yds',line:274.5,avg:292,hitRate:0.72,trueProb:0.72,edge:0.24,decimalOdds:1.76,americanOdds:-131,trend:[1,1,0,1,1,1,0,1,1,1,0,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 292 pass yds · 72% hit rate last 12',dataSource:'estimated',confidenceScore:81},
+        {playerName:'Travis Kelce',espnId:2576336,team:'Kansas City Chiefs',position:'TE',propType:'Rec Yds',line:59.5,avg:68,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[1,0,1,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 68 rec yds · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        /* Buffalo */
+        {playerName:'Josh Allen',espnId:3918298,team:'Buffalo Bills',position:'QB',propType:'Pass Yds',line:259.5,avg:276,hitRate:0.69,trueProb:0.69,edge:0.21,decimalOdds:1.82,americanOdds:-122,trend:[1,0,1,1,1,0,1,1,0,1,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 276 pass yds · 69% hit rate last 12',dataSource:'estimated',confidenceScore:73},
+        {playerName:'Stefon Diggs',espnId:2976212,team:'Buffalo Bills',position:'WR',propType:'Rec Yds',line:64.5,avg:72,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[0,1,1,0,1,1,1,0,1,1,0,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 72 rec yds · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Baltimore */
+        {playerName:'Lamar Jackson',espnId:3916387,team:'Baltimore Ravens',position:'QB',propType:'Rush Yds',line:54.5,avg:65,hitRate:0.71,trueProb:0.71,edge:0.23,decimalOdds:1.78,americanOdds:-128,trend:[1,1,0,1,1,1,1,0,1,0,1,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 65 rush yds · 71% hit rate last 12',dataSource:'estimated',confidenceScore:79},
+        {playerName:'Derrick Henry',espnId:3054030,team:'Baltimore Ravens',position:'RB',propType:'Rush Yds',line:79.5,avg:88,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,0,1,1,0,1,1,1,0,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 88 rush yds · 68% hit rate last 12',dataSource:'estimated',confidenceScore:72},
+        /* Miami */
+        {playerName:'Tyreek Hill',espnId:3054211,team:'Miami Dolphins',position:'WR',propType:'Rec Yds',line:79.5,avg:88,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[0,1,1,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 88 rec yds · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        /* Minnesota */
+        {playerName:'Justin Jefferson',espnId:4262921,team:'Minnesota Vikings',position:'WR',propType:'Rec Yds',line:74.5,avg:83,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,0,1,1,1,0,1,1,0,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 83 rec yds · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        {playerName:'Sam Darnold',espnId:3918804,team:'Minnesota Vikings',position:'QB',propType:'Pass Yds',line:219.5,avg:234,hitRate:0.64,trueProb:0.64,edge:0.16,decimalOdds:1.89,americanOdds:-112,trend:[1,0,1,1,0,1,0,1,1,0,1,0],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 234 pass yds · 64% hit rate last 12',dataSource:'estimated',confidenceScore:65},
+        /* San Francisco */
+        {playerName:'Brock Purdy',espnId:4360310,team:'San Francisco 49ers',position:'QB',propType:'Pass Yds',line:229.5,avg:244,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[1,1,0,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 244 pass yds · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        {playerName:'Deebo Samuel',espnId:4040556,team:'San Francisco 49ers',position:'WR',propType:'Rec Yds',line:54.5,avg:62,hitRate:0.64,trueProb:0.64,edge:0.16,decimalOdds:1.89,americanOdds:-112,trend:[0,1,1,0,1,1,0,1,1,0,1,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 62 rec yds · 64% hit rate last 12',dataSource:'estimated',confidenceScore:66},
+        /* Philadelphia */
+        {playerName:'Jalen Hurts',espnId:4040715,team:'Philadelphia Eagles',position:'QB',propType:'Rush Yds',line:44.5,avg:54,hitRate:0.69,trueProb:0.69,edge:0.21,decimalOdds:1.82,americanOdds:-122,trend:[1,1,0,1,1,0,1,1,1,0,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 54 rush yds · 69% hit rate last 12',dataSource:'estimated',confidenceScore:73},
+        {playerName:"A.J. Brown",espnId:4047618,team:'Philadelphia Eagles',position:'WR',propType:'Rec Yds',line:74.5,avg:82,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[1,0,1,1,0,1,1,0,1,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 82 rec yds · 66% hit rate last 12',dataSource:'estimated',confidenceScore:68},
+        /* Dallas */
+        {playerName:'CeeDee Lamb',espnId:4241478,team:'Dallas Cowboys',position:'WR',propType:'Rec Yds',line:84.5,avg:93,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,1,0,1,1,0,1,1,1,0,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 93 rec yds · 68% hit rate last 12',dataSource:'estimated',confidenceScore:72},
+        /* Detroit */
+        {playerName:'Amon-Ra St. Brown',espnId:4361579,team:'Detroit Lions',position:'WR',propType:'Rec Yds',line:69.5,avg:78,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[0,1,1,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 78 rec yds · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        /* Cincinnati */
+        {playerName:'Ja\'Marr Chase',espnId:4360077,team:'Cincinnati Bengals',position:'WR',propType:'Rec Yds',line:79.5,avg:88,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,0,1,1,0,1,1,1,0,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 88 rec yds · 68% hit rate last 12',dataSource:'estimated',confidenceScore:72},
+        /* Green Bay */
+        {playerName:'Jordan Love',espnId:4241389,team:'Green Bay Packers',position:'QB',propType:'Pass Yds',line:234.5,avg:248,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,0,1,1,0,1,1,1,0,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 248 pass yds · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+      ],
+      mlb:[
+        /* LA Dodgers */
+        {playerName:'Shohei Ohtani',espnId:39949,team:'Los Angeles Dodgers',position:'DH',propType:'Hits',line:0.5,avg:0.98,hitRate:0.72,trueProb:0.72,edge:0.24,decimalOdds:1.76,americanOdds:-131,trend:[1,1,1,0,1,1,1,0,1,1,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 0.98 hits/game · 72% hit rate last 12',dataSource:'estimated',confidenceScore:80},
+        {playerName:'Mookie Betts',espnId:33039,team:'Los Angeles Dodgers',position:'RF',propType:'Hits',line:0.5,avg:0.91,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,0,1,1,0,1,1,1,0,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.91 hits/game · 68% hit rate last 12',dataSource:'estimated',confidenceScore:72},
+        {playerName:'Freddie Freeman',espnId:30836,team:'Los Angeles Dodgers',position:'1B',propType:'Total Bases',line:1.5,avg:1.78,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[1,1,0,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 1.78 total bases · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        /* Atlanta */
+        {playerName:'Spencer Strider',espnId:4917788,team:'Atlanta Braves',position:'SP',propType:'Strikeouts',line:7.5,avg:9.2,hitRate:0.74,trueProb:0.74,edge:0.26,decimalOdds:1.72,americanOdds:-138,trend:[1,1,1,0,1,1,1,1,0,1,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 9.2 Ks · 74% hit rate last 12',dataSource:'estimated',confidenceScore:82},
+        {playerName:'Ronald Acuna Jr.',espnId:4140929,team:'Atlanta Braves',position:'RF',propType:'Hits',line:0.5,avg:0.94,hitRate:0.70,trueProb:0.70,edge:0.22,decimalOdds:1.80,americanOdds:-125,trend:[1,1,0,1,1,0,1,1,1,0,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 0.94 hits/game · 70% hit rate last 12',dataSource:'estimated',confidenceScore:77},
+        /* New York Mets */
+        {playerName:'Juan Soto',espnId:4407273,team:'New York Mets',position:'RF',propType:'Total Bases',line:1.5,avg:1.88,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[0,1,1,0,1,1,0,1,1,1,0,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 1.88 total bases · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        {playerName:'Francisco Lindor',espnId:32839,team:'New York Mets',position:'SS',propType:'Hits',line:0.5,avg:0.84,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,0,1,1,0,1,1,0,1,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 0.84 hits/game · 65% hit rate last 12',dataSource:'estimated',confidenceScore:66},
+        /* New York Yankees */
+        {playerName:'Aaron Judge',espnId:33192,team:'New York Yankees',position:'RF',propType:'Total Bases',line:1.5,avg:2.02,hitRate:0.72,trueProb:0.72,edge:0.24,decimalOdds:1.76,americanOdds:-131,trend:[1,1,1,0,1,1,0,1,1,1,0,1],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 2.02 total bases · 72% hit rate last 12',dataSource:'estimated',confidenceScore:80},
+        {playerName:'Juan Soto',espnId:4407273,team:'New York Yankees',position:'LF',propType:'Hits',line:0.5,avg:0.88,hitRate:0.66,trueProb:0.66,edge:0.18,decimalOdds:1.86,americanOdds:-116,trend:[1,0,1,1,0,1,1,0,1,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.88 hits/game · 66% hit rate last 12',dataSource:'estimated',confidenceScore:69},
+        /* Houston */
+        {playerName:'Yordan Alvarez',espnId:4249234,team:'Houston Astros',position:'LF/DH',propType:'Total Bases',line:1.5,avg:1.82,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,1,0,1,1,0,1,1,0,1,1,0],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 1.82 total bases · 68% hit rate last 12',dataSource:'estimated',confidenceScore:72},
+        /* Philadelphia */
+        {playerName:'Bryce Harper',espnId:33795,team:'Philadelphia Phillies',position:'1B',propType:'Hits',line:0.5,avg:0.88,hitRate:0.67,trueProb:0.67,edge:0.19,decimalOdds:1.85,americanOdds:-118,trend:[0,1,1,1,0,1,1,0,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.88 hits/game · 67% hit rate last 12',dataSource:'estimated',confidenceScore:70},
+        {playerName:'Zack Wheeler',espnId:30218,team:'Philadelphia Phillies',position:'SP',propType:'Strikeouts',line:7.5,avg:8.6,hitRate:0.70,trueProb:0.70,edge:0.22,decimalOdds:1.80,americanOdds:-125,trend:[1,1,0,1,1,1,0,1,0,1,1,0],tier:'FIRE',label:'High Confidence',riskLevel:'Low',reasoning:'Averaging 8.6 Ks · 70% hit rate last 12',dataSource:'estimated',confidenceScore:77},
+        /* San Diego */
+        {playerName:'Fernando Tatis Jr.',espnId:4248143,team:'San Diego Padres',position:'RF',propType:'Hits',line:0.5,avg:0.86,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,1,0,1,0,1,1,0,1,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 0.86 hits/game · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Boston */
+        {playerName:'Rafael Devers',espnId:4140552,team:'Boston Red Sox',position:'3B',propType:'Total Bases',line:1.5,avg:1.72,hitRate:0.65,trueProb:0.65,edge:0.17,decimalOdds:1.88,americanOdds:-114,trend:[1,0,1,0,1,1,0,1,1,0,1,1],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 1.72 total bases · 65% hit rate last 12',dataSource:'estimated',confidenceScore:67},
+        /* Seattle */
+        {playerName:'Julio Rodriguez',espnId:4709148,team:'Seattle Mariners',position:'CF',propType:'Hits',line:0.5,avg:0.82,hitRate:0.64,trueProb:0.64,edge:0.16,decimalOdds:1.89,americanOdds:-112,trend:[0,1,1,0,1,1,0,1,1,0,1,0],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 0.82 hits/game · 64% hit rate last 12',dataSource:'estimated',confidenceScore:65},
+        /* Chicago Cubs */
+        {playerName:'Cody Bellinger',espnId:36157,team:'Chicago Cubs',position:'CF',propType:'Hits',line:0.5,avg:0.80,hitRate:0.63,trueProb:0.63,edge:0.15,decimalOdds:1.91,americanOdds:-110,trend:[1,0,1,0,1,0,1,1,0,1,1,0],tier:'VALUE',label:'Trend-Based Pick',riskLevel:'Medium',reasoning:'Averaging 0.80 hits/game · 63% hit rate last 12',dataSource:'estimated',confidenceScore:64},
+        /* Cleveland */
+        {playerName:'Jose Ramirez',espnId:32156,team:'Cleveland Guardians',position:'3B',propType:'Total Bases',line:1.5,avg:1.80,hitRate:0.68,trueProb:0.68,edge:0.20,decimalOdds:1.83,americanOdds:-120,trend:[1,1,0,1,1,0,1,1,0,1,0,1],tier:'VALUE',label:'Recommended',riskLevel:'Medium',reasoning:'Averaging 1.80 total bases · 68% hit rate last 12',dataSource:'estimated',confidenceScore:71},
+      ],
+    };
+
+    /* Fetch props from backend recommendation engine */
+    async function fetchPropsFromAPI(){
+      var base=(window.PICKR_CONFIG&&window.PICKR_CONFIG.API_BASE_URL)||'';
+      if(!base&&(window.location.hostname!=='localhost'&&window.location.hostname!=='127.0.0.1')){
+        // On production hosting without config, skip API and use static fallback
+        throw new Error('no-base');
+      }
+      var url=base+'/api/props?sport='+encodeURIComponent(sport)+'&home='+encodeURIComponent(home||'TBD')+'&away='+encodeURIComponent(away||'TBD');
+      var headers={};
+      try{
+        var user=firebase.auth().currentUser;
+        if(user){var tok=await user.getIdToken();headers['Authorization']='Bearer '+tok;}
+      }catch(_){}
+      var resp=await fetch(url,{headers:headers});
+      if(!resp.ok)throw new Error('API '+resp.status);
+      var data=await resp.json();
+      var props=(data.props||[]).map(normaliseProp);
+      if(!props.length)throw new Error('empty');
+      return{props:props,disclaimer:data.disclaimer||''};
+    }
+
+    /* Build fallback props — only show players from the two matched teams */
+    function buildFallbackProps(){
+      var pool=(STATIC_PROPS[sport]||STATIC_PROPS.nba).slice();
+
+      if(home||away){
+        /* Match by exact full name first, then fall back to nickname (last word) only.
+           Using only the last word avoids false matches like "city" hitting both
+           "Oklahoma City Thunder" and "Kansas City Chiefs". */
+        function normalize(t){return t.trim().toLowerCase();}
+        function nickname(t){var p=t.trim().split(/\s+/);return p[p.length-1].toLowerCase();}
+
+        var homeNorm=normalize(home||'');
+        var awayNorm=normalize(away||'');
+        var homeNick=nickname(home||'');
+        var awayNick=nickname(away||'');
+
+        function matchesTeam(playerTeam,fullName,nick){
+          var pt=normalize(playerTeam);
+          return pt===fullName||pt.endsWith(nick)||pt.includes(nick);
+        }
+
+        var homeMatches=pool.filter(function(p){return matchesTeam(p.team,homeNorm,homeNick);});
+        var awayMatches=pool.filter(function(p){return matchesTeam(p.team,awayNorm,awayNick);});
+        var combined=homeMatches.concat(awayMatches);
+
+        if(combined.length>=1){
+          pool=combined;
+        }
+      }
+
+      pool.forEach(function(p){if(!p.trend)p.trend=[1,1,0,1,1,1,0,1,1,1,0,1];});
+      return{props:pool,disclaimer:'Trend-based estimates — for virtual-token practice only.'};
+    }
+
+    /* Main: try API, always fall back to static */
+    async function buildAllProps(){
+      try{
+        var result=await fetchPropsFromAPI();
+        return result;
+      }catch(err){
+        console.warn('Props API unavailable ('+err.message+'), using trend estimates');
+        return buildFallbackProps();
+      }
+    }
+
+    /* ═══ UI Rendering ═══ */
+    var allProps=[];
+    var TF={FIRE:'#ff6b35',VALUE:'#40d9b5',WATCH:'#7aa7ff'};
+
+    function buildCard(prop,idx){
+      var t=prop.tier;
+      var hp=Math.round(prop.hitRate*100);
+      var tp=Math.round(prop.trueProb*100);
+      var edgePct=Math.round(prop.edge*100);
+      var hc=prop.trueProb>=.70?'hot':prop.trueProb>=.58?'warm':'cold';
+      var ec=t==='FIRE'?'fire-edge':t==='VALUE'?'value-edge':'watch-edge';
+      var st=streak(prop.trend);
+      var oddsCls=prop.americanOdds>0?'pos':'neg';
+
+      var card=document.createElement('article');card.className='prop-card tier-'+t;
+
+      /* TOP */
+      var top=document.createElement('div');top.className='card-top';
+      top.appendChild(buildAvatar(prop.playerName,sport,prop.espnId||null));
+      var info=document.createElement('div');info.className='player-info';
+      var nm=document.createElement('div');nm.className='player-name';nm.textContent=prop.playerName;
+      var meta=document.createElement('div');meta.className='player-meta';
+      var turl=getLogoUrl(prop.team,sport);
+      if(turl){var ti=document.createElement('img');ti.src=turl;ti.alt=prop.team;ti.className='player-team-logo';ti.onerror=function(){ti.remove();};meta.appendChild(ti);}
+      var pb=document.createElement('span');pb.className='player-pos-badge';pb.textContent=prop.position;
+      var tt=document.createElement('span');tt.textContent=prop.team.split(' ').slice(-1)[0];
+      var dbadge=document.createElement('span');dbadge.className='data-badge '+(prop.dataSource==='live'?'live':'est');
+      dbadge.textContent=prop.dataSource==='live'?'\u25CF Live':'Est.';
+      var lbadge=document.createElement('span');
+      lbadge.className='data-badge '+(prop.tier==='FIRE'?'live':prop.tier==='VALUE'?'est':'est');
+      lbadge.style.cssText=prop.tier==='FIRE'?'background:rgba(255,77,0,.15);color:#ff6b35;border-color:rgba(255,77,0,.3)':prop.tier==='VALUE'?'background:rgba(64,217,181,.12);color:#40d9b5;border-color:rgba(64,217,181,.3)':'background:rgba(122,167,255,.1);color:#7aa7ff;border-color:rgba(122,167,255,.2)';
+      lbadge.textContent=prop.label||prop.tier;
+      meta.appendChild(pb);meta.appendChild(tt);meta.appendChild(dbadge);meta.appendChild(lbadge);
+      info.appendChild(nm);info.appendChild(meta);top.appendChild(info);
+
+      /* ODDS */
+      var oc=document.createElement('div');oc.className='card-odds';
+      var om=document.createElement('div');om.className='odds-main '+oddsCls;om.textContent=fmtOdds(prop.americanOdds);
+      var os=document.createElement('div');os.className='odds-sub';os.textContent=prop.decimalOdds.toFixed(2)+'x';
+      oc.appendChild(om);oc.appendChild(os);top.appendChild(oc);
+
+      /* LINE */
+      var lr=document.createElement('div');lr.className='card-line';
+      lr.innerHTML='<span class="line-label">OVER</span><span class="line-number">'+prop.line+'</span><span class="line-type">'+prop.propType+'</span><div class="line-avg">Season avg<span>'+prop.avg+'</span></div>';
+
+      /* STATS ROW */
+      var sr=document.createElement('div');sr.className='card-stats-row';
+      var cells=[
+        {v:tp+'%',l:'True Prob',hi:tp>=65},
+        {v:hp+'%',l:'Hit Rate',hi:hp>=70},
+        {v:(prop.ev>0?'+':'')+prop.ev+'%',l:'Edge',hi:prop.ev>0},
+        {v:st>0?st+'G \uD83D\uDD25':'--',l:'Streak',hi:st>=3}
+      ];
+      cells.forEach(function(c){
+        var el=document.createElement('div');el.className='stat-cell'+(c.hi?' highlight':'');
+        el.innerHTML='<div class="stat-val">'+c.v+'</div><div class="stat-lbl">'+c.l+'</div>';
+        sr.appendChild(el);
+      });
+
+      /* PROBABILITY BAR */
+      var pb2=document.createElement('div');pb2.className='card-prob';
+      var mktPct=Math.round(prop.marketImplied*100);
+      pb2.innerHTML='<span class="prob-label">True Prob</span><div class="prob-bar-wrap"><div class="prob-bar-fill" style="width:0%;background:'+TF[t]+'"></div><div class="prob-market-line" style="left:'+mktPct+'%"></div></div><span class="prob-pct '+hc+'">'+tp+'%</span>';
+      setTimeout(function(){var f=pb2.querySelector('.prob-bar-fill');if(f)f.style.width=tp+'%';},idx*55+250);
+
+      /* EDGE BAR */
+      var er=document.createElement('div');er.className='card-edge';
+      var edgeDisp=Math.max(0,edgePct);
+      er.innerHTML='<span class="edge-label">Edge vs -110</span><div class="edge-bar-wrap"><div class="edge-bar-fill" style="width:0%;background:'+TF[t]+'"></div></div><span class="edge-pct '+ec+'">'+(edgePct>0?'+':'')+edgePct+'%</span>';
+      setTimeout(function(){var f=er.querySelector('.edge-bar-fill');if(f)f.style.width=Math.min(100,edgeDisp*5)+'%';},idx*55+300);
+
+      /* DOTS */
+      var dr=document.createElement('div');dr.className='card-dots';
+      prop.trend.forEach(function(v){var d=document.createElement('div');d.className='prop-dot '+(v===1?'hit':'miss');dr.appendChild(d);});
+      if(st>=3){var sb=document.createElement('span');sb.className='streak-badge';sb.textContent='\uD83D\uDD25 '+st+' straight';dr.appendChild(sb);}
+
+      /* REASON */
+      var rs=document.createElement('div');rs.className='card-reason';
+      var confTxt=prop.confidenceScore?(' \u00B7 Confidence: '+Math.round(prop.confidenceScore)+'%'):'';
+      rs.textContent=(prop.reasoning||'')+confTxt;
+
+      card.appendChild(top);card.appendChild(lr);card.appendChild(sr);card.appendChild(pb2);card.appendChild(er);card.appendChild(dr);card.appendChild(rs);
+      card.style.opacity='0';card.style.transform='translateY(14px)';
+      setTimeout(function(){card.style.transition='opacity .35s ease,transform .35s ease';card.style.opacity='1';card.style.transform='translateY(0)';},idx*55);
+      return card;
+    }
+
+    function render(props){
+      var sorted=props.slice().sort(function(a,b){return b.confidenceScore-a.confidenceScore;});
+      var container=document.getElementById('propsContainer');
+      container.innerHTML='';
+      if(!sorted.length){document.getElementById('emptyState').style.display='block';document.getElementById('emptyState').textContent='No props found for this game.';return;}
+      document.getElementById('emptyState').style.display='none';
+      sorted.forEach(function(p,i){container.appendChild(buildCard(p,i));});
+    }
+
+    async function loadProps(){
+      try{
+        var result=await buildAllProps();
+        allProps=result.props;
+        document.getElementById('skeleton').style.display='none';
+        var liveCount=allProps.filter(function(p){return p.dataSource==='live';}).length;
+        document.getElementById('propsLoadedAt').textContent=allProps.length+' picks \u00B7 '+(liveCount>0?'\u25CF Live ESPN':'Trend estimates');
+        document.getElementById('dataSourceLabel').textContent='Trend-based picks for this game';
+        if(result.disclaimer){var d=document.getElementById('disclaimerBanner');if(d){d.textContent=result.disclaimer;d.style.display='block';}}
+        render(allProps);
+      }catch(err){
+        console.error(err);
+        document.getElementById('skeleton').style.display='none';
+        document.getElementById('emptyState').style.display='block';
+        document.getElementById('emptyState').textContent='Could not load picks. Please refresh.';
+      }
+    }
+
+    auth.onAuthStateChanged(function(user){
+      if(user){
+        firebase.firestore().collection('users').doc(user.uid).get().then(function(doc){if(doc.exists){var d=doc.data();document.querySelectorAll('.tokens').forEach(function(el){el.textContent=(d.tokenBalance||0).toLocaleString();});}}).catch(function(){});
+      }
+      loadProps();
+    });
+    window.addEventListener('load',function(){var l=document.getElementById('pageLoader');if(l){l.classList.add('loaded');setTimeout(function(){l.remove();},500);}document.getElementById('pageContent').style.visibility='visible';});
+  })();
+  </script>
+</body>
+</html>

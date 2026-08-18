@@ -76,3 +76,6 @@ node_modules/
 **/DerivedData/
 **/*.xcuserstate
 **/xcuserdata/
+
+# One-off local generation helper; the generated roulette page is the source of truth.
+public/_write_roulette.js

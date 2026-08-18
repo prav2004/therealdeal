@@ -31,16 +31,16 @@ function createRouter(authMiddleware, ensureProfileComplete) {
   const router = express.Router();
 
   // List available leagues
-  router.get('/leagues', authMiddleware, ensureProfileComplete, getLeagues);
+  router.get('/leagues', getLeagues);
 
   // All games across all sports
-  router.get('/', authMiddleware, ensureProfileComplete, getAllGames);
+  router.get('/', getAllGames);
 
   // Games for a single sport
-  router.get('/:sport', authMiddleware, ensureProfileComplete, getGamesBySport);
+  router.get('/:sport', getGamesBySport);
 
   // Games for a specific league within a sport
-  router.get('/:sport/:league', authMiddleware, ensureProfileComplete, getGamesBySportAndLeague);
+  router.get('/:sport/:league', getGamesBySportAndLeague);
 
   return router;
 }

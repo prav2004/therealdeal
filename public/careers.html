@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- CAREERS PAGE - FULL REDESIGN -->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -15,9 +16,306 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
     <script src="config.js"></script>
     <style>
+      :root { --ink:#0b0f1a; --ember:#ff7a1a; --mint:#40d9b5; --sky:#7aa7ff; }
+      *{box-sizing:border-box}
+      body{font-family:'IBM Plex Sans',sans-serif;background:var(--ink);color:#e5e7eb;min-height:100vh;overflow-x:hidden}
+      .bg-orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbFloat 12s ease-in-out infinite alternate}
+      .bg-orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(255,122,26,0.12),transparent 70%);top:-200px;left:-200px}
+      .bg-orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(122,167,255,0.14),transparent 70%);top:10%;right:-150px;animation-delay:-4s}
+      .bg-orb-3{width:400px;height:400px;background:radial-gradient(circle,rgba(64,217,181,0.1),transparent 70%);bottom:20%;left:10%;animation-delay:-8s}
+      @keyframes orbFloat{from{transform:translate(0,0) scale(1)}to{transform:translate(30px,20px) scale(1.06)}}
+      .cw{position:relative;z-index:1}
+      .hero-title{font-family:'Space Grotesk',sans-serif;letter-spacing:-0.03em}
+      .gradient-text{background:linear-gradient(90deg,#fff 0%,#ffb37a 50%,#ff7a1a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+      .top-nav{background:rgba(11,15,26,0.88);border-bottom:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(20px);position:sticky;top:0;z-index:50;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+      .hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,122,26,0.12);border:1px solid rgba(255,122,26,0.35);border-radius:999px;padding:5px 16px;font-size:11px;font-weight:700;color:#ffb37a;font-family:'Space Grotesk',sans-serif;letter-spacing:0.08em;text-transform:uppercase}
+      .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:#ff7a1a;box-shadow:0 0 6px rgba(255,122,26,0.8);animation:pulse-dot 1.5s ease-in-out infinite}
+      @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+      .stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;text-align:center;position:relative;overflow:hidden;transition:border-color 0.2s,transform 0.2s}
+      .stat-card:hover{border-color:rgba(255,122,26,0.3);transform:translateY(-3px)}
+      .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,linear-gradient(90deg,#ff7a1a,#ffb37a))}
+      .stat-num{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:800;letter-spacing:-0.03em;line-height:1}
+      .stat-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-top:6px}
+      .role-card{background:rgba(14,20,36,0.96);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:border-color 0.25s,box-shadow 0.25s,transform 0.2s}
+      .role-card:hover{border-color:rgba(255,122,26,0.35);box-shadow:0 8px 40px rgba(255,122,26,0.1);transform:translateY(-3px)}
+      .role-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ra,linear-gradient(90deg,#ff7a1a,#ffb37a))}
+      .rtag{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;letter-spacing:0.06em;text-transform:uppercase}
+      .perk-item{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;transition:border-color 0.2s}
+      .perk-item:hover{border-color:rgba(255,255,255,0.14)}
+      .perk-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+      .form-panel{background:rgba(10,15,28,0.97);border:1px solid rgba(255,122,26,0.2);border-radius:24px;position:relative;overflow:hidden;box-shadow:0 0 80px rgba(255,122,26,0.06)}
+      .form-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ff7a1a,#ffb37a,rgba(122,167,255,0.4))}
+      .fi{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 14px;color:#f1f5f9;font-size:14px;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+      .fi:focus{border-color:rgba(255,122,26,0.5);box-shadow:0 0 0 3px rgba(255,122,26,0.1)}
+      .fi::placeholder{color:#475569}
+      .fl{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:7px;font-family:'Space Grotesk',sans-serif}
+      .sbtn{width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,#ff7a1a,#ff9e50);color:#0b0f1a;font-size:15px;font-weight:800;font-family:'Space Grotesk',sans-serif;letter-spacing:0.04em;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,122,26,0.4);transition:all 0.2s}
+      .sbtn:hover{box-shadow:0 6px 32px rgba(255,122,26,0.55);transform:translateY(-1px)}
+      .sbtn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+      .spill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;color:#94a3b8;font-family:'Space Grotesk',sans-serif;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px}
+      .tstep{display:flex;gap:16px;position:relative}
+      .tstep:not(:last-child)::after{content:'';position:absolute;left:19px;top:40px;width:2px;height:calc(100% + 8px);background:linear-gradient(to bottom,rgba(255,122,26,0.3),transparent)}
+      .tnum{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:rgba(255,122,26,0.15);border:1.5px solid rgba(255,122,26,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#ff7a1a;font-family:'Space Grotesk',sans-serif}
+      .reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease}
+      .reveal.vi{opacity:1;transform:translateY(0)}
+      .rd1{transition-delay:0.1s}.rd2{transition-delay:0.2s}.rd3{transition-delay:0.3s}.rd4{transition-delay:0.4s}
+    </style>
+  </head>
+  <body>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="cw">
+
+    <!-- Nav -->
+    <nav class="top-nav">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="logo.png" alt="Pickr" style="height:42px;object-fit:contain">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#475569;font-family:'Space Grotesk',sans-serif">Careers</span>
+      </div>
+      <a href="index.html" style="padding:8px 18px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);font-size:13px;font-weight:600;color:#e2e8f0;text-decoration:none;font-family:'Space Grotesk',sans-serif;transition:all 0.2s" onmouseover="this.style.background='rgba(255,122,26,0.14)';this.style.borderColor='rgba(255,122,26,0.4)';this.style.color='#ffb37a'" onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='#e2e8f0'">← Back to Sports</a>
+    </nav>
+
+    <!-- Hero -->
+    <section style="max-width:860px;margin:0 auto;padding:64px 20px 40px;text-align:center">
+      <div class="hero-badge reveal" style="margin-bottom:22px;display:inline-flex"><span class="dot"></span>We're Hiring — 2 Openings</div>
+      <h1 class="hero-title reveal rd1" style="font-size:clamp(2.4rem,7vw,4.2rem);font-weight:800;line-height:1.05;margin-bottom:20px">Build the future of<br><span class="gradient-text">sports picks</span></h1>
+      <p class="reveal rd2" style="font-size:16px;color:#94a3b8;max-width:540px;margin:0 auto 32px;line-height:1.75">Pickr is a fast-growing free-to-play sports prediction platform. We're building something the sports world has never seen — and we want you on the team.</p>
+      <div class="reveal rd3" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="#roles" style="padding:13px 28px;border-radius:14px;background:linear-gradient(135deg,#ff7a1a,#ff9e50);color:#0b0f1a;font-weight:800;font-family:'Space Grotesk',sans-serif;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;text-decoration:none;box-shadow:0 4px 24px rgba(255,122,26,0.4);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 32px rgba(255,122,26,0.55)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 24px rgba(255,122,26,0.4)'">View Open Roles</a>
+        <a href="#apply" style="padding:13px 28px;border-radius:14px;background:rgba(255,255,255,0.06);color:#e2e8f0;font-weight:700;font-family:'Space Grotesk',sans-serif;font-size:14px;border:1px solid rgba(255,255,255,0.12);text-decoration:none;transition:background 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">Apply Now →</a>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section style="max-width:900px;margin:0 auto;padding:0 20px 60px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+        <div class="stat-card reveal" style="--accent:linear-gradient(90deg,#ff7a1a,#ffb37a)"><div class="stat-num" style="color:#ff7a1a" data-count="10" data-suffix="K+">10K+</div><div class="stat-lbl">Active Users</div></div>
+        <div class="stat-card reveal rd1" style="--accent:linear-gradient(90deg,#7aa7ff,#40d9b5)"><div class="stat-num" style="background:linear-gradient(90deg,#fff,#7aa7ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" data-count="5" data-suffix="+">5+</div><div class="stat-lbl">Sports Covered</div></div>
+        <div class="stat-card reveal rd2" style="--accent:linear-gradient(90deg,#40d9b5,#7aa7ff)"><div class="stat-num" style="color:#40d9b5">Free</div><div class="stat-lbl">Always Free to Play</div></div>
+        <div class="stat-card reveal rd3" style="--accent:linear-gradient(90deg,#fbbf24,#ff7a1a)"><div class="stat-num" style="color:#fbbf24">Live</div><div class="stat-lbl">Real-Time Odds</div></div>
+      </div>
+    </section>
+
+    <!-- Why Pickr -->
+    <section style="max-width:900px;margin:0 auto;padding:0 20px 70px">
+      <div style="text-align:center;margin-bottom:40px" class="reveal">
+        <div class="spill">Why Pickr</div>
+        <h2 class="hero-title" style="font-size:2rem;font-weight:800;color:#f1f5f9">A company worth joining</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+        <div class="perk-item reveal"><div class="perk-icon" style="background:rgba(255,122,26,0.12)">🚀</div><div><div style="font-size:14px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Early-Stage Momentum</div><div style="font-size:13px;color:#64748b;line-height:1.6">Be one of the first hires. Your work ships to real users on day one.</div></div></div>
+        <div class="perk-item reveal rd1"><div class="perk-icon" style="background:rgba(122,167,255,0.12)">💡</div><div><div style="font-size:14px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">High Ownership</div><div style="font-size:13px;color:#64748b;line-height:1.6">No red tape. Ship fast, own meaningful features.</div></div></div>
+        <div class="perk-item reveal rd2"><div class="perk-icon" style="background:rgba(64,217,181,0.12)">🏆</div><div><div style="font-size:14px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Sports-First Culture</div><div style="font-size:13px;color:#64748b;line-height:1.6">Games, debates, and picks are literally part of the job.</div></div></div>
+        <div class="perk-item reveal rd3"><div class="perk-icon" style="background:rgba(251,191,36,0.12)">📈</div><div><div style="font-size:14px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Grow Fast</div><div style="font-size:13px;color:#64748b;line-height:1.6">Rapid skill growth and a clear path to leadership.</div></div></div>
+        <div class="perk-item reveal"><div class="perk-icon" style="background:rgba(167,122,255,0.12)">🌎</div><div><div style="font-size:14px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Remote Friendly</div><div style="font-size:13px;color:#64748b;line-height:1.6">Work from anywhere. We care about output, not clocks.</div></div></div>
+        <div class="perk-item reveal rd1"><div class="perk-icon" style="background:rgba(255,122,26,0.12)">🎯</div><div><div style="font-size:14px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Mission-Driven</div><div style="font-size:13px;color:#64748b;line-height:1.6">Making sports predictions exciting, social, and free for everyone.</div></div></div>
+      </div>
+    </section>
+
+    <!-- Open Roles -->
+    <section id="roles" style="max-width:900px;margin:0 auto;padding:0 20px 70px">
+      <div style="text-align:center;margin-bottom:40px" class="reveal">
+        <div class="spill">Open Positions</div>
+        <h2 class="hero-title" style="font-size:2rem;font-weight:800;color:#f1f5f9">2 roles available now</h2>
+        <p style="font-size:14px;color:#64748b;margin-top:8px">We move fast — you'll hear back within 48 hours.</p>
+      </div>
+      <div style="display:grid;gap:20px">
+        <!-- Role 1 -->
+        <div class="role-card reveal" style="--ra:linear-gradient(90deg,#ff7a1a,#ffb37a)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            <div>
+              <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+                <span class="rtag" style="background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.25)"><span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block"></span>Open</span>
+                <span class="rtag" style="background:rgba(122,167,255,0.1);color:#7aa7ff;border:1px solid rgba(122,167,255,0.22)">Business</span>
+                <span class="rtag" style="background:rgba(255,122,26,0.1);color:#ffb37a;border:1px solid rgba(255,122,26,0.22)">Full-Time / Part-Time</span>
+              </div>
+              <h3 class="hero-title" style="font-size:22px;font-weight:800;color:#f1f5f9">Business Associate</h3>
+            </div>
+            <a href="#apply" style="padding:10px 20px;border-radius:12px;background:linear-gradient(135deg,rgba(255,122,26,0.22),rgba(255,122,26,0.1));border:1px solid rgba(255,122,26,0.4);color:#ffb37a;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px;flex-shrink:0;transition:background 0.2s" onmouseover="this.style.background='rgba(255,122,26,0.3)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(255,122,26,0.22),rgba(255,122,26,0.1))'">Apply →</a>
+          </div>
+          <p style="font-size:14px;color:#94a3b8;line-height:1.75;margin-bottom:20px">Drive Pickr's growth through partnerships, outreach, and business strategy. Work directly with the founders to expand our user base, land deals, and shape how we go to market.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#34d399">✓</span> Partnership development</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#34d399">✓</span> User acquisition strategy</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#34d399">✓</span> Market research & analysis</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#34d399">✓</span> Social & community growth</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#34d399">✓</span> Sponsor & brand outreach</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#34d399">✓</span> Passion for sports a plus</div>
+          </div>
+        </div>
+        <!-- Role 2 -->
+        <div class="role-card reveal rd1" style="--ra:linear-gradient(90deg,#7aa7ff,#40d9b5)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+            <div>
+              <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+                <span class="rtag" style="background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.25)"><span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block"></span>Open</span>
+                <span class="rtag" style="background:rgba(122,167,255,0.1);color:#7aa7ff;border:1px solid rgba(122,167,255,0.22)">Engineering</span>
+                <span class="rtag" style="background:rgba(122,167,255,0.08);color:#9fb8ff;border:1px solid rgba(122,167,255,0.2)">Full-Time / Contract</span>
+              </div>
+              <h3 class="hero-title" style="font-size:22px;font-weight:800;color:#f1f5f9">Developer</h3>
+            </div>
+            <a href="#apply" style="padding:10px 20px;border-radius:12px;background:linear-gradient(135deg,rgba(122,167,255,0.2),rgba(122,167,255,0.08));border:1px solid rgba(122,167,255,0.35);color:#9fb8ff;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px;flex-shrink:0;transition:background 0.2s" onmouseover="this.style.background='rgba(122,167,255,0.3)'" onmouseout="this.style.background='linear-gradient(135deg,rgba(122,167,255,0.2),rgba(122,167,255,0.08))'">Apply →</a>
+          </div>
+          <p style="font-size:14px;color:#94a3b8;line-height:1.75;margin-bottom:20px">Help build and scale the Pickr platform. Work on our Node.js backend, Firebase infrastructure, and front-end web app — shipping features that real users interact with every game day.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#7aa7ff">✓</span> Node.js / JavaScript</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#7aa7ff">✓</span> Firebase / Firestore</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#7aa7ff">✓</span> REST API development</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#7aa7ff">✓</span> Front-end HTML / CSS / JS</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#7aa7ff">✓</span> Real-time sports data APIs</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cbd5e1"><span style="color:#7aa7ff">✓</span> Python / ML a bonus</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hiring Process -->
+    <section style="max-width:680px;margin:0 auto;padding:0 20px 70px">
+      <div style="text-align:center;margin-bottom:40px" class="reveal">
+        <div class="spill">Process</div>
+        <h2 class="hero-title" style="font-size:2rem;font-weight:800;color:#f1f5f9">How it works</h2>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div class="tstep reveal"><div class="tnum">1</div><div style="padding-top:7px"><div style="font-size:15px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Apply below</div><div style="font-size:13px;color:#64748b;line-height:1.65">Takes 3 minutes. We review every application ourselves — no bots.</div></div></div>
+        <div class="tstep reveal rd1"><div class="tnum">2</div><div style="padding-top:7px"><div style="font-size:15px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Hear back in 48h</div><div style="font-size:13px;color:#64748b;line-height:1.65">We reply to every applicant — no ghosting. Serious inquiries get a call.</div></div></div>
+        <div class="tstep reveal rd2"><div class="tnum">3</div><div style="padding-top:7px"><div style="font-size:15px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Quick intro call</div><div style="font-size:13px;color:#64748b;line-height:1.65">20 minutes with the founders. Real conversation — no trick questions.</div></div></div>
+        <div class="tstep reveal rd3"><div class="tnum">4</div><div style="padding-top:7px"><div style="font-size:15px;font-weight:700;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;margin-bottom:4px">Welcome aboard</div><div style="font-size:13px;color:#64748b;line-height:1.65">Offer → onboarding → you're shipping on day one.</div></div></div>
+      </div>
+    </section>
+
+    <!-- Application Form -->
+    <section id="apply" style="max-width:660px;margin:0 auto;padding:0 20px 80px">
+      <div class="form-panel reveal" style="padding:36px 32px">
+        <div style="margin-bottom:28px">
+          <div class="spill">Apply Now</div>
+          <h2 class="hero-title" style="font-size:26px;font-weight:800;color:#f1f5f9;margin-bottom:6px">Send your application</h2>
+          <p style="font-size:13px;color:#64748b">Takes less than 3 minutes. We read every one.</p>
+        </div>
+        <form id="careerForm" style="display:flex;flex-direction:column;gap:18px" enctype="multipart/form-data">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div><label class="fl">Full Name</label><input id="careerName" name="name" type="text" required class="fi" placeholder="Your name" /></div>
+            <div><label class="fl">Email Address</label><input id="careerEmail" name="email" type="email" required class="fi" placeholder="you@email.com" /></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div><label class="fl">Phone (optional)</label><input id="careerPhone" name="phone" type="text" class="fi" placeholder="(555) 555-5555" /></div>
+            <div><label class="fl">Role</label><select id="careerPosition" name="position" required class="fi" style="cursor:pointer"><option value="" style="background:#0b0f1a">Select a role</option><option value="Business Associate" style="background:#0b0f1a">Business Associate</option><option value="Developer" style="background:#0b0f1a">Developer</option></select></div>
+          </div>
+          <div><label class="fl">LinkedIn URL (optional)</label><input id="careerLinkedin" name="linkedin" type="url" class="fi" placeholder="https://linkedin.com/in/your-name" /></div>
+          <div><label class="fl">Tell us about yourself</label><textarea id="careerAbout" name="about" required rows="5" class="fi" style="resize:vertical;line-height:1.65" placeholder="Your experience, what excites you about Pickr, and why you'd be a great fit..."></textarea></div>
+          <div>
+            <label class="fl">Resume (PDF/DOC/DOCX · max 5MB)</label>
+            <div style="background:rgba(255,255,255,0.03);border:1.5px dashed rgba(255,255,255,0.12);border-radius:12px;padding:16px;text-align:center">
+              <div style="font-size:22px;margin-bottom:8px">📄</div>
+              <input id="careerResume" name="resume" type="file" accept=".pdf,.doc,.docx" required style="display:block;width:100%;font-size:13px;color:#94a3b8;cursor:pointer" />
+              <div style="margin-top:8px;font-size:11px;color:#475569">PDF, DOC, or DOCX — max 5MB</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#475569;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,0.06)">🔒 Resume files are emailed directly to our team and are not stored in the app database.</div>
+          <div id="careerStatus" style="font-size:13px;min-height:20px" role="status" aria-live="polite"></div>
+          <button id="careerSubmit" type="submit" class="sbtn">🚀 Submit Application</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="border-top:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02)">
+      <div style="max-width:1000px;margin:0 auto;padding:48px 20px 32px">
+        <div style="display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+          <div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:#475569;margin-bottom:10px;font-family:'Space Grotesk',sans-serif">Pickr</div>
+            <div style="font-size:17px;font-weight:600;color:#f1f5f9;margin-bottom:8px">Stay in the know</div>
+            <p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:12px">Free-to-play insights, product updates, and community highlights.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <a href="https://www.linkedin.com/in/pickr-picks-a654423b2/" target="_blank" rel="noopener" style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);font-size:11px;color:#94a3b8;text-decoration:none;font-weight:600;font-family:'Space Grotesk',sans-serif;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='rgba(255,255,255,0.1)'">LinkedIn</a>
+              <a href="https://www.tiktok.com/@pickrpicks_" target="_blank" rel="noopener" style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);font-size:11px;color:#94a3b8;text-decoration:none;font-weight:600;font-family:'Space Grotesk',sans-serif;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='rgba(255,255,255,0.1)'">TikTok</a>
+              <a href="https://www.instagram.com/pickrpicks/" target="_blank" rel="noopener" style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);font-size:11px;color:#94a3b8;text-decoration:none;font-weight:600;font-family:'Space Grotesk',sans-serif;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.2s" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='#94a3b8';this.style.borderColor='rgba(255,255,255,0.1)'">Instagram</a>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:#475569;margin-bottom:10px;font-family:'Space Grotesk',sans-serif">Support</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <a href="contact.html" style="font-size:13px;color:#94a3b8;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">Contact us</a>
+              <a href="faq.html" style="font-size:13px;color:#94a3b8;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">FAQ</a>
+              <a href="terms.html" style="font-size:13px;color:#94a3b8;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">Terms of Service</a>
+              <a href="careers.html" style="font-size:13px;color:#94a3b8;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#94a3b8'">Careers</a>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.3em;color:#475569;margin-bottom:10px;font-family:'Space Grotesk',sans-serif">Get Help</div>
+            <p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:12px">Picks, rewards, or account issues? Submit a ticket any time.</p>
+            <a href="contact.html" style="display:inline-flex;align-items:center;padding:9px 18px;border-radius:999px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:13px;font-weight:600;color:#e2e8f0;text-decoration:none;transition:background 0.2s" onmouseover="this.style.background='rgba(255,255,255,0.14)'" onmouseout="this.style.background='rgba(255,255,255,0.07)'">Submit a ticket</a>
+          </div>
+        </div>
+        <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div style="font-size:12px;color:#475569">© 2026 Pickr. Free-to-play. 19+ only in Canada.</div>
+          <div style="display:flex;gap:16px">
+            <a href="terms.html" style="font-size:12px;color:#475569;text-decoration:none">Terms</a>
+            <a href="faq.html" style="font-size:12px;color:#475569;text-decoration:none">FAQ</a>
+            <a href="careers.html" style="font-size:12px;color:#475569;text-decoration:none">Careers</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    </div><!-- /cw -->
+
+    <script>
+      // Scroll reveal
+      const obs = new IntersectionObserver(e => e.forEach(x => { if (x.isIntersecting) { x.target.classList.add('vi'); obs.unobserve(x.target); } }), { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+      // Career form
+      const careerForm = document.getElementById('careerForm');
+      const careerStatus = document.getElementById('careerStatus');
+      const careerSubmit = document.getElementById('careerSubmit');
+      const careersFallbackEmail = 'pickrbets@gmail.com';
+      const getApiBase = () => {
+        const c = window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL;
+        if (typeof c === 'string') { if (c.length > 0) return c; if (['localhost','127.0.0.1'].includes(window.location.hostname)) return ''; }
+        return 'https://pickr-backend-972106331799.us-central1.run.app';
+      };
+      function setCareerStatus(msg, type) {
+        if (!careerStatus) return;
+        const colors = { error:'#f87171', success:'#34d399', info:'#94a3b8' };
+        const bgs = { error:'rgba(248,113,113,0.08)', success:'rgba(52,211,153,0.08)', info:'transparent' };
+        const borders = { error:'rgba(248,113,113,0.2)', success:'rgba(52,211,153,0.2)', info:'transparent' };
+        type = type || 'info';
+        careerStatus.style.color = colors[type];
+        careerStatus.style.background = bgs[type];
+        careerStatus.style.borderRadius = msg ? '10px' : '0';
+        careerStatus.style.padding = msg ? '10px 14px' : '0';
+        careerStatus.style.border = msg ? '1px solid ' + borders[type] : 'none';
+        careerStatus.innerHTML = msg;
+      }
+      careerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        setCareerStatus('', 'info');
+        careerSubmit.disabled = true;
+        careerSubmit.textContent = '⏳ Sending...';
+        const fd = new FormData(careerForm);
+        try {
+          const r = await fetch(getApiBase() + '/api/careers/apply', { method: 'POST', body: fd });
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(d && d.error ? d.error : 'Application failed');
+          setCareerStatus('✅ Application sent! Check your email for confirmation. We\'ll be in touch within 48 hours.', 'success');
+          careerForm.reset();
+        } catch (err) {
+          const msg = err && err.message ? String(err.message) : '';
+          const net = msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network') || msg.toLowerCase().includes('cors');
+          if (net) setCareerStatus('⚠️ Network issue. Email your resume to <a style="color:#ff7a1a;text-decoration:underline" href="mailto:' + careersFallbackEmail + '">' + careersFallbackEmail + '</a>.', 'error');
+          else setCareerStatus('❌ ' + (msg || 'Application failed. Please try again.'), 'error');
+        } finally {
+          careerSubmit.disabled = false;
+          careerSubmit.textContent = '🚀 Submit Application';
+        }
+      });
+    </script>
+  </body>
+</html>
       :root {
         --ink: #0b0f1a;
         --ember: #ff7a1a;

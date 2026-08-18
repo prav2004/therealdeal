@@ -43,6 +43,7 @@
     @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
     .pickr-page-content{transition:visibility 0s}
   </style>
+  <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
 </head>
   <body class="min-h-screen bg-gradient-to-br from-zinc-950 via-slate-950 to-zinc-900 text-zinc-100">
   <!-- Page loader -->
@@ -220,16 +221,35 @@
     /* Reveal onboarding page once auth & profile check are done */
     (function(){
       var revealed = false;
+      var isRedirecting = false;
+      var safetyTimer = null;
       function revealOnboarding(){
-        if (revealed) return;
-        revealed = true;
-        document.querySelectorAll('.pickr-page-content').forEach(function(el){ el.style.visibility='visible'; });
-        var pl=document.getElementById('pageLoader');
-        if(pl){pl.classList.add('loaded');setTimeout(function(){pl.remove();},800);}
+        if (revealed || isRedirecting) return;
+        if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+
+        function doReveal() {
+          if (revealed || isRedirecting) return;
+          revealed = true;
+          document.querySelectorAll('.pickr-page-content').forEach(function(el){ el.style.visibility='visible'; });
+          var pl=document.getElementById('pageLoader');
+          if(pl){pl.classList.add('loaded');setTimeout(function(){pl.remove();},800);}
+        }
+
+        if (document.readyState === 'complete') {
+          doReveal();
+        } else {
+          window.addEventListener('load', doReveal, { once: true });
+        }
+      }
+      /* Called before any redirect so the safety timer never accidentally shows the form */
+      function cancelReveal(){
+        isRedirecting = true;
+        if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
       }
       window.__revealOnboarding = revealOnboarding;
-      /* Safety — never leave it stuck */
-      setTimeout(revealOnboarding, 6000);
+      window.__cancelOnboardingReveal = cancelReveal;
+      /* Safety — never leave loader stuck (only fires if not redirecting) */
+      safetyTimer = setTimeout(revealOnboarding, 5000);
     })();
   </script>
   <script>
@@ -313,6 +333,7 @@
     (async () => {
   const user = await ensureSignedIn();
   if (!user) {
+    if (window.__cancelOnboardingReveal) window.__cancelOnboardingReveal();
     window.location.replace('/login');
     return;
   }
@@ -329,6 +350,7 @@
     if (resp.ok) {
       const profile = await resp.json();
       if (profile && profile.profileComplete && profile.ageVerified) {
+        if (window.__cancelOnboardingReveal) window.__cancelOnboardingReveal();
         window.location.replace('/index.html');
         return;
       }
@@ -355,10 +377,10 @@
       }
     }
   } catch (e) {
-    // ignore and let user fill the form
+    // ignore fetch errors and let user fill the form
   }
 
-  // Onboarding form is ready — reveal the page
+  // Onboarding form is ready — reveal the page (only if not redirecting)
   if (window.__revealOnboarding) window.__revealOnboarding();
 
   // wire validation listeners

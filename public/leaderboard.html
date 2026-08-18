@@ -16,6 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
     <style>
       :root {
         --ink: #0b0f1a;
@@ -99,6 +100,44 @@
         box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
         border-color: rgba(122, 167, 255, 0.35);
       }
+      /* ── Props button on pick cards ── */
+      .props-btn-wrap {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+      }
+      .props-btn {
+        display: flex; align-items: center; justify-content: center; gap: 7px;
+        width: 100%; padding: 10px 16px; border-radius: 12px;
+        font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.8rem;
+        cursor: pointer; text-decoration: none;
+        background: linear-gradient(135deg, rgba(255,77,0,0.12), rgba(255,122,26,0.08));
+        border: 1px solid rgba(255,100,0,0.3); color: #ff7a1a;
+        transition: all 0.18s ease; position: relative; overflow: hidden;
+      }
+      .props-btn::before {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,122,26,0.08), transparent);
+        transform: translateX(-100%); transition: transform 0.4s ease;
+      }
+      .props-btn:hover {
+        background: linear-gradient(135deg, rgba(255,77,0,0.22), rgba(255,122,26,0.15));
+        border-color: rgba(255,100,0,0.55);
+        box-shadow: 0 0 16px rgba(255,80,0,0.2);
+        color: #ff9040;
+        text-decoration: none;
+      }
+      .props-btn:hover::before { transform: translateX(100%); }
+      .props-btn-fire { font-size: 1rem; animation: propsBtnFire 1.8s ease-in-out infinite; }
+      @keyframes propsBtnFire { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2) translateY(-1px)} }
+      .props-btn-count {
+        display: inline-flex; align-items: center; justify-content: center;
+        background: rgba(255,80,0,0.25); color: #ff7a1a;
+        border-radius: 999px; font-size: 0.7rem; font-weight: 800;
+        min-width: 20px; height: 20px; padding: 0 6px;
+        border: 1px solid rgba(255,80,0,0.4);
+      }
+
       .lock-card {
         background: linear-gradient(145deg, rgba(255, 122, 26, 0.12), rgba(17, 25, 40, 0.92));
         border: 1px solid rgba(255, 180, 90, 0.5);
@@ -359,12 +398,12 @@
 
       /* ── Redesigned leaderboard ── */
       .lb-section {
-        border-radius: 20px;
+        border-radius: 24px;
         padding: 1.5rem;
-        background: linear-gradient(145deg, rgba(17,25,40,0.92), rgba(30,41,59,0.85));
-        border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-        backdrop-filter: blur(12px);
+        background: linear-gradient(160deg, rgba(17,25,40,0.97) 0%, rgba(22,32,54,0.95) 100%);
+        border: 1px solid rgba(255,255,255,0.07);
+        box-shadow: 0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+        backdrop-filter: blur(16px);
         position: relative;
         overflow: hidden;
       }
@@ -373,7 +412,7 @@
         position: absolute;
         top: 0; left: 0; right: 0;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(122,167,255,0.35), rgba(64,217,181,0.25), transparent);
+        background: linear-gradient(90deg, transparent 0%, rgba(122,167,255,0.5) 30%, rgba(64,217,181,0.4) 70%, transparent 100%);
       }
       .lb-title-row {
         display: flex;
@@ -381,7 +420,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
       }
       .lb-heading {
         font-family: 'Space Grotesk', sans-serif;
@@ -410,163 +449,204 @@
         animation: pulse-dot 1.5s ease-in-out infinite;
       }
 
-      /* Podium for top 3 */
-      .lb-podium {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-      }
-      .lb-podium-card {
+      /* ── Premium podium ── */
+      .lb-podium-wrap {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 1rem 0.5rem;
-        border-radius: 16px;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+        padding: 28px 8px 0;
+        margin-bottom: 20px;
         position: relative;
-        overflow: hidden;
-        text-align: center;
       }
-      .lb-podium-card::before {
+      .lb-podium-wrap::before {
         content: '';
         position: absolute;
         inset: 0;
-        border-radius: 16px;
+        background: radial-gradient(ellipse at 50% 60%, rgba(255,180,60,0.07) 0%, transparent 65%);
         pointer-events: none;
       }
-      .lb-podium-card--1 {
-        background: linear-gradient(180deg, rgba(255,180,60,0.15) 0%, rgba(17,25,40,0.9) 100%);
-        border: 1px solid rgba(255,180,60,0.35);
-        order: 2;
+      .lb-pod {
+        display: flex; flex-direction: column; align-items: center;
+        flex: 1; max-width: 120px; position: relative;
+        animation: podEntry 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
       }
-      .lb-podium-card--1::before {
-        background: radial-gradient(ellipse at 50% 0%, rgba(255,180,60,0.2), transparent 70%);
+      .lb-pod.rank-two  { animation-delay: 0.08s; }
+      .lb-pod.rank-three{ animation-delay: 0.16s; }
+      @keyframes podEntry {
+        from { opacity: 0; transform: translateY(22px) scale(0.92); }
+        to   { opacity: 1; transform: translateY(0)  scale(1); }
       }
-      .lb-podium-card--2 {
-        background: linear-gradient(180deg, rgba(192,192,220,0.12) 0%, rgba(17,25,40,0.9) 100%);
-        border: 1px solid rgba(192,192,220,0.25);
-        order: 1;
+      .lb-pod-info { display: flex; flex-direction: column; align-items: center; gap: 5px; padding-bottom: 10px; }
+      .lb-pod-crown { font-size: 18px; line-height: 1; margin-bottom: -2px; }
+      .lb-pod-avatar-ring {
+        border-radius: 50%; padding: 3px;
+        position: relative;
       }
-      .lb-podium-card--3 {
-        background: linear-gradient(180deg, rgba(205,127,50,0.12) 0%, rgba(17,25,40,0.9) 100%);
-        border: 1px solid rgba(205,127,50,0.25);
-        order: 3;
+      .lb-pod-avatar-ring.gold   { background: linear-gradient(135deg, #ffd700, #ffb300, #ff8c00); box-shadow: 0 0 20px rgba(255,180,60,0.45); }
+      .lb-pod-avatar-ring.silver { background: linear-gradient(135deg, #e8e8e8, #b0b0b0, #888); box-shadow: 0 0 14px rgba(192,192,192,0.3); }
+      .lb-pod-avatar-ring.bronze { background: linear-gradient(135deg, #e8a87c, #cd7f32, #8b4513); box-shadow: 0 0 14px rgba(205,127,50,0.3); }
+      .lb-pod-avatar-inner { border-radius: 50%; background: rgba(15,23,42,0.8); overflow: hidden; }
+      .lb-pod-avatar-inner.sz-lg { width: 62px; height: 62px; }
+      .lb-pod-avatar-inner.sz-md { width: 50px; height: 50px; }
+      .lb-pod-name {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.72rem;
+        color: #f1f5f9; text-align: center; max-width: 108px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       }
-      .lb-rank-badge {
-        width: 28px; height: 28px;
-        border-radius: 999px;
+      .lb-pod-pts {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 0.92rem;
+        color: #40d9b5; text-align: center;
+      }
+      .lb-pod-pts.first { font-size: 1.05rem; color: #fbbf24; }
+      .lb-pod-pts.second { color: #c0c0dc; }
+      .lb-pod-pts.third  { color: #cd9a6a; }
+      .lb-pod-block {
+        width: 100%; border-radius: 12px 12px 0 0;
         display: flex; align-items: center; justify-content: center;
-        font-family: 'Space Grotesk', sans-serif;
-        font-weight: 700;
-        font-size: 0.75rem;
+        font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.2rem;
+        padding: 6px 0;
       }
-      .lb-rank-badge--1 {
-        background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        color: #422006;
-        box-shadow: 0 4px 14px rgba(251,191,36,0.4);
+      .lb-pod-block.first  {
+        min-height: 60px;
+        background: linear-gradient(180deg, rgba(255,215,0,0.2) 0%, rgba(255,215,0,0.06) 100%);
+        border: 1px solid rgba(255,215,0,0.3); border-bottom: none;
+        color: #ffd700;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
       }
-      .lb-rank-badge--2 {
-        background: linear-gradient(135deg, #c0c0dc, #94a3b8);
-        color: #1e293b;
-        box-shadow: 0 4px 14px rgba(192,192,220,0.3);
+      .lb-pod-block.second {
+        min-height: 42px;
+        background: linear-gradient(180deg, rgba(192,192,220,0.15) 0%, rgba(192,192,220,0.04) 100%);
+        border: 1px solid rgba(192,192,220,0.2); border-bottom: none;
+        color: #c0c0dc;
       }
-      .lb-rank-badge--3 {
-        background: linear-gradient(135deg, #cd7f32, #b45309);
-        color: #fff;
-        box-shadow: 0 4px 14px rgba(205,127,50,0.3);
-      }
-      .lb-podium-name {
-        font-family: 'Space Grotesk', sans-serif;
-        font-weight: 600;
-        font-size: 0.75rem;
-        color: #e2e8f0;
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .lb-podium-pts {
-        font-family: 'Space Grotesk', sans-serif;
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #34d399;
-      }
-      .lb-podium-sub {
-        font-size: 0.6rem;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
+      .lb-pod-block.third {
+        min-height: 28px;
+        background: linear-gradient(180deg, rgba(205,127,50,0.15) 0%, rgba(205,127,50,0.04) 100%);
+        border: 1px solid rgba(205,127,50,0.2); border-bottom: none;
+        color: #cd7f32;
       }
 
-      /* Rows for rank 4+ */
-      .lb-row {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem 0.85rem;
+      /* ── My rank callout ── */
+      .lb-my-rank {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 14px; margin-bottom: 12px;
         border-radius: 12px;
+        background: rgba(122,167,255,0.07);
+        border: 1px solid rgba(122,167,255,0.2);
+      }
+      .lb-my-rank-label {
+        font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+        color: #7aa7ff; font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+        white-space: nowrap;
+      }
+      .lb-my-rank-pos, .lb-my-rank-num {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 800;
+        font-size: 1rem; color: #a5c4ff;
+      }
+      .lb-my-rank-name {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+        font-size: 0.85rem; color: #cbd5e1;
+        flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .lb-my-rank-pts {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+        font-size: 0.78rem; color: #64748b;
+        margin-left: auto;
+      }
+
+      /* ── Rows for rank 4+ ── */
+      .lb-row {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 12px; border-radius: 12px;
         transition: background 0.15s ease;
+        position: relative;
       }
-      .lb-row:hover {
-        background: rgba(255,255,255,0.04);
-      }
-      .lb-row + .lb-row {
-        border-top: 1px solid rgba(255,255,255,0.05);
-      }
+      .lb-row:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.04); }
+      .lb-row:hover { background: rgba(255,255,255,0.03); }
+      .lb-row.lb-row-me { background: rgba(122,167,255,0.07); border: 1px solid rgba(122,167,255,0.18); }
       .lb-row-rank {
-        flex: 0 0 32px;
+        flex: 0 0 28px;
         font-family: 'Space Grotesk', sans-serif;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: #64748b;
-        text-align: center;
+        font-weight: 700; font-size: 0.78rem;
+        color: #475569; text-align: center;
       }
+      .lb-row-rank.hot { color: #ff7a1a; }
       .lb-row-player {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-        min-width: 0;
-        overflow: visible;
+        flex: 1; display: flex; align-items: center;
+        gap: 8px; min-width: 0;
       }
       .lb-row-name {
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: #e2e8f0;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-weight: 600; font-size: 0.82rem;
+        color: #e2e8f0; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+      }
+      .lb-row-streak {
+        flex-shrink: 0;
+        font-size: 0.6rem; font-weight: 700;
+        padding: 2px 6px; border-radius: 999px;
+        background: rgba(255,122,26,0.15);
+        color: #ff9a4a;
+        border: 1px solid rgba(255,122,26,0.25);
         white-space: nowrap;
-        min-width: 0;
       }
       .lb-row-pts {
         flex: 0 0 auto;
         font-family: 'Space Grotesk', sans-serif;
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: #34d399;
-        text-align: right;
+        font-weight: 700; font-size: 0.88rem;
+        color: #34d399; text-align: right;
+        min-width: 44px;
       }
       .lb-row-stat {
-        flex: 0 0 48px;
-        text-align: right;
-        font-size: 0.75rem;
-        color: #94a3b8;
+        flex: 0 0 36px; text-align: right;
+        font-size: 0.7rem;
       }
       @media (max-width: 640px) {
+        .lb-pod { max-width: 100px; }
+        .lb-pod-pts { font-size: 0.82rem; }
+        .lb-pod-pts.first { font-size: 0.95rem; }
+        .lb-pod-name { font-size: 0.65rem; max-width: 90px; }
+        .lb-pod-avatar-inner.sz-lg { width: 52px; height: 52px; }
+        .lb-pod-avatar-inner.sz-md { width: 42px; height: 42px; }
+        .lb-row { gap: 6px; padding: 9px 8px; }
+        .lb-row-pts { font-size: 0.8rem; }
+        .lb-row-name { font-size: 0.74rem; }
         .lb-row-stat { display: none; }
-        .lb-podium-card { padding: 0.75rem 0.35rem; }
-        .lb-podium-pts { font-size: 0.95rem; }
-        .lb-podium-name { font-size: 0.65rem; }
-        .lb-rank-badge { width: 24px; height: 24px; font-size: 0.65rem; }
-        .lb-row { gap: 0.5rem; padding: 0.65rem 0.5rem; }
       }
       @media (min-width: 640px) {
         .lb-section { padding: 2rem; }
-        .lb-podium { gap: 0.75rem; }
+        .lb-pod { max-width: 140px; }
         .lb-heading { font-size: 1.5rem; }
       }
-      /* ── Sticky top banner ── */
+
+      /* ── View full CTA ── */
+      .lb-view-all {
+        display: flex; align-items: center; justify-content: center;
+        margin-top: 1.25rem;
+      }
+      .lb-view-all-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 10px 22px; border-radius: 999px;
+        background: linear-gradient(135deg, rgba(255,122,26,0.18), rgba(255,180,60,0.1));
+        border: 1px solid rgba(255,122,26,0.35);
+        color: #ff9a4a; font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700; font-size: 0.78rem;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 20px rgba(255,122,26,0.15);
+      }
+      .lb-view-all-btn:hover {
+        background: linear-gradient(135deg, rgba(255,122,26,0.28), rgba(255,180,60,0.18));
+        border-color: rgba(255,122,26,0.55);
+        box-shadow: 0 8px 28px rgba(255,122,26,0.25);
+        transform: translateY(-1px);
+        color: #ffb347;
+      }
+      .lb-view-all-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+      /* Sticky top banner */
+      /* Sticky top banner */
       .top-banner {
         position: fixed;
         top: 0;
@@ -713,7 +793,7 @@
     <!-- Page loader -->
     <div id="pageLoader"><div class="loader-ball"></div><div class="loader-shadow"></div></div>
     <div class="pickr-page-content" style="visibility:hidden;">
-    <!-- Sticky top banner: logo + player + tokens + cash -->
+    <!-- Sticky top banner: logo + player + tokens -->
     <div class="top-banner">
       <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Pickr" class="banner-logo" /></a>
       <div class="banner-right">
@@ -725,10 +805,6 @@
           <div class="banner-bal banner-bal-token">
             <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#34d399" stroke-width="2"/><path d="M12 7v10" stroke="#34d399" stroke-width="2" stroke-linecap="round"/><path d="M9 9.5c0-1 1.3-1.5 3-1.5s3 .5 3 1.5-1.3 1.5-3 1.5-3 .5-3 1.5 1.3 1.5 3 1.5 3 .5 3 1.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span class="tokens">0</span>
-          </div>
-          <div class="banner-bal banner-bal-cash">
-            <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" stroke="#fbbf24" stroke-width="2"/><path d="M12 9v6" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/><path d="M10 10.5c0-.8 .9-1.2 2-1.2s2 .4 2 1.2-.9 1.2-2 1.2-2 .4-2 1.2.9 1.2 2 1.2 2 .4 2 1.2" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span class="cash">$0</span>
           </div>
         </div>
       </div>
@@ -764,12 +840,14 @@
             </div>
             <div class="lb-live-chip"><span class="live-dot"></span>Live</div>
           </div>
-          <div id="playerLeaderboardPodium" class="lb-podium"></div>
-          <div id="playerLeaderboardList">
-            <div class="px-4 py-4 text-sm text-slate-400">Loading players...</div>
-          </div>
-          <div class="mt-5 flex justify-end">
-            <a href="leaderboard-full.html" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.15em] text-slate-300 hover:border-white/25 hover:text-white transition-colors">View full leaderboard &rarr;</a>
+          <div id="playerLeaderboardPodium" class="lb-podium-wrap"></div>
+          <div id="lbMyRank" style="display:none;"></div>
+          <div id="playerLeaderboardList"></div>
+          <div class="lb-view-all">
+            <a href="leaderboard-full.html" class="lb-view-all-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l6 6-6 6"/></svg>
+              View full leaderboard
+            </a>
           </div>
         </section>
 
@@ -819,35 +897,31 @@
       </div>
     </main>
     <!-- Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
-      <!-- Pickr Picks tab (highlighted on this page) -->
-      <a href="leaderboard.html" class="nav-link active flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">⭐</span>
-        <span>Pickr Picks</span>
-      </a>
-      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">📝</span>
-        <span>Tasks</span>
-      </a>
-      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">🏈</span>
+    <nav class="pk-tabbar" aria-label="Primary">
+      <a href="index.html" class="pk-tab" aria-label="Sports">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
         <span>Sports</span>
       </a>
-      <a href="casino.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">🎰</span>
-        <span>Casino</span>
+      <a href="leaderboard.html" class="pk-tab is-active" aria-label="Insights" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg>
+        <span>Insights</span>
       </a>
-      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">📜</span>
-        <span>My Bets</span>
+      <a href="tasks.html" class="pk-tab" aria-label="Perks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <span>Perks</span>
       </a>
-      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <div class="pickr-avatar" data-size="24" aria-hidden="true"></div>
-        <span>Wallet</span>
+      <a href="picks.html" class="pk-tab" aria-label="My Picks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>My Picks</span>
+      </a>
+      <a href="wallet.html" class="pk-tab" aria-label="Profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span>Profile</span>
       </a>
     </nav>
+    <script src="js/product-rules.js?v=20260709a"></script>
     <script src="config.js"></script>
-    <script src="config.js"></script>
+    <script src="js/guest.js?v=1"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -875,10 +949,7 @@
             if (useEmu) auth.useEmulator && auth.useEmulator('http://localhost:9099/');
           } catch (e) {}
           async function enforceProfile(user) {
-            if (!user) {
-              window.location.replace('/login.html');
-              return;
-            }
+            if (!user) return; // unauthenticated visitors can browse freely
             try {
               const idToken = await user.getIdToken();
               const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
@@ -939,22 +1010,29 @@
           return headers;
         }
 
+        function escHtml(str) {
+          return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
         function renderRows(players) {
           const podiumEl = document.getElementById('playerLeaderboardPodium');
+          const myRankEl = document.getElementById('lbMyRank');
           if (!players || players.length === 0) {
             listEl.innerHTML = '<div class="px-4 py-4 text-sm text-slate-400">No leaderboard data yet.</div>';
             if (podiumEl) podiumEl.innerHTML = '';
+            if (myRankEl) myRankEl.style.display = 'none';
             return;
           }
           listEl.innerHTML = '';
           if (podiumEl) podiumEl.innerHTML = '';
+          if (myRankEl) myRankEl.style.display = 'none';
 
-          // Filter valid players first
+          // Filter valid players
           const validPlayers = [];
           players.forEach((player) => {
             const nameRaw = String(player.name || '').trim();
-            if (!nameRaw || nameRaw.includes('@') || nameRaw !== nameRaw.toUpperCase()) return;
-            if (!/^[A-Z0-9_.]+$/.test(nameRaw)) return;
+            if (!nameRaw) return;
+            if (!/^[A-Za-z0-9_.\- ]+$/.test(nameRaw)) return;
             validPlayers.push(player);
           });
           if (!validPlayers.length) {
@@ -962,82 +1040,132 @@
             return;
           }
 
-          // Top 3 → podium cards
+          // Detect my rank
+          const myName = window.userProfile && window.userProfile.screenName ? window.userProfile.screenName : null;
+          if (myName && myRankEl) {
+            const myIdx = validPlayers.findIndex(p => String(p.name || '').trim() === myName);
+            if (myIdx !== -1) {
+              const myPts = Number(validPlayers[myIdx].points || 0);
+              myRankEl.innerHTML = `<span class="lb-my-rank-label">Your Rank</span><span class="lb-my-rank-num">#${myIdx + 1}</span><span class="lb-my-rank-name">${escHtml(myName)}</span><span class="lb-my-rank-pts">${myPts.toLocaleString()} pts</span>`;
+              myRankEl.style.display = 'flex';
+            }
+          }
+
+          // Top 3 podium — display order: 2nd | 1st | 3rd
           const top3 = validPlayers.slice(0, 3);
-          if (podiumEl && top3.length >= 3) {
-            top3.forEach((player, i) => {
-              const rank = i + 1;
+          const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
+          const podiumRanks = top3.length >= 3 ? [2, 1, 3] : [1, 2, 3];
+          const ringClass = ['silver', 'gold', 'bronze'];
+          const blockClass = ['second', 'first', 'third'];
+          const crownMap = { 1: '👑', 2: '🥈', 3: '🥉' };
+
+          if (podiumEl && top3.length >= 1) {
+            podiumOrder.forEach((player, slot) => {
+              if (!player) return;
+              const rank = podiumRanks[slot];
               const name = String(player.name || '').trim();
-              const avatarId = player.avatarId || '';
+              const avatarId = player.avatarId || 'avatar-1';
               const points = Number(player.points || 0);
+              const streak = Number(player.streakWins || 0);
 
-              const card = document.createElement('div');
-              card.className = `lb-podium-card lb-podium-card--${rank}`;
+              const pod = document.createElement('div');
+              pod.className = 'lb-pod';
 
-              const badge = document.createElement('div');
-              badge.className = `lb-rank-badge lb-rank-badge--${rank}`;
-              badge.textContent = rank === 1 ? '\u{1F451}' : String(rank);
+              // Crown / medal
+              const crown = document.createElement('div');
+              crown.className = 'lb-pod-crown';
+              crown.textContent = crownMap[rank] || String(rank);
+              pod.appendChild(crown);
 
+              // Avatar ring
+              const ring = document.createElement('div');
+              ring.className = `lb-pod-avatar-ring ${ringClass[slot] || ''}`;
               const avatarEl = document.createElement('div');
               avatarEl.className = 'pickr-avatar';
-              avatarEl.setAttribute('data-size', rank === 1 ? '48' : '40');
-              if (avatarId) avatarEl.setAttribute('data-avatar-id', avatarId);
+              avatarEl.setAttribute('data-size', rank === 1 ? '58' : '46');
+              avatarEl.setAttribute('data-avatar-id', avatarId);
               if (window.PickrApp && typeof window.PickrApp.renderAvatar === 'function') {
-                window.PickrApp.renderAvatar(avatarEl, avatarId || 'avatar-1');
+                window.PickrApp.renderAvatar(avatarEl, avatarId);
               }
+              ring.appendChild(avatarEl);
+              pod.appendChild(ring);
+
+              // Info block
+              const info = document.createElement('div');
+              info.className = 'lb-pod-info';
 
               const nameEl = document.createElement('div');
-              nameEl.className = 'lb-podium-name';
+              nameEl.className = 'lb-pod-name';
               nameEl.textContent = name;
+              info.appendChild(nameEl);
 
               const ptsEl = document.createElement('div');
-              ptsEl.className = 'lb-podium-pts';
+              ptsEl.className = `lb-pod-pts ${blockClass[slot] || ''}`;
               ptsEl.textContent = points.toLocaleString();
+              info.appendChild(ptsEl);
 
               const subEl = document.createElement('div');
-              subEl.className = 'lb-podium-sub';
+              subEl.className = 'lb-pod-sub';
               subEl.textContent = 'points';
+              info.appendChild(subEl);
 
-              card.appendChild(badge);
-              card.appendChild(avatarEl);
-              card.appendChild(nameEl);
-              card.appendChild(ptsEl);
-              card.appendChild(subEl);
-              podiumEl.appendChild(card);
+              if (streak >= 3) {
+                const streakBadge = document.createElement('div');
+                streakBadge.className = 'lb-row-streak';
+                streakBadge.innerHTML = `🔥 ${streak}`;
+                info.appendChild(streakBadge);
+              }
+
+              pod.appendChild(info);
+
+              // Platform block
+              const block = document.createElement('div');
+              block.className = `lb-pod-block ${blockClass[slot] || ''}`;
+              block.textContent = `#${rank}`;
+              pod.appendChild(block);
+
+              podiumEl.appendChild(pod);
             });
           }
 
-          // Remaining players → clean rows
+          // Rows for rank 4+
           const startIdx = (podiumEl && top3.length >= 3) ? 3 : 0;
           validPlayers.slice(startIdx).forEach((player, i) => {
             const rank = startIdx + i + 1;
             const name = String(player.name || '').trim();
-            const avatarId = player.avatarId || '';
+            const avatarId = player.avatarId || 'avatar-1';
             const points = Number(player.points || 0);
             const wins = Number(player.wins || 0);
             const streak = Number(player.streakWins || 0);
+            const isMe = myName && name === myName;
 
             const row = document.createElement('div');
-            row.className = 'lb-row';
+            row.className = 'lb-row' + (isMe ? ' lb-row-me' : '');
 
             const rankEl = document.createElement('div');
-            rankEl.className = 'lb-row-rank';
-            rankEl.textContent = String(rank);
+            rankEl.className = 'lb-row-rank' + (rank <= 10 ? ' hot' : '');
+            rankEl.textContent = `#${rank}`;
 
             const playerEl = document.createElement('div');
             playerEl.className = 'lb-row-player';
             const avatarEl = document.createElement('div');
             avatarEl.className = 'pickr-avatar';
             avatarEl.setAttribute('data-size', '32');
-            if (avatarId) avatarEl.setAttribute('data-avatar-id', avatarId);
+            avatarEl.setAttribute('data-avatar-id', avatarId);
             if (window.PickrApp && typeof window.PickrApp.renderAvatar === 'function') {
-              window.PickrApp.renderAvatar(avatarEl, avatarId || 'avatar-1');
+              window.PickrApp.renderAvatar(avatarEl, avatarId);
             }
             const nameText = document.createElement('span');
             nameText.className = 'lb-row-name';
             nameText.textContent = name;
             playerEl.appendChild(avatarEl);
             playerEl.appendChild(nameText);
+            if (streak >= 3) {
+              const streakBadge = document.createElement('span');
+              streakBadge.className = 'lb-row-streak';
+              streakBadge.innerHTML = `🔥 ${streak}`;
+              playerEl.appendChild(streakBadge);
+            }
 
             const ptsEl = document.createElement('div');
             ptsEl.className = 'lb-row-pts';
@@ -1047,17 +1175,18 @@
             winsEl.className = 'lb-row-stat';
             winsEl.innerHTML = `<span class="text-slate-300">${wins}</span><span class="text-[10px] text-slate-500 block">wins</span>`;
 
-            const streakEl = document.createElement('div');
-            streakEl.className = 'lb-row-stat';
-            streakEl.innerHTML = `<span class="text-slate-300">${streak}</span><span class="text-[10px] text-slate-500 block">streak</span>`;
+            const streakStatEl = document.createElement('div');
+            streakStatEl.className = 'lb-row-stat';
+            streakStatEl.innerHTML = `<span class="text-slate-300">${streak}</span><span class="text-[10px] text-slate-500 block">streak</span>`;
 
             row.appendChild(rankEl);
             row.appendChild(playerEl);
             row.appendChild(ptsEl);
             row.appendChild(winsEl);
-            row.appendChild(streakEl);
+            row.appendChild(streakStatEl);
             listEl.appendChild(row);
           });
+
           if (window.PickrApp && typeof window.PickrApp.refreshAvatars === 'function') {
             window.PickrApp.refreshAvatars();
           }
@@ -1082,7 +1211,7 @@
         });
       })();
     </script>
-    <script src="script.js?v=20260327-spinfix"></script>
+    <script src="script.js?v=20260327-autoselect"></script>
     <script>
       (function () {
         // Robust leaderboard header sync: wait for syncUserProfile if needed,
@@ -1825,6 +1954,22 @@
 
 
 
+          // ── Props button ──────────────────────────────────────────────
+          const propsBtnWrap = document.createElement('div');
+          propsBtnWrap.className = 'props-btn-wrap';
+          const propsBtn = document.createElement('a');
+          const sportKey = (pick.sport_key || '').replace('_', '').replace('basketball', 'nba').replace('hockey', 'nhl').replace('football', 'nfl').replace('baseball', 'mlb').replace('soccer', 'soccer');
+          const sportVal = sportKey.includes('nba') ? 'nba' : sportKey.includes('nhl') ? 'nhl' : sportKey.includes('nfl') ? 'nfl' : sportKey.includes('mlb') ? 'mlb' : sportKey.includes('soccer') ? 'soccer' : 'nba';
+          const propsUrl = `props.html?sport=${encodeURIComponent(sportVal)}&home=${encodeURIComponent(pick.home_team || '')}&away=${encodeURIComponent(pick.away_team || '')}${pick.id ? '&gameId=' + encodeURIComponent(pick.id) : ''}`;
+          propsBtn.href = propsUrl;
+          propsBtn.className = 'props-btn';
+          // Deterministic prop count from game id seed
+          const propHash = (pick.id || pick.home_team || '').split('').reduce((a, c) => (Math.imul(31, a) + c.charCodeAt(0)) | 0, 0);
+          const propCount = 6 + ((Math.abs(propHash) % 7));
+          propsBtn.innerHTML = `<span class="props-btn-fire">🔥</span><span>Player Props</span><span class="props-btn-count">${propCount}</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>`;
+          propsBtnWrap.appendChild(propsBtn);
+          card.appendChild(propsBtnWrap);
+
           // Track insight view on render
           trackInsightView(pick);
 
@@ -1976,10 +2121,14 @@
         async function fetchAndRender(sport = 'all', sortBy = 'confidence') {
           try {
             renderSkeletons(6);
-            let headers = await getAuthHeaders();
-            if (!headers.Authorization && !headers['x-dev-uid']) {
-              await waitForAuthReady();
+            const isGuest = !(window.firebase && firebase.auth && firebase.auth().currentUser);
+            let headers = {};
+            if (!isGuest) {
               headers = await getAuthHeaders();
+              if (!headers.Authorization && !headers['x-dev-uid']) {
+                await waitForAuthReady();
+                headers = await getAuthHeaders();
+              }
             }
             let picks = [];
             let meta = null;
@@ -2056,9 +2205,71 @@
           }
         }
 
-        // Initial load
+        // Lightweight probe: does a category currently have upcoming games?
+        // Used to auto-select the first non-empty tab on load so users never land
+        // on an empty view and have to hunt for a category with games.
+        async function categoryHasGames(sport) {
+          try {
+            const isGuest = !(window.firebase && firebase.auth && firebase.auth().currentUser);
+            let headers = {};
+            if (!isGuest) { try { headers = await getAuthHeaders(); } catch (e) { headers = {}; } }
+            const sportMap = {
+              'nba-moneyline': { key: 'nba', label: 'NBA' },
+              'nhl-moneyline': { key: 'nhl', label: 'NHL' },
+              'nfl-moneyline': { key: 'nfl', label: 'NFL' },
+              'mlb-moneyline': { key: 'mlb', label: 'MLB' },
+              'soccer-moneyline': { key: 'soccer', label: 'Soccer' }
+            };
+            const info = sportMap[sport];
+            let picks = [];
+            if (info) {
+              const res = await fetch(`${GAME_APIS[info.key]}?ts=${Date.now()}`, { headers, cache: 'no-store' });
+              if (!res.ok) return false;
+              const data = await res.json();
+              const games = Array.isArray(data) ? data : (Array.isArray(data.games) ? data.games : []);
+              picks = buildMoneylinePicks(games, info.label, info.key);
+            } else {
+              const qs = sport && sport !== 'all' ? `?sport=${encodeURIComponent(sport)}` : '';
+              const joiner = qs ? '&' : '?';
+              const res = await fetch(API + qs + joiner + `ts=${Date.now()}`, { headers, cache: 'no-store' });
+              if (!res.ok) return false;
+              const data = await res.json();
+              picks = Array.isArray(data) ? data : (Array.isArray(data.picks) ? data.picks : []);
+            }
+            const nowMs = Date.now();
+            const win = (pick) => {
+              const sk = String(pick.sport_key || pick.sport || pick.league || '').toLowerCase();
+              if (sk.includes('nba')) return SPORT_WINDOWS.nba;
+              if (sk.includes('nhl')) return SPORT_WINDOWS.nhl;
+              if (sk.includes('nfl')) return SPORT_WINDOWS.nfl;
+              if (sk.includes('mlb')) return SPORT_WINDOWS.mlb;
+              return SPORT_WINDOWS.soccer;
+            };
+            return picks.some((p) => {
+              const ts = toMillis(p.commence_time || p.startTime || p.date || null);
+              return ts && ts > nowMs && ts <= nowMs + win(p);
+            });
+          } catch (e) { return false; }
+        }
+
+        // Initial load — auto-select the first category (in tab order) that has games.
         let activeSport = 'nba-moneyline'; let activeSort = 'confidence';
-        fetchAndRender(activeSport, activeSort);
+        (async () => {
+          const order = ['nba-moneyline', 'nhl-moneyline', 'nfl-moneyline', 'mlb-moneyline', 'soccer-moneyline'];
+          let chosen = activeSport;
+          try {
+            const results = await Promise.all(order.map((sp) => categoryHasGames(sp)));
+            const idx = results.findIndex(Boolean);
+            if (idx >= 0) chosen = order[idx];
+          } catch (e) { /* keep default */ }
+          activeSport = chosen;
+          if (leagueTabs) {
+            leagueTabs.querySelectorAll('.league-tab').forEach((b) => {
+              b.classList.toggle('active', (b.dataset.sport || '') === activeSport);
+            });
+          }
+          fetchAndRender(activeSport, activeSort);
+        })();
         setInterval(() => {
           fetchAndRender(activeSport, activeSort);
         }, 15 * 60 * 1000);

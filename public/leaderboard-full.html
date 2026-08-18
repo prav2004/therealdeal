@@ -2,398 +2,547 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Pickr – Full Leaderboard</title>
-    <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
-    <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full Leaderboard · Pickr</title>
     <link rel="manifest" href="manifest.json" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
     <style>
       :root {
         --ink: #0b0f1a;
         --ember: #ff7a1a;
         --mint: #40d9b5;
-        --sky: #7aa7ff;
-        --fog: rgba(255, 255, 255, 0.08);
-        --card: rgba(17, 25, 40, 0.82);
+        --gold: #ffd700;
+        --silver: #c0c0c0;
+        --bronze: #cd7f32;
+        --card: rgba(255,255,255,0.045);
       }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
       body {
-        font-family: 'IBM Plex Sans', sans-serif;
-        background: radial-gradient(circle at top, rgba(122, 167, 255, 0.18), transparent 45%),
-          radial-gradient(circle at 10% 20%, rgba(64, 217, 181, 0.2), transparent 40%),
-          radial-gradient(circle at 90% 10%, rgba(255, 122, 26, 0.15), transparent 40%),
-          var(--ink);
-        color: #e5e7eb;
+        font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        background: var(--ink);
+        color: #e2e8f0;
+        min-height: 100dvh;
+        overscroll-behavior: none;
+        padding-top: env(safe-area-inset-top);
       }
-      .hero-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
-      .glass {
-        background: var(--card);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-        backdrop-filter: blur(12px);
-      }
-      .chip {
-        background: rgba(64, 217, 181, 0.16);
-        color: #7de6c9;
-        border: 1px solid rgba(64, 217, 181, 0.4);
-        padding: 0.35rem 0.75rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-      }
-      .nav-link { color: #94a3b8; transition: color 0.2s ease; }
-      .nav-link:hover { color: #e2e8f0; }
-      .nav-link.active { color: var(--ember); }
-      .bottom-nav { padding-bottom: env(safe-area-inset-bottom); bottom: env(safe-area-inset-bottom); z-index: 50; }
-      .page-main { padding-bottom: calc(9rem + env(safe-area-inset-bottom)); }
-      @media (orientation: portrait) {
-        .page-main { padding-bottom: calc(10rem + env(safe-area-inset-bottom)); }
-      }
-      .footer-safe { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
 
-      /* ── Mobile leaderboard: stop grid from crushing avatars ── */
-      @media (max-width: 640px) {
-        .grid-cols-12 {
-          display: flex !important;
-          flex-wrap: nowrap;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .grid-cols-12 > *:nth-child(1) {
-          flex: 0 0 auto;
-          min-width: 2.5rem;
-        }
-        .grid-cols-12 > *:nth-child(2) {
-          flex: 1 1 0%;
-          min-width: 0;
-        }
-        .grid-cols-12 > *:nth-child(3) {
-          flex: 0 0 auto;
-          min-width: 3rem;
-          padding-left: 0.25rem;
-        }
-        .grid-cols-12 > *:nth-child(4),
-        .grid-cols-12 > *:nth-child(5) {
-          display: none !important;
-        }
-        .pickr-avatar {
-          flex: 0 0 32px !important;
-          width: 32px !important;
-          height: 32px !important;
-          min-width: 32px !important;
-          min-height: 32px !important;
-          max-width: 32px !important;
-          max-height: 32px !important;
-          border-radius: 999px !important;
-          position: relative !important;
-          overflow: hidden !important;
-          transform: translateZ(0) !important;
-          will-change: transform !important;
-          contain: layout style size !important;
-        }
-        .grid-cols-12 > *:nth-child(2) > span.leaderboard-name-text {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          display: block;
-          min-width: 0;
-        }
-        .grid-cols-12 > *:nth-child(2).flex {
-          overflow: visible !important;
-        }
+      /* ── Page loader ── */
+      #pageLoader {
+        position: fixed; inset: 0; z-index: 99999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: var(--ink); transition: opacity .6s ease;
       }
-      /* ── Page loader — bouncing ball ── */
-      #pageLoader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:#0b0f1a;transition:opacity .6s ease}
-      #pageLoader.loaded{opacity:0;pointer-events:none}
-      .loader-ball{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#ffb347 0%,#ff7a1a 45%,#c05600 100%);box-shadow:inset -4px -6px 10px rgba(0,0,0,.35),inset 2px 2px 6px rgba(255,220,160,.4);position:relative;animation:ballBounce 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
-      .loader-ball::after{content:'';position:absolute;inset:6px;border-radius:50%;border:1.5px solid rgba(0,0,0,.18);border-top-color:transparent;border-left-color:transparent;transform:rotate(-35deg)}
-      .loader-ball::before{content:'';position:absolute;left:50%;top:4px;width:1.5px;height:28px;background:rgba(0,0,0,.15);transform:translateX(-50%) rotate(25deg);border-radius:2px}
-      .loader-shadow{width:38px;height:8px;border-radius:50%;background:rgba(255,122,26,.25);filter:blur(3px);margin-top:4px;animation:shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
-      @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
-      @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
+      #pageLoader.loaded { opacity: 0; pointer-events: none; }
+      .loader-ball {
+        width: 38px; height: 38px; border-radius: 50%;
+        background: radial-gradient(circle at 38% 35%, #ffb347 0%, #ff7a1a 45%, #c05600 100%);
+        box-shadow: inset -4px -6px 10px rgba(0,0,0,.35), inset 2px 2px 6px rgba(255,220,160,.4);
+        animation: ballBounce 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate;
+      }
+      .loader-shadow {
+        width: 38px; height: 8px; border-radius: 50%;
+        background: rgba(255,122,26,.25); filter: blur(3px); margin-top: 4px;
+        animation: shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate;
+      }
+      @keyframes ballBounce {
+        0%   { transform: translateY(0) scaleX(1) scaleY(1); }
+        80%  { transform: translateY(36px) scaleX(1) scaleY(1); }
+        100% { transform: translateY(36px) scaleX(1.18) scaleY(0.82); }
+      }
+      @keyframes shadowPulse {
+        0%   { transform: scaleX(0.6); opacity: 0.3; }
+        100% { transform: scaleX(1.2); opacity: 0.7; }
+      }
+
+      /* ── Back button ── */
+      .back-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 16px; border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.06);
+        color: #94a3b8; font-size: 0.8rem; font-weight: 600;
+        letter-spacing: 0.03em; cursor: pointer; text-decoration: none;
+        transition: all 0.2s ease; font-family: 'Space Grotesk', sans-serif;
+      }
+      .back-btn:hover { background: rgba(255,255,255,0.11); color: #e2e8f0; border-color: rgba(255,255,255,0.22); transform: translateX(-2px); }
+      .back-btn svg { width: 15px; height: 15px; }
+
+      /* ── Top bar ── */
+      .top-bar {
+        position: sticky; top: 0; z-index: 40;
+        background: rgba(11,15,26,0.92);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        padding: 12px 20px;
+        display: flex; align-items: center; gap: 12px;
+      }
+      .bar-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700; font-size: 1.05rem; color: #f1f5f9; letter-spacing: -0.01em;
+      }
+      .bar-badge {
+        margin-left: auto; display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 10px; border-radius: 999px;
+        background: rgba(64,217,181,0.12); border: 1px solid rgba(64,217,181,0.22);
+        color: #40d9b5; font-size: 0.7rem; font-weight: 600;
+        letter-spacing: 0.08em; font-family: 'Space Grotesk', sans-serif;
+      }
+      .live-dot {
+        width: 6px; height: 6px; border-radius: 50%; background: #40d9b5;
+        animation: pulse-dot 1.6s ease infinite;
+      }
+      @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.7); }
+      }
+
+      /* ── Podium ── */
+      .podium-wrap {
+        display: flex; align-items: flex-end; justify-content: center;
+        gap: 10px; padding: 36px 12px 0;
+      }
+      .podium-card { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; max-width: 130px; }
+      .podium-card.first { order: 2; }
+      .podium-card.second { order: 1; }
+      .podium-card.third { order: 3; }
+
+      .podium-avatar-wrap { position: relative; margin-bottom: 2px; }
+      .podium-avatar-ring { border-radius: 50%; padding: 3px; }
+      .podium-avatar-ring.gold   { background: linear-gradient(135deg, #ffd700, #ffb300, #ff8c00); }
+      .podium-avatar-ring.silver { background: linear-gradient(135deg, #e8e8e8, #b0b0b0, #888); }
+      .podium-avatar-ring.bronze { background: linear-gradient(135deg, #e8a87c, #cd7f32, #8b4513); }
+
+      .podium-avatar { border-radius: 50%; background: rgba(255,255,255,0.07); overflow: hidden; }
+      .podium-avatar.lg { width: 68px; height: 68px; }
+      .podium-avatar.md { width: 56px; height: 56px; }
+
+      .podium-crown { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 20px; line-height: 1; }
+
+      .podium-name {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.78rem;
+        color: #f1f5f9; text-align: center; max-width: 110px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .podium-pts { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 0.95rem; color: #40d9b5; text-align: center; }
+      .podium-pts.first { font-size: 1.1rem; }
+
+      .podium-block {
+        width: 100%; border-radius: 12px 12px 0 0;
+        display: flex; align-items: center; justify-content: center;
+        padding: 8px 0; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.3rem;
+      }
+      .podium-block.first  { min-height: 64px; background: linear-gradient(180deg, rgba(255,215,0,0.18) 0%, rgba(255,215,0,0.06) 100%); border: 1px solid rgba(255,215,0,0.22); color: #ffd700; }
+      .podium-block.second { min-height: 44px; background: linear-gradient(180deg, rgba(192,192,192,0.14) 0%, rgba(192,192,192,0.04) 100%); border: 1px solid rgba(192,192,192,0.18); color: #c0c0c0; }
+      .podium-block.third  { min-height: 32px; background: linear-gradient(180deg, rgba(205,127,50,0.14) 0%, rgba(205,127,50,0.04) 100%); border: 1px solid rgba(205,127,50,0.18); color: #cd7f32; }
+
+      /* ── Player rows ── */
+      .player-row {
+        display: flex; align-items: center; padding: 14px 18px; gap: 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s;
+      }
+      .player-row:last-child { border-bottom: none; }
+      .player-row:hover { background: rgba(255,255,255,0.03); }
+
+      .rank-badge {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.82rem;
+        color: #64748b; min-width: 32px; text-align: center; flex-shrink: 0;
+      }
+      .rank-badge.top10 { color: #ff7a1a; }
+
+      .player-info { flex: 1; min-width: 0; }
+      .player-name {
+        font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem;
+        color: #f1f5f9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .player-sub { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+
+      .stat-pill { display: flex; flex-direction: column; align-items: flex-end; min-width: 48px; flex-shrink: 0; }
+      .stat-val { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.9rem; color: #40d9b5; }
+      .stat-lbl { font-size: 0.62rem; color: #475569; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 1px; }
+
+      /* ── Column header row ── */
+      .col-hdr {
+        display: flex; align-items: center; padding: 10px 18px; gap: 14px;
+        background: rgba(11,15,26,0.7); border-bottom: 1px solid rgba(255,255,255,0.07);
+        position: sticky; top: 53px; z-index: 30;
+      }
+      .col-hdr-label { font-size: 0.62rem; letter-spacing: 0.1em; color: #475569; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; }
+
+      /* ── Section divider ── */
+      .section-divider { display: flex; align-items: center; gap: 12px; padding: 24px 0 12px; }
+      .section-divider span {
+        font-family: 'Space Grotesk', sans-serif; font-size: 0.68rem; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase; color: #475569; white-space: nowrap;
+      }
+      .divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+
+      /* ── Skeleton loading ── */
+      .skeleton {
+        background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.04) 75%);
+        background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px;
+      }
+      @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+      /* ── Pickr avatar (from script.js) ── */
+      .pickr-avatar {
+        border-radius: 999px !important; position: relative !important;
+        overflow: hidden !important; transform: translateZ(0) !important;
+        will-change: transform !important; contain: layout style size !important;
+      }
+
+      /* ── Confetti canvas ── */
+      #confettiCanvas {
+        position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+        width: 100%; height: 100%;
+      }
+
+      /* ── #4 first-row glow separator ── */
+      .player-row.rank-four-first {
+        box-shadow: inset 0 4px 16px -4px rgba(255,122,26,0.18);
+        border-top: 1px solid rgba(255,122,26,0.18);
+      }
+
+      /* ── Load more button ── */
+      #loadMoreLeaderboard {
+        display: flex; align-items: center; justify-content: center;
+        width: 100%; max-width: 260px; margin: 20px auto;
+        padding: 11px 20px; border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.04);
+        color: #94a3b8; font-size: 0.78rem; font-weight: 600;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s;
+      }
+      #loadMoreLeaderboard:hover:not(:disabled) { background: rgba(255,122,26,0.1); border-color: rgba(255,122,26,0.3); color: #ff7a1a; }
+      #loadMoreLeaderboard:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      /* ── Bottom nav ── */
+      .bottom-nav {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: rgba(11,15,26,0.95);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid rgba(255,255,255,0.06);
+        display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 50;
+      }
+      .nav-link {
+        flex: 1; display: flex; flex-direction: column; align-items: center;
+        padding: 8px 4px; text-decoration: none; color: #475569;
+        font-size: 0.62rem; font-weight: 600; letter-spacing: 0.04em;
+        font-family: 'Space Grotesk', sans-serif; transition: color 0.15s; gap: 3px;
+      }
+      .nav-link:hover, .nav-link.active { color: #ff7a1a; }
+      .nav-icon { font-size: 1.25rem; line-height: 1; }
+
+      /* ── Desktop ── */
+      @media (min-width: 768px) {
+        .page-content { max-width: 680px; margin: 0 auto; }
+        .podium-card { max-width: 160px; }
+        .podium-avatar.lg { width: 80px; height: 80px; }
+        .podium-avatar.md { width: 64px; height: 64px; }
+        .player-row { padding: 16px 24px; }
+        .col-hdr { padding: 12px 24px; top: 57px; }
+      }
     </style>
   </head>
-  <body class="flex flex-col min-h-screen" style="padding-top: env(safe-area-inset-top);">
-    <!-- Page loader -->
-    <div id="pageLoader"><div class="loader-ball"></div><div class="loader-shadow"></div></div>
-    <div class="px-4">
-      <header class="glass rounded-2xl p-5 mt-4 max-w-5xl mx-auto w-full flex items-center justify-between">
-        <div>
-          <div class="text-xs uppercase tracking-[0.35em] text-slate-400">Leaderboard</div>
-          <h2 class="hero-title text-2xl sm:text-3xl tracking-tight text-slate-100">All players ranked</h2>
-        </div>
-        <img src="logo.png" alt="Pickr logo" class="h-[193px] w-[193px] sm:h-[250px] sm:w-[250px] object-contain flex-shrink-0 -my-16" />
-      </header>
+  <body>
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+    <div id="pageLoader">
+      <div class="loader-ball"></div>
+      <div class="loader-shadow"></div>
     </div>
 
-    <main class="flex-1 px-4 pt-4 page-main">
-      <div class="max-w-5xl mx-auto">
-        <section class="glass rounded-2xl p-6 mb-6">
-          <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div class="text-xs uppercase tracking-[0.35em] text-emerald-200">Overall leaderboard</div>
-              <h3 class="hero-title text-2xl">Top players by points</h3>
-              <p class="text-slate-400 text-sm">Points combine wins, streaks, and XP momentum.</p>
-            </div>
-            <div class="chip">Updated live</div>
-          </div>
-          <div class="mt-5 overflow-hidden rounded-2xl border border-white/10">
-            <div class="grid grid-cols-12 gap-2 bg-slate-900/70 px-4 py-3 text-xs uppercase tracking-widest text-slate-400">
-              <div class="col-span-2">Rank</div>
-              <div class="col-span-4">Player</div>
-              <div class="col-span-2 text-right">Points</div>
-              <div class="col-span-2 text-right">Wins</div>
-              <div class="col-span-2 text-right">Streak</div>
-            </div>
-            <div id="playerLeaderboardList" class="divide-y divide-white/10 bg-slate-900/40">
-              <div class="px-4 py-4 text-sm text-slate-400">Loading players...</div>
-            </div>
-          </div>
-          <div class="mt-5 flex flex-col items-center gap-3">
-            <button id="loadMoreLeaderboard" class="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-xs uppercase tracking-[0.2em] text-slate-200 hover:border-white/30 hover:text-white">Load more</button>
-            <div id="leaderboardStatus" class="text-xs text-slate-400"></div>
-          </div>
-        </section>
-      </div>
-    </main>
+    <div class="top-bar">
+      <a href="leaderboard.html" class="back-btn" aria-label="Back to leaderboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back
+      </a>
+      <span class="bar-title">Leaderboard</span>
+      <div class="bar-badge"><div class="live-dot"></div>Live</div>
+    </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
-      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">⭐</span>
-        <span>Pickr Picks</span>
-      </a>
-      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">📝</span>
-        <span>Tasks</span>
-      </a>
-      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">🏈</span>
-        <span>Sports</span>
-      </a>
-      <a href="casino.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">🎰</span>
-        <span>Casino</span>
-      </a>
-      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-2xl">📜</span>
-        <span>My Bets</span>
-      </a>
-      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <div class="pickr-avatar" data-size="24" aria-hidden="true"></div>
-        <span>Wallet</span>
-      </a>
+    <div style="padding-left:16px;padding-right:16px;padding-bottom:112px;">
+      <div class="page-content">
+
+        <div style="padding:28px 0 16px;">
+          <div style="font-size:0.68rem;color:#ff7a1a;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;">Rankings</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:clamp(1.7rem,5vw,2.6rem);letter-spacing:-0.03em;color:#f8fafc;line-height:1.08;margin-top:4px;">All Players<br/>Ranked</div>
+          <div style="font-size:0.82rem;color:#64748b;margin-top:8px;">Points combine wins, streaks, and XP momentum.</div>
+        </div>
+
+        <div id="podiumSection" style="display:none;">
+          <div class="podium-wrap" id="podiumPlayers"></div>
+        </div>
+
+        <div class="section-divider" id="restDivider" style="display:none;">
+          <div class="divider-line"></div>
+          <span>Ranked #4 and beyond</span>
+          <div class="divider-line"></div>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.045);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.07);border-radius:20px;overflow:clip;margin-top:8px;">
+          <div class="col-hdr" id="colHdr" style="display:none;">
+            <div class="col-hdr-label" style="min-width:32px;">#</div>
+            <div style="width:38px;flex-shrink:0;"></div>
+            <div class="col-hdr-label" style="flex:1;">Player</div>
+            <div class="col-hdr-label" style="min-width:48px;text-align:right;">Pts</div>
+          </div>
+
+          <div id="playerLeaderboardList">
+            <div id="skeletonRows">
+              <div class="player-row"><div class="skeleton" style="width:28px;height:14px;border-radius:4px;flex-shrink:0;"></div><div class="skeleton" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="skeleton" style="width:55%;height:13px;"></div><div class="skeleton" style="width:38%;height:10px;"></div></div><div class="skeleton" style="width:40px;height:26px;border-radius:6px;flex-shrink:0;"></div></div>
+              <div class="player-row"><div class="skeleton" style="width:28px;height:14px;border-radius:4px;flex-shrink:0;"></div><div class="skeleton" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="skeleton" style="width:65%;height:13px;"></div><div class="skeleton" style="width:42%;height:10px;"></div></div><div class="skeleton" style="width:40px;height:26px;border-radius:6px;flex-shrink:0;"></div></div>
+              <div class="player-row"><div class="skeleton" style="width:28px;height:14px;border-radius:4px;flex-shrink:0;"></div><div class="skeleton" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div><div style="flex:1;display:flex;flex-direction:column;gap:6px;"><div class="skeleton" style="width:48%;height:13px;"></div><div class="skeleton" style="width:35%;height:10px;"></div></div><div class="skeleton" style="width:40px;height:26px;border-radius:6px;flex-shrink:0;"></div></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;align-items:center;padding-bottom:16px;">
+            <button id="loadMoreLeaderboard">Load more players</button>
+            <div id="leaderboardStatus" style="font-size:0.72rem;color:#475569;margin-top:6px;font-family:'Space Grotesk',sans-serif;letter-spacing:0.04em;"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <nav class="pk-tabbar" aria-label="Primary">
+      <a href="index.html" class="pk-tab" aria-label="Sports"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg><span>Sports</span></a>
+      <a href="leaderboard.html" class="pk-tab is-active" aria-label="Insights" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg><span>Insights</span></a>
+      <a href="tasks.html" class="pk-tab" aria-label="Perks"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span>Perks</span></a>
+      <a href="picks.html" class="pk-tab" aria-label="My Picks"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>My Picks</span></a>
+      <a href="wallet.html" class="pk-tab" aria-label="Profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg><span>Profile</span></a>
     </nav>
 
     <script src="config.js"></script>
+    <script src="js/guest.js?v=1"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
       (function(){
         try {
-          const firebaseConfig = {
-            apiKey: "AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM",
-            authDomain: "pickr-d4d9b.firebaseapp.com",
-            projectId: "pickr-d4d9b",
-            storageBucket: "pickr-d4d9b.firebasestorage.app",
-            messagingSenderId: "972106331799",
-            appId: "1:972106331799:web:d261170267bbd7dfaf5bd2",
-            measurementId: "G-J0DC1K39NN"
-          };
+          const cfg = { apiKey:"AIzaSyBoQ1myN6q1HeQQaT8RkH7lRBIKtHUQOdM", authDomain:"pickr-d4d9b.firebaseapp.com", projectId:"pickr-d4d9b", storageBucket:"pickr-d4d9b.firebasestorage.app", messagingSenderId:"972106331799", appId:"1:972106331799:web:d261170267bbd7dfaf5bd2", measurementId:"G-J0DC1K39NN" };
           if (!window.firebase) return;
-          if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+          if (!firebase.apps.length) firebase.initializeApp(cfg);
           const auth = firebase.auth();
-          try {
-            const params = new URLSearchParams(window.location.search);
-            const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-            const useEmu = isLocalhost && (params.get('emulator') === '1' || localStorage.getItem('USE_FIREBASE_EMULATOR') === '1');
-            if (useEmu) auth.useEmulator && auth.useEmulator('http://localhost:9099/');
-          } catch (e) {}
-
+          try { const p=new URLSearchParams(window.location.search),isLocal=['localhost','127.0.0.1'].includes(window.location.hostname),useEmu=isLocal&&(p.get('emulator')==='1'||localStorage.getItem('USE_FIREBASE_EMULATOR')==='1'); if(useEmu) auth.useEmulator&&auth.useEmulator('http://localhost:9099/'); } catch(e){}
           async function enforceProfile(user) {
-            if (!user) {
-              window.location.replace('/login.html');
-              return;
-            }
+            if (!user) return; // unauthenticated visitors can browse freely
             try {
               const idToken = await user.getIdToken();
-              const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
-              const resp = await fetch(apiBase + '/api/me', { headers: { Authorization: 'Bearer ' + idToken } });
-              if (!resp.ok) {
-                window.location.replace('/onboarding.html');
-                return;
-              }
+              const apiBase = (window.PICKR_CONFIG&&window.PICKR_CONFIG.API_BASE_URL)||'';
+              const resp = await fetch(apiBase+'/api/me',{headers:{Authorization:'Bearer '+idToken}});
+              if (!resp.ok) { window.location.replace('/onboarding.html'); return; }
               const profile = await resp.json();
-              if (!profile || !profile.profileComplete || !profile.ageVerified) {
-                window.location.replace('/onboarding.html');
-                return;
-              }
-            } catch (e) {
-              window.location.replace('/onboarding.html');
-            }
+              if (!profile||!profile.profileComplete||!profile.ageVerified) { window.location.replace('/onboarding.html'); return; }
+            } catch(e) { window.location.replace('/onboarding.html'); }
           }
-
-          auth.onAuthStateChanged(async (user) => {
-            if (user) {
-              try { if (typeof syncUserProfile === 'function') await syncUserProfile(); } catch (e) {}
-            }
-            enforceProfile(user);
-          });
-
-          window.addEventListener('pageshow', () => {
-            if (auth.currentUser) {
-              enforceProfile(auth.currentUser);
-              return;
-            }
-            const unsub = auth.onAuthStateChanged((user) => {
-              try { unsub && unsub(); } catch (e) {}
-              enforceProfile(user);
-            });
-          });
-        } catch (e) { /* ignore */ }
+          auth.onAuthStateChanged(async(user)=>{ if(user){try{if(typeof syncUserProfile==='function')await syncUserProfile();}catch(e){}} enforceProfile(user); });
+          window.addEventListener('pageshow',()=>{ if(auth.currentUser){enforceProfile(auth.currentUser);return;} const u=auth.onAuthStateChanged((user)=>{try{u&&u();}catch(e){} enforceProfile(user);}); });
+        } catch(e){}
       })();
     </script>
-    <script src="script.js?v=20260327-spinfix"></script>
+    <script src="script.js?v=20260327-autoselect"></script>
     <script>
-      (function () {
-        const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
-        const listEl = document.getElementById('playerLeaderboardList');
-        const loadMoreBtn = document.getElementById('loadMoreLeaderboard');
-        const statusEl = document.getElementById('leaderboardStatus');
-        if (!listEl || !loadMoreBtn) return;
+      (function(){
+        const apiBase=(window.PICKR_CONFIG&&window.PICKR_CONFIG.API_BASE_URL)||'';
+        const listEl=document.getElementById('playerLeaderboardList');
+        const loadMoreBtn=document.getElementById('loadMoreLeaderboard');
+        const statusEl=document.getElementById('leaderboardStatus');
+        const podiumSection=document.getElementById('podiumSection');
+        const podiumPlayers=document.getElementById('podiumPlayers');
+        const restDivider=document.getElementById('restDivider');
+        const colHdr=document.getElementById('colHdr');
+        if(!listEl||!loadMoreBtn) return;
 
-        let cursor = null;
-        let loading = false;
-        let loadedCount = 0;
-        let done = false;
+        let cursor=null,loading=false,totalRendered=0,done=false;
 
-        async function getAuthHeaders() {
-          const headers = {};
-          try {
-            if (window.firebase && firebase.auth && firebase.auth().currentUser) {
-              const idToken = await firebase.auth().currentUser.getIdToken();
-              headers.Authorization = 'Bearer ' + idToken;
-              return headers;
-            }
-          } catch (e) {}
-          const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-          const devUid = localStorage.getItem('DEV_AUTH_UID') || (isLocalhost ? 'test-user-123' : null);
-          if (devUid) headers['x-dev-uid'] = devUid;
-          return headers;
+        async function getAuthHeaders(){
+          const h={};
+          try{ if(window.firebase&&firebase.auth&&firebase.auth().currentUser){ h.Authorization='Bearer '+await firebase.auth().currentUser.getIdToken(); return h; } }catch(e){}
+          const isLocal=['localhost','127.0.0.1'].includes(window.location.hostname);
+          const devUid=localStorage.getItem('DEV_AUTH_UID')||(isLocal?'test-user-123':null);
+          if(devUid) h['x-dev-uid']=devUid;
+          return h;
         }
 
-        function renderRows(players, append) {
-          if (!players || players.length === 0) {
-            if (!append) {
-              listEl.innerHTML = '<div class="px-4 py-4 text-sm text-slate-400">No leaderboard data yet.</div>';
-            }
-            return;
-          }
-          if (!append) listEl.innerHTML = '';
-          let displayRank = 0;
-          players.forEach((player) => {
-            const row = document.createElement('div');
-            row.className = 'grid grid-cols-12 gap-2 px-4 py-4 text-sm text-slate-200 items-center';
-            const nameRaw = String(player.name || '').trim();
-            if (!nameRaw || nameRaw.includes('@') || nameRaw !== nameRaw.toUpperCase()) return;
-            if (!/^[A-Z0-9_.]+$/.test(nameRaw)) return;
-            displayRank += 1;
-            const rank = loadedCount + displayRank;
-            const name = nameRaw;
-            const avatarId = player.avatarId || '';
-            const points = Number(player.points || 0);
-            const wins = Number(player.wins || 0);
-            const streak = Number(player.streakWins || 0);
+        function makeAvatar(avatarId,size){
+          const el=document.createElement('div');
+          el.className='pickr-avatar';
+          el.setAttribute('data-size',String(size));
+          if(avatarId) el.setAttribute('data-avatar-id',avatarId);
+          el.style.cssText='width:'+size+'px;height:'+size+'px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0;';
+          if(window.PickrApp&&typeof window.PickrApp.renderAvatar==='function') window.PickrApp.renderAvatar(el,avatarId||'avatar-1');
+          return el;
+        }
 
-            const rankEl = document.createElement('div');
-            rankEl.className = 'col-span-2 text-slate-400';
-            rankEl.textContent = `#${rank}`;
-
-            const nameEl = document.createElement('div');
-            nameEl.className = 'col-span-4 font-semibold flex items-center gap-3';
-            const avatarEl = document.createElement('div');
-            avatarEl.className = 'pickr-avatar';
-            avatarEl.setAttribute('data-size', '32');
-            if (avatarId) avatarEl.setAttribute('data-avatar-id', avatarId);
-            // Render avatar immediately — don't defer to refreshAvatars()
-            if (window.PickrApp && typeof window.PickrApp.renderAvatar === 'function') {
-              window.PickrApp.renderAvatar(avatarEl, avatarId || 'avatar-1');
-            }
-            const nameText = document.createElement('span');
-            nameText.className = 'leaderboard-name-text';
-            nameText.textContent = String(name);
-            nameEl.appendChild(avatarEl);
-            nameEl.appendChild(nameText);
-
-            const pointsEl = document.createElement('div');
-            pointsEl.className = 'col-span-2 text-right font-semibold text-emerald-200';
-            pointsEl.textContent = points.toLocaleString();
-
-            const winsEl = document.createElement('div');
-            winsEl.className = 'col-span-2 text-right';
-            winsEl.textContent = String(wins);
-
-            const streakEl = document.createElement('div');
-            streakEl.className = 'col-span-2 text-right';
-            streakEl.textContent = String(streak);
-
-            row.appendChild(rankEl);
-            row.appendChild(nameEl);
-            row.appendChild(pointsEl);
-            row.appendChild(winsEl);
-            row.appendChild(streakEl);
-            listEl.appendChild(row);
+        function renderPodium(top3){
+          if(!top3||top3.length<1) return;
+          const slots=[top3[1],top3[0],top3[2]];
+          const medals=['second','first','third'];
+          const labels=['2','1','3'];
+          const avSizes=[56,68,56];
+          const avClasses=['md','lg','md'];
+          podiumPlayers.innerHTML='';
+          slots.forEach((player,i)=>{
+            if(!player) return;
+            const card=document.createElement('div');
+            card.className='podium-card '+medals[i];
+            const avWrap=document.createElement('div');
+            avWrap.className='podium-avatar-wrap';
+            if(medals[i]==='first'){const crown=document.createElement('div');crown.className='podium-crown';crown.textContent='👑';avWrap.appendChild(crown);}
+            const ring=document.createElement('div'); ring.className='podium-avatar-ring '+medals[i];
+            const avDiv=document.createElement('div'); avDiv.className='podium-avatar '+avClasses[i];
+            avDiv.appendChild(makeAvatar(player.avatarId,avSizes[i]));
+            ring.appendChild(avDiv); avWrap.appendChild(ring); card.appendChild(avWrap);
+            const nameEl=document.createElement('div'); nameEl.className='podium-name'; nameEl.textContent=player.name||'—'; card.appendChild(nameEl);
+            const ptsEl=document.createElement('div'); ptsEl.className='podium-pts '+medals[i]; ptsEl.textContent=Number(player.points||0).toLocaleString()+' pts'; card.appendChild(ptsEl);
+            const block=document.createElement('div'); block.className='podium-block '+medals[i]; block.textContent='#'+labels[i]; card.appendChild(block);
+            podiumPlayers.appendChild(card);
           });
-          loadedCount += displayRank;
-          if (window.PickrApp && typeof window.PickrApp.refreshAvatars === 'function') {
-            window.PickrApp.refreshAvatars();
-          }
+          podiumSection.style.display='';
+          restDivider.style.display='flex';
+          colHdr.style.display='flex';
         }
 
-        async function loadMore() {
-          if (loading || done) return;
-          loading = true;
-          loadMoreBtn.disabled = true;
-          loadMoreBtn.textContent = 'Loading...';
-          if (statusEl) statusEl.textContent = '';
-          try {
-            const headers = await getAuthHeaders();
-            const params = new URLSearchParams({ limit: '50' });
-            if (cursor) {
-              params.set('startAfterPoints', String(cursor.startAfterPoints));
-            }
-            const res = await fetch(apiBase + '/api/leaderboard/players?' + params.toString(), { headers });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data && data.error ? data.error : 'Failed to load leaderboard');
-            renderRows(data.players || [], !!cursor);
-            cursor = data.nextCursor || null;
-            if (!cursor || !data.players || data.players.length < 50) {
-              done = true;
-              loadMoreBtn.classList.add('hidden');
-              if (statusEl) statusEl.textContent = 'All players loaded.';
-            }
-          } catch (err) {
-            if (statusEl) statusEl.textContent = 'Failed to load leaderboard.';
-          } finally {
-            loading = false;
-            loadMoreBtn.disabled = false;
-            loadMoreBtn.textContent = 'Load more';
+        function renderRows(players,append){
+          const sk=document.getElementById('skeletonRows'); if(sk) sk.remove();
+          if(!players||players.length===0){ if(!append) listEl.innerHTML='<div style="padding:32px;text-align:center;color:#475569;font-size:0.85rem;font-family:Space Grotesk,sans-serif;">No leaderboard data yet.</div>'; return; }
+          let firstIdx=0;
+          if(totalRendered===0&&players.length>=1){
+            const n=Math.min(3,players.length);
+            renderPodium(players.slice(0,n));
+            firstIdx=n; totalRendered+=n;
+            // 🎉 Confetti burst for top 3 reveal
+            setTimeout(launchConfetti, 180);
           }
+          let added=0;
+          for(let i=firstIdx;i<players.length;i++){
+            const p=players[i];
+            const nameRaw=String(p.name||'').trim();
+            if(!nameRaw||!/^[A-Za-z0-9_.\- ]+$/.test(nameRaw)) continue;
+            added++;
+            const rank=totalRendered+added;
+            const row=document.createElement('div'); row.className='player-row'+(rank===4?' rank-four-first':'');
+            const rb=document.createElement('div'); rb.className='rank-badge'+(rank<=10?' top10':''); rb.textContent='#'+rank; row.appendChild(rb);
+            row.appendChild(makeAvatar(p.avatarId,38));
+            const info=document.createElement('div'); info.className='player-info';
+            const pn=document.createElement('div'); pn.className='player-name'; pn.textContent=nameRaw; info.appendChild(pn);
+            const ps=document.createElement('div'); ps.className='player-sub';
+            const wins=Number(p.wins||0),streak=Number(p.streakWins||0);
+            ps.textContent=wins+' wins'+(streak>0?'  ·  '+streak+(streak>=3?'🔥':'')+' streak':'');
+            if(streak>=3) ps.style.color='#ff7a1a';
+            info.appendChild(ps); row.appendChild(info);
+            const sp=document.createElement('div'); sp.className='stat-pill';
+            const sv=document.createElement('div'); sv.className='stat-val'; sv.textContent=Number(p.points||0).toLocaleString(); sp.appendChild(sv);
+            const sl=document.createElement('div'); sl.className='stat-lbl'; sl.textContent='pts'; sp.appendChild(sl);
+            row.appendChild(sp); listEl.appendChild(row);
+          }
+          totalRendered+=added;
+          if(window.PickrApp&&typeof window.PickrApp.refreshAvatars==='function') window.PickrApp.refreshAvatars();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-          loadMore();
-        });
-        loadMoreBtn.addEventListener('click', loadMore);
+        async function loadMore(){
+          if(loading||done) return;
+          loading=true; loadMoreBtn.disabled=true; loadMoreBtn.textContent='Loading…';
+          if(statusEl) statusEl.textContent='';
+          try{
+            const headers=await getAuthHeaders();
+            const params=new URLSearchParams({limit:'100'});
+            if(cursor) params.set('startAfterPoints',String(cursor.startAfterPoints));
+            const res=await fetch(apiBase+'/api/leaderboard/players?'+params.toString(),{headers});
+            const data=await res.json();
+            if(!res.ok) throw new Error(data&&data.error?data.error:'Failed');
+            renderRows(data.players||[],!!cursor);
+            cursor=data.nextCursor||null;
+            if(!cursor||!data.players||data.players.length<50){ done=true; loadMoreBtn.style.display='none'; if(statusEl) statusEl.textContent='All '+totalRendered+' players loaded'; }
+          }catch(err){ if(statusEl) statusEl.textContent='Failed to load. Try again.'; }
+          finally{ loading=false; loadMoreBtn.disabled=false; loadMoreBtn.textContent='Load more players'; }
+        }
+
+        document.addEventListener('DOMContentLoaded',loadMore);
+        loadMoreBtn.addEventListener('click',loadMore);
+      })();
+
+      // ── Confetti engine ──────────────────────────────────────────────
+      (function(){
+        const canvas = document.getElementById('confettiCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [], raf;
+        const COLORS = ['#ffd700','#ff7a1a','#40d9b5','#ffffff','#ff9ecd','#c0c0c0','#a78bfa','#fbbf24'];
+
+        function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function makeParticle(){
+          const x = Math.random() * W;
+          const s = (Math.random() * 8 + 5);
+          return {
+            x, y: -10 - Math.random() * 80,
+            vx: (Math.random() - 0.5) * 3.5,
+            vy: Math.random() * 3 + 2.5,
+            size: s,
+            color: COLORS[Math.floor(Math.random() * COLORS.length)],
+            rot: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.18,
+            shape: Math.random() < 0.55 ? 'rect' : 'circle',
+            alpha: 1,
+            life: 0,
+            maxLife: 110 + Math.floor(Math.random() * 80)
+          };
+        }
+
+        function drawParticle(p){
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          if (p.shape === 'rect') {
+            ctx.fillRect(-p.size / 2, -p.size * 0.38, p.size, p.size * 0.55);
+          } else {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.size * 0.44, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+
+        function loop(){
+          ctx.clearRect(0, 0, W, H);
+          for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vx += (Math.random() - 0.5) * 0.12;
+            p.vy += 0.07;
+            p.rot += p.rotSpeed;
+            p.life++;
+            if (p.life > p.maxLife * 0.65) p.alpha = 1 - (p.life - p.maxLife * 0.65) / (p.maxLife * 0.35);
+            if (p.life >= p.maxLife || p.y > H + 20) { particles.splice(i, 1); }
+            else drawParticle(p);
+          }
+          if (particles.length > 0) raf = requestAnimationFrame(loop);
+          else { ctx.clearRect(0, 0, W, H); raf = null; }
+        }
+
+        window.launchConfetti = function(){
+          if (raf) cancelAnimationFrame(raf);
+          particles = [];
+          // First burst — wide spread
+          for (let i = 0; i < 120; i++) particles.push(makeParticle());
+          // Second burst 300ms later — trickle
+          setTimeout(() => { for (let i = 0; i < 60; i++) particles.push(makeParticle()); }, 320);
+          raf = requestAnimationFrame(loop);
+        };
       })();
     </script>
   </body>

@@ -1,5 +1,5 @@
 // public/app.js - Clean consolidated client script for Pickr
-// Provides header refresh, picks loader (with recommendation), bet slip, bet history and wallet helpers.
+// Provides header refresh, picks loader (with recommendation), pick slip, pick history and profile helpers.
 
 /* Helper: safe parse JSON from localStorage */
 const readJSON = (k, fallback) => {
@@ -17,19 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Prefer server-provided in-memory profile when available
     const up = window.userProfile || {};
   const tokens = (typeof up.tokens !== 'undefined') ? String(up.tokens) : (localStorage.getItem('tokens') || '0');
-  const cash = (typeof up.cash !== 'undefined')
-    ? Number(up.cash).toFixed(2)
-    : (typeof up.cashBalance !== 'undefined')
-      ? Number(up.cashBalance).toFixed(2)
-      : parseFloat(localStorage.getItem('cash') || '0').toFixed(2);
   const xp = (typeof up.xp !== 'undefined') ? String(up.xp) : (localStorage.getItem('xp') || '0');
     document.querySelectorAll('.tokens').forEach(el => el.textContent = tokens);
-    document.querySelectorAll('.cash').forEach(el => el.textContent = `$${cash}`);
+    // Pickr is free-to-play: tokens have no cash value. Hide any legacy cash UI.
+    document.querySelectorAll('.cash').forEach(el => { el.textContent = ''; el.style.display = 'none'; });
     document.querySelectorAll('.xp').forEach(el => el.textContent = xp);
     const xpEl = document.getElementById('xp'); if (xpEl) xpEl.textContent = xp;
     // Also update header ids for pages that use explicit header spans
     const headerTokensEl = document.getElementById('headerTokens'); if (headerTokensEl) headerTokensEl.textContent = tokens;
-    const headerCashEl = document.getElementById('headerCash'); if (headerCashEl) headerCashEl.textContent = `$${cash}`;
+    const headerCashEl = document.getElementById('headerCash'); if (headerCashEl) { headerCashEl.textContent = ''; headerCashEl.style.display = 'none'; }
   }
   // Listen for cross-module balance updates so this script can refresh
   // the header whenever balances change elsewhere in the app.
@@ -89,24 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const entries = Object.entries(betSlip); if (entries.length === 0) return;
   // Use server-authoritative in-memory profile when present
   const up = window.userProfile || {};
-  let currentCash = (typeof up.cash !== 'undefined')
-    ? Number(up.cash)
-    : (typeof up.cashBalance !== 'undefined')
-      ? Number(up.cashBalance)
-      : parseFloat(localStorage.getItem('cash') || '0');
-      let totalStake = 0; for (const [, { stake }] of entries) { if (!stake || stake <= 0) { alert('Please enter a stake for each selection.'); return; } totalStake += stake; }
-      if (totalStake > currentCash) { alert('Insufficient cash to place these bets. Please deposit more funds.'); return; }
+  let currentTokens = (typeof up.tokens !== 'undefined')
+    ? Number(up.tokens)
+    : parseFloat(localStorage.getItem('tokens') || '0');
+      let totalStake = 0; for (const [, { stake }] of entries) { if (!stake || stake <= 0) { alert('Please enter a token stake for each selection.'); return; } totalStake += stake; }
+      if (totalStake > currentTokens) { alert('Insufficient tokens for these picks. Tokens are free virtual credits used for practice.'); return; }
   const history = readJSON('betHistory', []);
-  entries.forEach(([matchId, { team, stake }]) => { history.unshift({ matchId, team, stake, date: Date.now() }); currentCash -= stake; });
-  // Keep bet history in localStorage (UI-only). Do NOT persist authoritative
+  entries.forEach(([matchId, { team, stake }]) => { history.unshift({ matchId, team, stake, date: Date.now() }); currentTokens -= stake; });
+  // Keep pick history in localStorage (UI-only). Do NOT persist authoritative
   // balance changes locally; instead update in-memory view so the header
-  // reflects the expected value. Server will be authoritative for tokens/cash.
+  // reflects the expected value. Server will be authoritative for tokens.
   localStorage.setItem('betHistory', JSON.stringify(history));
-  updateBalances(undefined, currentCash);
+  updateBalances(currentTokens);
       Object.keys(betSlip).forEach(m => delete betSlip[m]);
       document.querySelectorAll('.select-team').forEach(btn => { btn.classList.remove('bg-red-600', 'text-white', 'opacity-50'); btn.disabled = false; });
       renderBetSlip();
-      alert('Bet placed! Check the My Bets tab to view your wager history.');
+      alert('Pick submitted! Check the My Picks tab to view your pick history. No real money is wagered.');
     });
   }
 
@@ -234,17 +228,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadPicks(selectedSport);
 
-  // Bet history (picks.html)
+  // Pick history (picks.html)
   const betHistoryContainer = document.getElementById('betHistoryContainer');
   if (betHistoryContainer) {
     const history = readJSON('betHistory', []);
-    if (history.length === 0) betHistoryContainer.innerHTML = '<p class="text-gray-600">No bets placed yet.</p>';
+    if (history.length === 0) betHistoryContainer.innerHTML = '<p class="text-gray-600">No picks made yet.</p>';
     else history.forEach(item => {
       const div = document.createElement('div');
       div.className = 'bg-white rounded shadow p-4 flex justify-between items-center';
-      const stake = parseFloat(item.stake || item.amount || 0).toFixed(2);
+      const stake = Math.round(Number(item.stake || item.amount || 0));
       const date = new Date(item.date).toLocaleString();
-      div.innerHTML = `<div><strong>${item.team || item.description || 'Bet'}</strong> &ndash; $${stake}</div><div class="text-gray-500 text-sm">${date}</div>`;
+      div.innerHTML = `<div><strong>${item.team || item.description || 'Pick'}</strong> &ndash; ${stake} Tokens</div><div class="text-gray-500 text-sm">${date}</div>`;
       betHistoryContainer.appendChild(div);
     });
   }
@@ -254,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-/* Balance helpers used by wallet page or other modules */
+/* Balance helpers used by profile page or other modules */
 function updateBalances(tokens, cash) {
   // Delegate to the canonical implementation exported by script.js. If it's
   // not available, fall back to a local UI-only refresh (should be rare).
@@ -268,33 +262,28 @@ function updateBalances(tokens, cash) {
   const up = window.userProfile || null;
   if (up) {
     if (typeof tokens !== 'undefined') up.tokens = Number(tokens);
-    if (typeof cash !== 'undefined') up.cash = Number(cash);
   }
+  // Pickr is free-to-play: tokens have no cash value.
   document.querySelectorAll('.tokens').forEach(el => el.textContent = (up && typeof up.tokens !== 'undefined') ? String(up.tokens) : (localStorage.getItem('tokens') || '0'));
-  document.querySelectorAll('.cash').forEach(el => el.textContent = `$${((up && typeof up.cash !== 'undefined') ? Number(up.cash) : parseFloat(localStorage.getItem('cash') || '0')).toFixed(2)}`);
+  document.querySelectorAll('.cash').forEach(el => { el.textContent = ''; el.style.display = 'none'; });
   const walletTokensEl = document.getElementById('walletTokens');
-  const walletCashEl = document.getElementById('walletCash');
   if (walletTokensEl) walletTokensEl.textContent = (up && typeof up.tokens !== 'undefined') ? String(up.tokens) : (localStorage.getItem('tokens') || '0');
-  if (walletCashEl) walletCashEl.textContent = ((up && typeof up.cash !== 'undefined') ? Number(up.cash) : parseFloat(localStorage.getItem('cash') || '0')).toFixed(2);
 }
 
 function loadWalletPage() {
   const up = window.userProfile || {};
   const tokens = (typeof up.tokens !== 'undefined') ? parseInt(String(up.tokens), 10) : parseInt(localStorage.getItem('tokens') || '0', 10);
-  const cash = (typeof up.cash !== 'undefined') ? Number(up.cash) : parseFloat(localStorage.getItem('cash') || '0');
   const walletTokensEl = document.getElementById('walletTokens');
-  const walletCashEl = document.getElementById('walletCash');
   if (walletTokensEl) walletTokensEl.textContent = tokens;
-  if (walletCashEl) walletCashEl.textContent = cash.toFixed(2);
   const historyContainer = document.getElementById('betHistory');
   if (historyContainer) {
     historyContainer.innerHTML = '';
     const history = readJSON('betHistory', []);
-    if (history.length === 0) historyContainer.innerHTML = '<p class="text-gray-500">No bets placed yet.</p>';
+    if (history.length === 0) historyContainer.innerHTML = '<p class="text-gray-500">No picks made yet.</p>';
     else history.forEach(item => {
       const div = document.createElement('div');
       div.className = 'py-2 flex justify-between items-start';
-      div.innerHTML = `<div><strong>$${Number(item.amount || item.stake || 0).toFixed(2)}</strong>` + (item.description ? ` &ndash; ${item.description}` : '') + `</div><div class="text-gray-400 text-xs">${new Date(item.date).toLocaleString()}</div>`;
+      div.innerHTML = `<div><strong>${Math.round(Number(item.amount || item.stake || 0))} Tokens</strong>` + (item.description ? ` &ndash; ${item.description}` : '') + `</div><div class="text-gray-400 text-xs">${new Date(item.date).toLocaleString()}</div>`;
       historyContainer.appendChild(div);
     });
   }

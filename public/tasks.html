@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Pickr – Tasks</title>
+    <title>Pickr – Perks</title>
     <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
@@ -16,14 +16,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
     <style>
       :root {
         --ink: #0b0f1a;
         --ember: #ff7a1a;
         --mint: #40d9b5;
         --sky: #7aa7ff;
-        --fog: rgba(255, 255, 255, 0.08);
-        --card: rgba(17, 25, 40, 0.82);
+        --gold: #f0c842;
+        --fog: rgba(255,255,255,0.08);
+        --card: rgba(17,25,40,0.82);
       }
       body {
         font-family: 'IBM Plex Sans', sans-serif;
@@ -474,10 +476,11 @@
       }
       .quest-card--partner {
         border-color: rgba(59, 130, 246, 0.35);
+        background: linear-gradient(145deg, rgba(37, 41, 67, 0.95), rgba(26, 31, 52, 0.94));
       }
       @media (min-width: 768px) {
         .quest-card--partner {
-          min-height: 520px;
+          min-height: 430px;
         }
       }
       .quest-content {
@@ -582,8 +585,9 @@
         box-shadow: 0 18px 32px rgba(34, 197, 94, 0.35);
       }
       .quest-card--partner .quest-cta {
-        background: linear-gradient(120deg, #3b82f6, #0ea5e9);
-        box-shadow: 0 18px 32px rgba(59, 130, 246, 0.35);
+        background: linear-gradient(120deg, #ff8a1c, #f8d12f);
+        color: #1f2937;
+        box-shadow: 0 18px 32px rgba(248, 146, 35, 0.36);
       }
       .quest-cta:hover {
         transform: translateY(-1px);
@@ -593,7 +597,95 @@
         box-shadow: 0 22px 38px rgba(20, 184, 166, 0.45);
       }
       .quest-card--partner .quest-cta:hover {
-        box-shadow: 0 22px 38px rgba(59, 130, 246, 0.45);
+        box-shadow: 0 22px 38px rgba(248, 146, 35, 0.45);
+      }
+      .deals-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+      }
+      .deals-tools-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #cbd5e1;
+        text-decoration: underline;
+        text-decoration-color: rgba(203, 213, 225, 0.55);
+        text-underline-offset: 2px;
+      }
+      .deals-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.85rem;
+      }
+      .deal-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        min-width: 0;
+      }
+      .deal-brand-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        object-fit: contain;
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 0.25rem;
+        flex: none;
+      }
+      .deal-brand-name {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #f8fafc;
+      }
+      .deal-offer-tag {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        white-space: nowrap;
+      }
+      .deal-legal {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0.7rem 0;
+      }
+      .deal-hotline {
+        font-size: 0.84rem;
+        color: #e2e8f0;
+        font-weight: 600;
+      }
+      .deal-note {
+        font-size: 0.78rem;
+        color: #94a3b8;
+      }
+      .deal-chevron {
+        color: #94a3b8;
+        font-size: 1rem;
+      }
+      .deal-action-panel {
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 0.9rem;
+      }
+      .deal-action-title {
+        color: #e5e7eb;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.65rem;
+      }
+      .deal-status-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
       }
       .partner-grid {
         grid-template-columns: 1fr;
@@ -665,12 +757,21 @@
       .loader-shadow{width:38px;height:8px;border-radius:50%;background:rgba(255,122,26,.25);filter:blur(3px);margin-top:4px;animation:shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
       @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
       @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
+      /* ── Modern card + CTA interactions ── */
+      [data-task]{transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s ease,border-color .28s ease;will-change:transform}
+      [data-task]:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.22)}
+      .feat-card:hover{box-shadow:0 30px 70px rgba(0,0,0,.55)}
+      [data-task] a[href]:not(.legal-toggle),[data-task] button:not(.legal-toggle){transition:transform .2s ease,filter .2s ease,box-shadow .2s ease}
+      [data-task] a[href]:not(.legal-toggle):hover,[data-task] button:not(.legal-toggle):hover{transform:translateY(-1px);filter:brightness(1.08)}
+      [data-task] a[href]:not(.legal-toggle):active,[data-task] button:not(.legal-toggle):active{transform:translateY(0) scale(.98)}
+      .feat-card a[href]:not(.legal-toggle):hover{box-shadow:0 10px 28px rgba(255,122,26,.35)}
+      @media (prefers-reduced-motion:reduce){[data-task],[data-task] a,[data-task] button{transition:none}[data-task]:hover{transform:none}}
     </style>
   </head>
   <body class="flex flex-col min-h-screen">
     <!-- Page loader -->
     <div id="pageLoader"><div class="loader-ball"></div><div class="loader-shadow"></div></div>
-    <!-- Sticky top banner: logo + player + tokens + cash -->
+    <!-- Sticky top banner: logo + player + tokens -->
     <div class="top-banner">
       <a href="index.html" class="flex-shrink-0"><img src="logo.png" alt="Pickr" class="banner-logo" /></a>
       <div class="banner-right">
@@ -683,380 +784,452 @@
             <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#34d399" stroke-width="2"/><path d="M12 7v10" stroke="#34d399" stroke-width="2" stroke-linecap="round"/><path d="M9 9.5c0-1 1.3-1.5 3-1.5s3 .5 3 1.5-1.3 1.5-3 1.5-3 .5-3 1.5 1.3 1.5 3 1.5 3 .5 3 1.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span class="tokens">0</span>
           </div>
-          <div class="banner-bal banner-bal-cash">
-            <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" stroke="#fbbf24" stroke-width="2"/><path d="M12 9v6" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/><path d="M10 10.5c0-.8 .9-1.2 2-1.2s2 .4 2 1.2-.9 1.2-2 1.2-2 .4-2 1.2.9 1.2 2 1.2 2 .4 2 1.2" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span class="cash">$0</span>
+        </div>
+      </div>
+    </div>
+    <!-- Perks Content -->
+    <main class="flex-1 page-main" style="padding:0 0 6rem;">
+
+      <!-- ── HERO ── -->
+      <section style="max-width:64rem;margin:0 auto;padding:2rem 1rem 1.5rem;text-align:center;">
+        <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,122,26,.14);border:1px solid rgba(255,122,26,.32);border-radius:999px;padding:.35rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:#ff9a4a;margin-bottom:1rem;">⭐ Perks</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.9rem,5vw,3rem);font-weight:700;background:linear-gradient(135deg,#fff 30%,rgba(255,122,26,.85));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.65rem;line-height:1.15;">Unlock More With Pickr</h1>
+        <p style="color:rgba(226,232,240,.65);font-size:1rem;max-width:38rem;margin:0 auto 1.75rem;">Complete challenges and partner experiences to level up your account and unlock exclusive perks.</p>
+        <!-- Level progress card -->
+        <div style="background:rgba(17,25,40,.82);border:1px solid rgba(255,122,26,.22);border-radius:18px;padding:1.25rem 1.5rem;max-width:30rem;margin:0 auto 1.5rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;color:#ffa559;">🥉 Level 1 · Rookie</span>
+            <span style="font-size:.8rem;color:rgba(226,232,240,.45);">Level 2 · Challenger →</span>
+          </div>
+          <div style="height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:.55rem;">
+            <div id="levelBarFill" style="height:100%;width:40%;background:linear-gradient(90deg,#ff7a1a,#f0c842);border-radius:999px;transition:width 1.2s ease;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.72rem;color:rgba(226,232,240,.4);">
+            <span id="challengeCount">2 / 5 challenges completed</span>
+            <span id="xpNeeded">300 XP to next level</span>
+          </div>
+        </div>
+        <!-- Badge strip -->
+        <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+          <span style="padding:.35rem .9rem;border-radius:999px;font-size:.73rem;font-weight:600;background:rgba(255,122,26,.18);border:1px solid rgba(255,122,26,.38);color:#ffa559;">🥉 Rookie Predictor</span>
+          <span style="padding:.35rem .9rem;border-radius:999px;font-size:.73rem;font-weight:600;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(226,232,240,.35);">🥈 Challenge Hunter</span>
+          <span style="padding:.35rem .9rem;border-radius:999px;font-size:.73rem;font-weight:600;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(226,232,240,.35);">🥇 Elite Member</span>
+          <span style="padding:.35rem .9rem;border-radius:999px;font-size:.73rem;font-weight:600;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(226,232,240,.35);">🏆 Pickr Champion</span>
+        </div>
+      </section>
+
+      <!-- ── FEATURED EXPERIENCES ── -->
+      <section style="max-width:64rem;margin:0 auto 2.5rem;padding:0 1rem;">
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:rgba(226,232,240,.4);margin-bottom:.3rem;">⭐ Featured Experiences</div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.65rem;font-weight:700;color:#fff;margin-bottom:.3rem;">Top Partner Offers</h2>
+          <p style="font-size:.88rem;color:rgba(226,232,240,.55);">Explore optional offers from licensed betting partners and earn XP boosts and account features on Pickr.</p>
+          <div style="margin-top:.9rem;background:rgba(255,122,26,.08);border:1px solid rgba(255,122,26,.22);border-radius:12px;padding:.8rem 1rem;font-size:.76rem;color:rgba(226,232,240,.62);line-height:1.55;">Pickr is free-to-play and does not accept wagers or deposits. Partner offers are optional and take place on separate third-party websites. Pickr may receive compensation for qualifying referrals. Eligibility, location restrictions, and partner terms apply. 19+.</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;">
+
+          <!-- ── OLG (Tier 1 · #1) ── -->
+          <div class="feat-card" data-task="partner-task-olg" style="background:linear-gradient(140deg,rgba(17,25,40,.97),rgba(28,38,60,.97));border:1px solid rgba(255,122,26,.35);border-radius:22px;padding:1.5rem;position:relative;overflow:hidden;box-shadow:0 24px 56px rgba(0,0,0,.45);">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,122,26,.7),transparent);"></div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <span style="padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;background:rgba(255,122,26,.18);border:1px solid rgba(255,122,26,.38);color:#ff9a4a;">⭐ Featured</span>
+              <span style="padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.28);color:#f87171;">🔥 #1 Most Popular</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1.25rem;">
+              <img src="olg.jpg" alt="OLG" style="width:54px;height:54px;border-radius:13px;object-fit:cover;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);flex-shrink:0;" />
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;">OLG</div>
+                <div style="font-size:.73rem;color:rgba(226,232,240,.4);">Official Partner</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem;">
+              <div style="font-size:.9rem;color:rgba(226,232,240,.88);">✅ Unlock bonus token perks</div>
+              <div style="font-size:.9rem;color:rgba(226,232,240,.88);">✅ Earn 500 bonus XP</div>
+              <div style="font-size:.9rem;color:rgba(226,232,240,.88);">✅ Increase your account level</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;font-size:.8rem;">
+              <span style="color:rgba(226,232,240,.5);">⏱️ 3 minutes</span>
+            </div>
+            <a href="https://wlolg.adsrv.eacdn.com/C.ashx?btag=a_2411b_86c_&affid=501&siteid=2411&adid=86&c=" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;padding:.9rem 1.5rem;border-radius:999px;background:linear-gradient(135deg,#ff8a1c,#f0c842);color:#0b0f1a;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;text-decoration:none;margin-bottom:.85rem;transition:opacity .2s;">Sign Up →</a>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span id="olgTaskStatus" style="font-size:.73rem;color:rgba(64,217,181,.6);"></span>
+              <button class="legal-toggle" data-target="olg-legal" style="font-size:.7rem;color:rgba(226,232,240,.3);background:none;border:none;cursor:pointer;padding:0;">ℹ️ 19+ | Responsible Gaming</button>
+            </div>
+            <div id="olg-legal" style="display:none;margin-top:.6rem;font-size:.7rem;color:rgba(226,232,240,.4);line-height:1.5;">Problem Gambling Hotline: 1-866-531-2600. If you or someone you know has a gambling problem, call ConnexOntario. <a href="https://www.connexontario.ca/" target="_blank" rel="noopener" style="color:rgba(64,217,181,.6);text-decoration:underline;">Responsible Gaming Tools</a></div>
+          </div>
+
+          <!-- ── Tooniebet (Tier 1 · Trending) ── -->
+          <div class="feat-card" data-task="partner-task-tooniebet" style="background:linear-gradient(140deg,rgba(17,25,40,.97),rgba(30,22,50,.97));border:1px solid rgba(255,122,26,.3);border-radius:22px;padding:1.5rem;position:relative;overflow:hidden;box-shadow:0 24px 56px rgba(0,0,0,.45);">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,68,68,.6),transparent);"></div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+              <span style="padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;background:rgba(255,122,26,.18);border:1px solid rgba(255,122,26,.38);color:#ff9a4a;">⭐ Featured</span>
+              <span style="padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.28);color:#f87171;">🔥 Trending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1.25rem;">
+              <img src="too.png" alt="Tooniebet" style="width:54px;height:54px;border-radius:13px;object-fit:cover;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);flex-shrink:0;" />
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;">Tooniebet</div>
+                <div style="font-size:.73rem;color:rgba(226,232,240,.4);">Official Partner</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem;">
+              <div style="font-size:.9rem;color:rgba(226,232,240,.88);">✅ Unlock bonus token perks</div>
+              <div style="font-size:.9rem;color:rgba(226,232,240,.88);">✅ Earn 500 bonus XP</div>
+              <div style="font-size:.9rem;color:rgba(226,232,240,.88);">✅ Increase your account level</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;font-size:.8rem;">
+              <span style="color:rgba(226,232,240,.5);">⏱️ 3 minutes</span>
+            </div>
+            <a href="https://tnb.wermifal.com/?mid=359925_2091235" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;padding:.9rem 1.5rem;border-radius:999px;background:linear-gradient(135deg,#ff7a1a,#ff4c00);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;text-decoration:none;margin-bottom:.85rem;">Sign Up →</a>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span id="tooniebetTaskStatus" style="font-size:.73rem;color:rgba(64,217,181,.6);"></span>
+              <button class="legal-toggle" data-target="too-legal" style="font-size:.7rem;color:rgba(226,232,240,.3);background:none;border:none;cursor:pointer;padding:0;">ℹ️ 19+ | Responsible Gaming</button>
+            </div>
+            <div id="too-legal" style="display:none;margin-top:.6rem;font-size:.7rem;color:rgba(226,232,240,.4);line-height:1.5;">Problem Gambling Hotline: 1-866-531-2600. If you or someone you know has a gambling problem, call ConnexOntario. <a href="https://www.connexontario.ca/" target="_blank" rel="noopener" style="color:rgba(64,217,181,.6);text-decoration:underline;">Responsible Gaming Tools</a></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── QUICK WINS ── -->
+      <section style="max-width:64rem;margin:0 auto 2.5rem;padding:0 1rem;">
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:rgba(226,232,240,.4);margin-bottom:.3rem;">⚡ Quick Wins</div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.65rem;font-weight:700;color:#fff;margin-bottom:.3rem;">Daily Challenges</h2>
+          <p style="font-size:.88rem;color:rgba(226,232,240,.55);">Fast actions that keep your streak alive and your XP growing. Resets every 24 hours.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.875rem;">
+
+          <!-- Spin -->
+          <div data-task="spin" style="background:linear-gradient(140deg,rgba(17,25,40,.8),rgba(30,20,60,.82));border:1px solid rgba(139,92,246,.3);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🎡</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">Daily XP Spin</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+50–500 XP</div>
+            <div id="spinTaskTimer" style="font-size:.7rem;color:rgba(226,232,240,.45);letter-spacing:.04em;">Checking...</div>
+            <button id="spinTaskButton" type="button" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.35);color:#c4b5fd;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;">Spin Now</button>
+          </div>
+
+          <!-- Build Picks -->
+          <div data-task="daily-3-picks" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🏈</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">Build Today's Picks</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+75 XP</div>
+            <div id="dailyPicksProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">0/3</div>
+            <a id="dailyPicksButton" href="index.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Go Now</a>
+          </div>
+
+          <!-- Streak -->
+          <div data-task="daily-streak" style="background:linear-gradient(140deg,rgba(17,25,40,.8),rgba(40,20,20,.75));border:1px solid rgba(239,68,68,.22);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🔥</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">3-Day Streak</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+150 XP</div>
+            <div style="font-size:.72rem;color:rgba(226,232,240,.4);">Keep it going</div>
+            <a href="index.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Open App</a>
+          </div>
+
+          <!-- Insights -->
+          <div data-task="daily-5-insights" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🧠</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">Read 5 Insights</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+25 XP</div>
+            <div id="dailyInsightsProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">0/5</div>
+            <a id="dailyInsightsButton" href="leaderboard.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Read Now</a>
+          </div>
+
+          <!-- Multi-sport -->
+          <div data-task="daily-2-sports" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🏟</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">Pick 2 Sports</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+80 XP</div>
+            <div id="dailySportsProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">0/2</div>
+            <a id="dailySportsButton" href="index.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Explore</a>
+          </div>
+
+          <!-- Hit wins -->
+          <div data-task="daily-2-wins" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🎯</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">Hit 2 Correct Picks</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+100 XP</div>
+            <div id="dailyWinsProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">0/2</div>
+            <a id="dailyWinsButton" href="picks.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Track Results</a>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── TRENDING — BETWAY + starters ── -->
+      <section style="max-width:64rem;margin:0 auto 2.5rem;padding:0 1rem;">
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:rgba(226,232,240,.4);margin-bottom:.3rem;">🔥 Trending Now</div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.65rem;font-weight:700;color:#fff;margin-bottom:.3rem;">More Partner Experiences</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">
+
+          <!-- Betway -->
+          <div data-task="partner-task-betway" style="background:rgba(17,25,40,.78);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.25rem;position:relative;">
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem;">
+              <span style="padding:.25rem .7rem;border-radius:999px;font-size:.67rem;font-weight:700;text-transform:uppercase;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.28);color:#f87171;">🔥 Trending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+              <img src="betway.png" alt="Betway" style="width:46px;height:46px;border-radius:11px;object-fit:cover;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);flex-shrink:0;" />
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;">Betway</div>
+                <div style="font-size:.72rem;color:rgba(226,232,240,.4);">Official Partner</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem;">
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Earn 250 bonus XP</div>
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Unlock trending challenges</div>
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Boost your Pickr rank</div>
+            </div>
+            <div style="font-size:.78rem;color:rgba(226,232,240,.45);margin-bottom:1rem;">⏱️ 3 minutes</div>
+            <a href="https://betway.ca/bwp/welcome-sports-on-300-50/en-ca/?s=sp51761&a=spadid227182" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;padding:.8rem 1.25rem;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:.9rem;text-decoration:none;margin-bottom:.75rem;">Sign Up →</a>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span id="betwayTaskStatus" style="font-size:.73rem;color:rgba(64,217,181,.6);"></span>
+              <button class="legal-toggle" data-target="betway-legal" style="font-size:.7rem;color:rgba(226,232,240,.3);background:none;border:none;cursor:pointer;padding:0;">ℹ️ 19+ | Responsible Gaming</button>
+            </div>
+            <div id="betway-legal" style="display:none;margin-top:.6rem;font-size:.7rem;color:rgba(226,232,240,.4);line-height:1.5;">Problem Gambling Hotline: 1-866-531-2600. If you or someone you know has a gambling problem, call ConnexOntario. <a href="https://www.connexontario.ca/" target="_blank" rel="noopener" style="color:rgba(64,217,181,.6);text-decoration:underline;">Responsible Gaming Tools</a></div>
+          </div>
+
+          <!-- First Pick -->
+          <div data-task="first-bet" style="background:rgba(17,25,40,.78);border:1px solid rgba(64,217,181,.18);border-radius:18px;padding:1.25rem;position:relative;">
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem;">
+              <span style="padding:.25rem .7rem;border-radius:999px;font-size:.67rem;font-weight:700;text-transform:uppercase;background:rgba(64,217,181,.14);border:1px solid rgba(64,217,181,.28);color:#40d9b5;">🎯 Starter</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+              <span style="font-size:2rem;">🎯</span>
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;">First Pick</div>
+                <div style="font-size:.72rem;color:rgba(226,232,240,.4);">Starter challenge</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem;">
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Earn 100 XP instantly</div>
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Unlock your Rookie badge</div>
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Start your win streak</div>
+            </div>
+            <div style="font-size:.78rem;color:rgba(226,232,240,.45);margin-bottom:1rem;">⏱️ 1 minute</div>
+            <a id="firstBetTaskButton" href="index.html" style="display:flex;align-items:center;justify-content:center;width:100%;padding:.8rem 1.25rem;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:.9rem;text-decoration:none;margin-bottom:.75rem;">Sign Up →</a>
+            <span id="firstBetTaskStatus" style="font-size:.73rem;color:rgba(64,217,181,.6);"></span>
+          </div>
+
+          <!-- First Parlay -->
+          <div data-task="first-parlay" style="background:rgba(17,25,40,.78);border:1px solid rgba(122,167,255,.18);border-radius:18px;padding:1.25rem;position:relative;">
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem;">
+              <span style="padding:.25rem .7rem;border-radius:999px;font-size:.67rem;font-weight:700;text-transform:uppercase;background:rgba(122,167,255,.14);border:1px solid rgba(122,167,255,.28);color:#7aa7ff;">🔀 Combo</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;">
+              <span style="font-size:2rem;">🔀</span>
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;">First Parlay</div>
+                <div style="font-size:.72rem;color:rgba(226,232,240,.4);">Combo challenge</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem;">
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Earn 200 XP instantly</div>
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Unlock Combo Hunter badge</div>
+              <div style="font-size:.88rem;color:rgba(226,232,240,.85);">✅ Multiply your XP gains</div>
+            </div>
+            <div style="font-size:.78rem;color:rgba(226,232,240,.45);margin-bottom:1rem;">⏱️ 2 minutes</div>
+            <a id="firstParlayTaskButton" href="index.html" style="display:flex;align-items:center;justify-content:center;width:100%;padding:.8rem 1.25rem;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:.9rem;text-decoration:none;margin-bottom:.75rem;">Sign Up →</a>
+            <span id="firstParlayTaskStatus" style="font-size:.73rem;color:rgba(64,217,181,.6);"></span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── EXCLUSIVE PERKS (locked teasers) ── -->
+      <section style="max-width:64rem;margin:0 auto 2.5rem;padding:0 1rem;">
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:rgba(226,232,240,.4);margin-bottom:.3rem;">🔓 Exclusive Perks</div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.65rem;font-weight:700;color:#fff;margin-bottom:.3rem;">Unlock These Benefits</h2>
+          <p style="font-size:.88rem;color:rgba(226,232,240,.55);">Complete challenges to access features only available to verified Pickr members.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.875rem;">
+          <div style="background:rgba(17,25,40,.65);border:1px solid rgba(64,217,181,.22);border-radius:15px;padding:1.1rem;text-align:center;">
+            <div style="font-size:1.75rem;margin-bottom:.45rem;">🎟️</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:#fff;margin-bottom:.35rem;">Bonus Token Drops</div>
+            <div style="font-size:.75rem;color:rgba(226,232,240,.5);margin-bottom:.5rem;line-height:1.4;">Monthly bonus virtual tokens for active members (no cash value)</div>
+            <div style="font-size:.72rem;font-weight:600;color:#40d9b5;">Complete 1 featured challenge</div>
+          </div>
+          <div style="background:rgba(17,25,40,.45);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:1.1rem;text-align:center;position:relative;opacity:.55;">
+            <span style="position:absolute;top:.5rem;right:.6rem;font-size:.8rem;">🔒</span>
+            <div style="font-size:1.75rem;margin-bottom:.45rem;">🏆</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:#fff;margin-bottom:.35rem;">Leaderboard Bonuses</div>
+            <div style="font-size:.75rem;color:rgba(226,232,240,.5);margin-bottom:.5rem;line-height:1.4;">XP multipliers for top performers</div>
+            <div style="font-size:.72rem;font-weight:600;color:rgba(226,232,240,.3);">Reach Level 3</div>
+          </div>
+          <div style="background:rgba(17,25,40,.45);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:1.1rem;text-align:center;position:relative;opacity:.55;">
+            <span style="position:absolute;top:.5rem;right:.6rem;font-size:.8rem;">🔒</span>
+            <div style="font-size:1.75rem;margin-bottom:.45rem;">⭐</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:#fff;margin-bottom:.35rem;">Early Feature Access</div>
+            <div style="font-size:.75rem;color:rgba(226,232,240,.5);margin-bottom:.5rem;line-height:1.4;">Get new features before anyone else</div>
+            <div style="font-size:.72rem;font-weight:600;color:rgba(226,232,240,.3);">Reach Level 5</div>
+          </div>
+          <div style="background:rgba(17,25,40,.45);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:1.1rem;text-align:center;position:relative;opacity:.55;">
+            <span style="position:absolute;top:.5rem;right:.6rem;font-size:.8rem;">🔒</span>
+            <div style="font-size:1.75rem;margin-bottom:.45rem;">🎁</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:#fff;margin-bottom:.35rem;">Special Events</div>
+            <div style="font-size:.75rem;color:rgba(226,232,240,.5);margin-bottom:.5rem;line-height:1.4;">Exclusive in-app events &amp; bonus XP weekends</div>
+            <div style="font-size:.72rem;font-weight:600;color:rgba(226,232,240,.3);">Complete 2 featured challenges</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── LIMITED TIME ── -->
+      <section style="max-width:64rem;margin:0 auto 2.5rem;padding:0 1rem;">
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:rgba(226,232,240,.4);margin-bottom:.3rem;">⏳ Limited Time</div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.65rem;font-weight:700;color:#fff;">Don't Miss Out</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+          <div style="background:rgba(17,25,40,.75);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.25rem;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff7a1a,#f0c842);opacity:.7;"></div>
+            <div style="display:inline-flex;padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.28);color:#f87171;margin-bottom:.75rem;">🔥 Trending This Week</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.4rem;">Double XP Weekend</div>
+            <div style="font-size:.85rem;color:rgba(226,232,240,.6);margin-bottom:.875rem;">Earn 2× XP on all challenges this weekend only.</div>
+            <div id="countdown1" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#f0c842;letter-spacing:.05em;">Loading...</div>
+          </div>
+          <div style="background:rgba(17,25,40,.75);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.25rem;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff7a1a,#f0c842);opacity:.7;"></div>
+            <div style="display:inline-flex;padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.28);color:#fbbf24;margin-bottom:.75rem;">⏳ Ends In 48 Hours</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.4rem;">OLG Featured Bonus</div>
+            <div style="font-size:.85rem;color:rgba(226,232,240,.6);margin-bottom:.875rem;">Complete the OLG challenge this weekend for an XP bonus.</div>
+            <div id="countdown2" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#f0c842;letter-spacing:.05em;">Loading...</div>
+          </div>
+          <div style="background:rgba(17,25,40,.75);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.25rem;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff7a1a,#f0c842);opacity:.7;"></div>
+            <div style="display:inline-flex;padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;background:rgba(255,122,26,.14);border:1px solid rgba(255,122,26,.28);color:#ffa559;margin-bottom:.75rem;">⭐ Most Popular Today</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.4rem;">3-Day Streak Challenge</div>
+            <div style="font-size:.85rem;color:rgba(226,232,240,.6);margin-bottom:.875rem;">431 members active on this challenge right now.</div>
+            <a href="index.html" style="display:inline-flex;padding:.5rem 1.25rem;border-radius:999px;background:linear-gradient(135deg,#ff8a1c,#f0c842);color:#0b0f1a;font-weight:700;font-size:.85rem;text-decoration:none;">Join Challenge</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── WEEKLY MILESTONES ── -->
+      <section style="max-width:64rem;margin:0 auto 2.5rem;padding:0 1rem;">
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:rgba(226,232,240,.4);margin-bottom:.3rem;">🏆 Weekly</div>
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.65rem;font-weight:700;color:#fff;margin-bottom:.3rem;">Weekly Milestones</h2>
+          <p style="font-size:.88rem;color:rgba(226,232,240,.55);">Bigger challenges with bigger XP rewards. Resets every Monday.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.875rem;">
+          <div data-task="weekly-5-streak" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🏆</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">5-Win Streak</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+400 XP</div>
+            <div id="weeklyStreakProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">0/5</div>
+            <a id="weeklyStreakButton" href="index.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Start Streak</a>
+          </div>
+          <div data-task="weekly-60-winrate" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">📊</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">60% Win Rate</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+250 XP</div>
+            <div id="weeklyWinrateProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">0/10 picks</div>
+            <a id="weeklyWinrateButton" href="picks.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Track Results</a>
+          </div>
+          <div data-task="weekly-3-leg-parlay" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">🎯</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">Win a 3-Leg Parlay</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+400 XP</div>
+            <div id="weeklyParlayProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">0/1</div>
+            <a id="weeklyParlayButton" href="index.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Build Parlay</a>
+          </div>
+          <div data-task="weekly-level-up" style="background:rgba(17,25,40,.7);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.125rem .875rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;">
+            <div style="font-size:1.75rem;line-height:1;">💎</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.82rem;color:#fff;">Level Up This Week</div>
+            <div style="font-size:.78rem;font-weight:700;color:#40d9b5;">+500 XP</div>
+            <div id="weeklyLevelProgress" style="font-size:.72rem;color:rgba(226,232,240,.4);">Level: Rookie</div>
+            <a id="weeklyLevelButton" href="tasks.html" style="margin-top:.25rem;padding:.42rem .9rem;border-radius:999px;background:rgba(255,122,26,.15);border:1px solid rgba(255,122,26,.3);color:#ffa559;font-size:.75rem;font-weight:600;text-decoration:none;">Check Progress</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ── Spin Modal (keep for script.js) ── -->
+    <div id="spinModal" class="spin-modal" aria-hidden="true">
+      <div class="spin-modal__panel">
+        <button id="spinModalClose" class="spin-modal__close" type="button">✕</button>
+        <div class="flex flex-col items-center gap-4">
+          <div class="relative flex items-center justify-center">
+            <div class="spin-pointer"></div>
+            <div id="spinWheel" class="spin-wheel">
+              <div class="spin-label" style="--i:0;"><span>100</span></div>
+              <div class="spin-label" style="--i:1;"><span>250</span></div>
+              <div class="spin-label" style="--i:2;"><span>100</span></div>
+              <div class="spin-label" style="--i:3;"><span>50</span></div>
+              <div class="spin-label" style="--i:4;"><span>100</span></div>
+              <div class="spin-label" style="--i:5;"><span>500</span></div>
+              <div class="spin-label" style="--i:6;"><span>250</span></div>
+            </div>
+            <div class="spin-hub">Spin</div>
+          </div>
+          <div class="text-sm uppercase tracking-[0.3em] text-purple-300">Daily XP Spin</div>
+          <div id="spinModalStatus" class="text-sm text-gray-300">Good luck. Let it spin.</div>
+          <div id="spinModalResult" class="text-lg font-semibold text-emerald-300">Ready for your daily spin.</div>
+          <div class="grid gap-1 text-xs text-gray-400 text-center">
+            <div>100 XP (×3) · 250 XP (×2)</div>
+            <div>50 XP (×1) · 500 XP (×1, rare)</div>
           </div>
         </div>
       </div>
     </div>
-    <!-- Tasks Content -->
-    <main class="flex-1 p-4 page-main">
-      <section class="spin-task mb-6">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div class="space-y-3">
-            <div class="task-pill"><span class="mini-wheel" aria-hidden="true"></span>Daily Spin Task</div>
-            <h2 class="text-2xl font-semibold">Complete your daily spin and claim tokens</h2>
-            <p class="text-sm text-gray-300">One spin per day after 12:00 PM. Rare 500 Tokens hit.</p>
-            <div class="task-timer" id="spinTaskTimer">Checking availability...</div>
-          </div>
-          <div class="flex flex-col items-start gap-3">
-            <button id="spinTaskButton" class="task-cta" type="button">Start spin</button>
-            <div id="spinTaskStatus" class="text-sm text-purple-200">Ready to spin</div>
-          </div>
-        </div>
-      </section>
-      <div id="spinModal" class="spin-modal" aria-hidden="true">
-        <div class="spin-modal__panel">
-          <button id="spinModalClose" class="spin-modal__close" type="button">✕</button>
-          <div class="flex flex-col items-center gap-4">
-            <div class="relative flex items-center justify-center">
-              <div class="spin-pointer"></div>
-              <div id="spinWheel" class="spin-wheel">
-                <div class="spin-label" style="--i:0;"><span>100</span></div>
-                <div class="spin-label" style="--i:1;"><span>250</span></div>
-                <div class="spin-label" style="--i:2;"><span>100</span></div>
-                <div class="spin-label" style="--i:3;"><span>50</span></div>
-                <div class="spin-label" style="--i:4;"><span>100</span></div>
-                <div class="spin-label" style="--i:5;"><span>500</span></div>
-                <div class="spin-label" style="--i:6;"><span>250</span></div>
-              </div>
-              <div class="spin-hub">Spin</div>
-            </div>
-            <div class="text-sm uppercase tracking-[0.3em] text-purple-300">Daily Spin</div>
-            <div id="spinModalStatus" class="text-sm text-gray-300">Good luck. Let it spin.</div>
-            <div id="spinModalResult" class="text-lg font-semibold text-emerald-300">Ready for your daily spin.</div>
-            <div class="grid gap-1 text-xs text-gray-400 text-center">
-              <div>100 Tokens (x3) · 250 Tokens (x2)</div>
-              <div>50 Tokens (x1) · 500 Tokens (x1, rare)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <section class="quest-grid mb-8">
-        <div class="quest-card quest-card--bet" data-task="first-bet">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Starter quest</div>
-              <div class="quest-icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 12h16" stroke="#f97316" stroke-width="2" stroke-linecap="round" />
-                  <path d="M12 4l4 8-4 8-4-8 4-8z" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </div>
-            </div>
-            <h3 class="quest-title">Place your first bet</h3>
-            <p class="quest-copy">Lock in your very first pick to unlock a token boost.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+100 Tokens</span>
-              <span id="firstBetTaskStatus" class="quest-status">Not completed</span>
-            </div>
-            <a id="firstBetTaskButton" class="quest-cta" href="index.html">Place a bet</a>
-          </div>
-        </div>
-        <div class="quest-card quest-card--parlay" data-task="first-parlay">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Combo quest</div>
-              <div class="quest-icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 7h12M6 12h12M6 17h12" stroke="#10b981" stroke-width="2" stroke-linecap="round" />
-                </svg>
-              </div>
-            </div>
-            <h3 class="quest-title">Place your first parlay</h3>
-            <p class="quest-copy">Chain your first multi-pick parlay to earn extra tokens.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+200 Tokens</span>
-              <span id="firstParlayTaskStatus" class="quest-status">Not completed</span>
-            </div>
-            <a id="firstParlayTaskButton" class="quest-cta" href="index.html">Build a parlay</a>
-          </div>
-        </div>
-      </section>
-      <section class="max-w-5xl mx-auto mb-4">
-        <h2 class="mt-2 text-3xl sm:text-4xl font-semibold text-white">Partner Tasks</h2>
-        <p class="text-sm text-zinc-400">Complete a verified partner task to unlock withdrawals and activate cash-out access.</p>
-        <div class="mt-3 grid gap-3 sm:grid-cols-3 text-xs text-slate-300">
-          <div class="rounded-xl border border-white/10 bg-white/5 p-3">Verified sign-ups only</div>
-          <div class="rounded-xl border border-white/10 bg-white/5 p-3">Fast approval once confirmed</div>
-        </div>
-      </section>
-      <section class="quest-grid partner-grid mb-8">
-        <!-- ToonieBet Card -->
-        <div class="quest-card quest-card--partner" data-task="partner-task-tooniebet">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Partner</div>
-              <div class="quest-icon" aria-hidden="true">🤝</div>
-            </div>
-            <h3 class="quest-title">Sign up on ToonieBet</h3>
-            <p class="quest-copy">Create a ToonieBet account to unlock withdrawals and activate cash-out access.</p>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
-              <div class="flex items-center justify-between">
-                <span class="font-semibold">Featured partner</span>
-                <span class="text-xs uppercase tracking-[0.2em] text-slate-400">TOONIEBET</span>
-              </div>
-              <div class="mt-3 flex items-center gap-3">
-                <img src="too.png" alt="ToonieBet" class="h-10 w-10 rounded-lg object-contain bg-white/10 p-1" />
-                <div class="text-xs text-slate-400">Sign up for a ToonieBet account to complete this task.</div>
-              </div>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
-              <div class="font-semibold">How it works</div>
-              <ol class="mt-2 list-decimal list-inside space-y-1 text-xs text-slate-300">
-                <li>Click below to open ToonieBet.</li>
-                <li>Sign up and create your account.</li>
-                <li>We verify completion and unlock withdrawals.</li>
-              </ol>
-            </div>
-            <div class="quest-meta">
-              <span class="quest-reward">Partner required</span>
-              <span id="tooniebetTaskStatus" class="quest-status">Not completed</span>
-            </div>
-            <a class="quest-cta" href="https://tnb.wermifal.com/?mid=359925_2091235" target="_blank" rel="noopener">Sign up on ToonieBet</a>
-          </div>
-        </div>
-        <!-- Betway Card -->
-        <div class="quest-card quest-card--partner" data-task="partner-task-betway">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Partner</div>
-              <div class="quest-icon" aria-hidden="true">🤝</div>
-            </div>
-            <h3 class="quest-title">Sign up on Betway</h3>
-            <p class="quest-copy">Create a Betway account to unlock withdrawals and activate cash-out access.</p>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
-              <div class="flex items-center justify-between">
-                <span class="font-semibold">Featured partner</span>
-                <span class="text-xs uppercase tracking-[0.2em] text-slate-400">BETWAY</span>
-              </div>
-              <div class="mt-3 flex items-center gap-3">
-                <img src="betway.png" alt="Betway" class="h-10 w-10 rounded-lg object-contain bg-white/10 p-1" />
-                <div class="text-xs text-slate-400">Sign up for a Betway account to complete this task.</div>
-              </div>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
-              <div class="font-semibold">How it works</div>
-              <ol class="mt-2 list-decimal list-inside space-y-1 text-xs text-slate-300">
-                <li>Click below to open Betway.</li>
-                <li>Sign up and create your account.</li>
-                <li>We verify completion and unlock withdrawals.</li>
-              </ol>
-            </div>
-            <div class="quest-meta">
-              <span class="quest-reward">Partner required</span>
-              <span id="betwayTaskStatus" class="quest-status">Not completed</span>
-            </div>
-            <a class="quest-cta" href="https://betway.ca/bwp/welcome-sports-on-300-50/en-ca/?s=sp51761&a=spadid227182" target="_blank" rel="noopener">Sign up on Betway</a>
-          </div>
-        </div>
-        <!-- FanDuel Card -->
-        <div class="quest-card quest-card--partner" data-task="partner-task-fanduel">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Partner</div>
-              <div class="quest-icon" aria-hidden="true">🤝</div>
-            </div>
-            <h3 class="quest-title">Sign up on FanDuel</h3>
-            <p class="quest-copy">Create a FanDuel account to unlock withdrawals and activate cash-out access.</p>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
-              <div class="flex items-center justify-between">
-                <span class="font-semibold">Featured partner</span>
-                <span class="text-xs uppercase tracking-[0.2em] text-slate-400">FANDUEL</span>
-              </div>
-              <div class="mt-3 flex items-center gap-3">
-                <img src="fanduel.jpg" alt="FanDuel" class="h-10 w-10 rounded-lg object-contain bg-white/10 p-1" />
-                <div class="text-xs text-slate-400">Sign up for a FanDuel account to complete this task.</div>
-              </div>
-            </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
-              <div class="font-semibold">How it works</div>
-              <ol class="mt-2 list-decimal list-inside space-y-1 text-xs text-slate-300">
-                <li>Click below to open FanDuel.</li>
-                <li>Sign up and create your account.</li>
-                <li>We verify completion and unlock withdrawals.</li>
-              </ol>
-            </div>
-            <div class="quest-meta">
-              <span class="quest-reward">Partner required</span>
-              <span id="fanduelTaskStatus" class="quest-status">Not completed</span>
-            </div>
-            <a class="quest-cta" href="https://www.fanduel.com/canada-casino-hnemp-spins?utm_source=google&utm_medium=cpc&utm_campaign=brand&utm_term=fanduel%20casino_b&utm_adCampaignId=23278426751&gad_source=1&gad_campaignid=23278426751&gclid=Cj0KCQjw37nNBhDkARIsAEBGI8MXVb-DrkQLZM1U_X5vQjcV2IDa_kXHBf8QqZDWvKJa74JQH_bQWbsaAt-7EALw_wcB" target="_blank" rel="noopener">Sign up on FanDuel</a>
-          </div>
-        </div>
-      </section>
-      <section class="max-w-5xl mx-auto mb-4">
-        <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Daily tasks (reset every 24 hours)</div>
-        <h2 class="mt-2 text-2xl font-semibold text-white">Daily tasks</h2>
-        <p class="text-sm text-zinc-400">Complete daily goals to keep momentum and earn fast rewards.</p>
-      </section>
-      <section class="quest-grid mb-8">
-        <div class="quest-card" data-task="daily-3-picks">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Daily task</div>
-              <div class="quest-icon" aria-hidden="true">🎯</div>
-            </div>
-            <h3 class="quest-title">Place 3 picks today</h3>
-            <p class="quest-copy">Stay active with three picks in 24 hours.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+75 Tokens</span>
-              <span id="dailyPicksStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="dailyPicksProgress" class="text-xs text-slate-400">0/3</div>
-            <a id="dailyPicksButton" class="quest-cta" href="index.html">Make picks</a>
-          </div>
-        </div>
-        <div class="quest-card" data-task="daily-2-wins">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Daily task</div>
-              <div class="quest-icon" aria-hidden="true">🔥</div>
-            </div>
-            <h3 class="quest-title">Hit 2 correct picks</h3>
-            <p class="quest-copy">Lock in two wins in the same day.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+100 Tokens</span>
-              <span id="dailyWinsStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="dailyWinsProgress" class="text-xs text-slate-400">0/2</div>
-            <a id="dailyWinsButton" class="quest-cta" href="picks.html">View my bets</a>
-          </div>
-        </div>
-        <div class="quest-card" data-task="daily-5-insights">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Daily task</div>
-              <div class="quest-icon" aria-hidden="true">🧠</div>
-            </div>
-            <h3 class="quest-title">View 5 player insights</h3>
-            <p class="quest-copy">Explore insight panels to sharpen your reads.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+25 XP</span>
-              <span id="dailyInsightsStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="dailyInsightsProgress" class="text-xs text-slate-400">0/5</div>
-            <a id="dailyInsightsButton" class="quest-cta" href="leaderboard.html">Read insights</a>
-          </div>
-        </div>
-        <div class="quest-card" data-task="daily-2-sports">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Daily task</div>
-              <div class="quest-icon" aria-hidden="true">🏟</div>
-            </div>
-            <h3 class="quest-title">Bet on 2 different sports</h3>
-            <p class="quest-copy">Diversify today with two leagues.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+80 Tokens</span>
-              <span id="dailySportsStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="dailySportsProgress" class="text-xs text-slate-400">0/2</div>
-            <a id="dailySportsButton" class="quest-cta" href="index.html">Pick another sport</a>
-          </div>
-        </div>
-      </section>
-      <section class="max-w-5xl mx-auto mb-4">
-        <div class="text-xs uppercase tracking-[0.3em] text-zinc-400">Weekly quests</div>
-        <h2 class="mt-2 text-2xl font-semibold text-white">Weekly quests</h2>
-        <p class="text-sm text-zinc-400">Longer milestones that reward consistency.</p>
-      </section>
-      <section class="quest-grid mb-8">
-        <div class="quest-card" data-task="weekly-5-streak">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Weekly quest</div>
-              <div class="quest-icon" aria-hidden="true">🏆</div>
-            </div>
-            <h3 class="quest-title">5-win streak</h3>
-            <p class="quest-copy">Keep the streak alive for five straight wins.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+400 Tokens</span>
-              <span id="weeklyStreakStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="weeklyStreakProgress" class="text-xs text-slate-400">0/5</div>
-            <a id="weeklyStreakButton" class="quest-cta" href="tasks.html">Check streak</a>
-          </div>
-        </div>
-        <div class="quest-card" data-task="weekly-60-winrate">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Weekly quest</div>
-              <div class="quest-icon" aria-hidden="true">📊</div>
-            </div>
-            <h3 class="quest-title">Maintain 60% win rate</h3>
-            <p class="quest-copy">Hit 60%+ with at least 10 picks.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+250 Tokens</span>
-              <span id="weeklyWinrateStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="weeklyWinrateProgress" class="text-xs text-slate-400">0/10 · 0%</div>
-            <a id="weeklyWinrateButton" class="quest-cta" href="picks.html">Track results</a>
-          </div>
-        </div>
-        <div class="quest-card quest-card--parlay" data-task="weekly-3-leg-parlay">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Weekly quest</div>
-              <div class="quest-icon" aria-hidden="true">🎯</div>
-            </div>
-            <h3 class="quest-title">Win a 3+ leg parlay</h3>
-            <p class="quest-copy">Hit a parlay with three or more legs.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+400 Tokens</span>
-              <span id="weeklyParlayStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="weeklyParlayProgress" class="text-xs text-slate-400">0/1</div>
-            <a id="weeklyParlayButton" class="quest-cta" href="index.html">Build a parlay</a>
-          </div>
-        </div>
-        <div class="quest-card" data-task="weekly-level-up">
-          <div class="quest-content">
-            <div class="quest-top">
-              <div class="quest-badge">Weekly quest</div>
-              <div class="quest-icon" aria-hidden="true">💎</div>
-            </div>
-            <h3 class="quest-title">Reach level up</h3>
-            <p class="quest-copy">Level up at least once this week.</p>
-            <div class="quest-meta">
-              <span class="quest-reward">+500 Tokens</span>
-              <span id="weeklyLevelStatus" class="quest-status">Not completed</span>
-            </div>
-            <div id="weeklyLevelProgress" class="text-xs text-slate-400">Level: Bronze</div>
-            <a id="weeklyLevelButton" class="quest-cta" href="tasks.html">Check level</a>
-          </div>
-        </div>
-      </section>
-    </main>
+
+    <div id="spinTaskStatus" style="display:none;"></div>
+
+    <!-- ── Perks page scripts ── -->
+    <script>
+      // Legal disclosure toggles
+      document.querySelectorAll('.legal-toggle').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var panel = document.getElementById(btn.getAttribute('data-target'));
+          if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+      });
+      // Countdown timers
+      function startCountdown(id, hours) {
+        var end = Date.now() + hours * 36e5;
+        function tick() {
+          var rem = Math.max(0, end - Date.now());
+          var h = Math.floor(rem / 36e5), m = Math.floor((rem % 36e5) / 6e4), s = Math.floor((rem % 6e4) / 1e3);
+          var el = document.getElementById(id);
+          if (el) el.textContent = h + 'h ' + String(m).padStart(2,'0') + 'm ' + String(s).padStart(2,'0') + 's';
+          if (rem > 0) setTimeout(tick, 1000);
+        }
+        tick();
+      }
+      startCountdown('countdown1', 68);
+      startCountdown('countdown2', 48);
+    </script>
+
+    <div id="pickr-page-content-end"></div>
+    <div id="spinTaskStatusDisplay" class="text-sm text-purple-200" style="display:none;">Ready to spin</div>
     <!-- Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 shadow-inner flex text-xs text-gray-400 bottom-nav">
-      <a href="leaderboard.html" class="flex-1 flex flex-col items-center py-2 hover:text-primary">
-        <span class="text-2xl">⭐</span>
-        <span>Pickr Picks</span>
-      </a>
-      <a href="tasks.html" class="flex-1 flex flex-col items-center py-2 text-primary">
-        <span class="text-2xl">📝</span>
-        <span>Tasks</span>
-      </a>
-      <a href="index.html" class="flex-1 flex flex-col items-center py-2 hover:text-primary">
-        <span class="text-2xl">🏈</span>
+    <nav class="pk-tabbar" aria-label="Primary">
+      <a href="index.html" class="pk-tab" aria-label="Sports">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
         <span>Sports</span>
       </a>
-      <a href="casino.html" class="flex-1 flex flex-col items-center py-2 hover:text-primary">
-        <span class="text-2xl">🎰</span>
-        <span>Casino</span>
+      <a href="leaderboard.html" class="pk-tab" aria-label="Insights">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg>
+        <span>Insights</span>
       </a>
-      <a href="picks.html" class="flex-1 flex flex-col items-center py-2 hover:text-primary">
-        <span class="text-2xl">🎯</span>
-        <span>Picks</span>
+      <a href="tasks.html" class="pk-tab is-active" aria-label="Perks" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <span>Perks</span>
       </a>
-      <!-- Wallet navigation entry replacing the old Profile link -->
-      <a href="wallet.html" class="flex-1 flex flex-col items-center py-2 hover:text-primary">
-        <div class="pickr-avatar" data-size="24" aria-hidden="true"></div>
-        <span>Wallet</span>
+      <a href="picks.html" class="pk-tab" aria-label="My Picks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>My Picks</span>
+      </a>
+      <a href="wallet.html" class="pk-tab" aria-label="Profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span>Profile</span>
       </a>
     </nav>
+    <script src="js/product-rules.js?v=20260709a"></script>
     <script src="config.js?v=20260410a"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -1091,10 +1264,7 @@
           let _enforcing = false;
           async function enforceProfile(user) {
             if (_enforcing) return;          // prevent duplicate concurrent runs
-            if (!user) {
-              window.location.replace('/login.html');
-              return;
-            }
+            if (!user) return; // unauthenticated visitors can browse freely
             _enforcing = true;
             try {
               const idToken = await user.getIdToken();
@@ -1144,7 +1314,8 @@
         } catch (e) { /* ignore */ }
       })();
     </script>
-    <script src="script.js?v=20260327-spinfix"></script>
+    <script src="js/guest.js?v=1"></script>
+    <script src="script.js?v=20260327-autoselect"></script>
     <script>
       (function () {
         const modal = document.getElementById('partnerTaskModal');

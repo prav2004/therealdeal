@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Casino — Pickr</title>
     <script src="config.js?v=20260410"></script>
+    <script src="js/guest.js?v=1"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script>
@@ -20,7 +21,7 @@
         if (!window.firebase) return;
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         firebase.auth().onAuthStateChanged((user) => {
-          if (!user) window.location.replace('/login.html');
+          // unauthenticated visitors can browse freely
         });
       })();
     </script>
@@ -29,6 +30,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
     <style>
       :root {
         --ink: #0b0f1a;
@@ -134,30 +136,26 @@
     </main>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
-      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">⭐</span>
-        <span>Pickr Picks</span>
-      </a>
-      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">📝</span>
-        <span>Tasks</span>
-      </a>
-      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🏈</span>
+    <nav class="pk-tabbar" aria-label="Primary">
+      <a href="index.html" class="pk-tab" aria-label="Sports">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
         <span>Sports</span>
       </a>
-      <a href="casino.html" class="nav-link active flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🎰</span>
-        <span>Casino</span>
+      <a href="leaderboard.html" class="pk-tab" aria-label="Insights">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg>
+        <span>Insights</span>
       </a>
-      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🎯</span>
-        <span>Picks</span>
+      <a href="tasks.html" class="pk-tab" aria-label="Perks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <span>Perks</span>
       </a>
-      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span>💰</span>
-        <span>Wallet</span>
+      <a href="picks.html" class="pk-tab" aria-label="My Picks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>My Picks</span>
+      </a>
+      <a href="wallet.html" class="pk-tab" aria-label="Profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span>Profile</span>
       </a>
     </nav>
   </body>

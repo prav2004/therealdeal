@@ -9,6 +9,8 @@
   "dev:all": "concurrently \"npx firebase emulators:start --only firestore\" \"npm run start:dev\"",
   "seed:firestore": "node tools/seedFirestore.js",
   "seed:firestore:force": "set SEED_FORCE=1 && node tools/seedFirestore.js",
+  "seed:users": "node tools/seedActiveUsers.js",
+  "seed:users:force": "set SEED_FORCE=1 && node tools/seedActiveUsers.js",
     "test": "jest --runInBand",
   "test:emulator": "set FIRESTORE_EMULATOR_HOST=localhost:8085 && npm test"
   },

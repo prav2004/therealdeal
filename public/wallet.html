@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <!--
-  Wallet Page
-  This page allows users to manage their Pickr account balance. They can
-  request withdrawals, review balances, and view a history of previous bets. The
-  design follows the same visual language as the rest of the site: clean
-  surfaces, rounded cards, vibrant accent colours and icons for quick
-  recognition. All values are persisted in localStorage by the accompanying
-  script.js functions.
+  Profile Page
+  This page lets users review their Pickr profile and virtual-token balance.
+  Pickr is free-to-play: tokens are virtual practice credits with no cash value.
+  There are no deposits, withdrawals, or payouts on Pickr. The design follows the
+  same visual language as the rest of the site.
 -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Wallet &mdash; Pickr</title>
+    <title>Profile &mdash; Pickr</title>
     <link rel="icon" type="image/png" sizes="16x16" href="tablogo.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="tablogo.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
@@ -35,6 +33,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
     <!-- Global stylesheet -->
     <link rel="stylesheet" href="styles.css" />
     <style>
@@ -167,6 +166,7 @@
     </style>
 
     <!-- Firebase (Compat) for login/profile data -->
+    <script src="js/product-rules.js"></script>
     <script src="config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -185,8 +185,8 @@
     <div class="px-4 md:px-6">
       <header class="glass max-w-3xl mx-auto w-full mt-4 rounded-2xl px-4 py-3 md:px-6 md:py-4">
         <div class="space-y-1">
-          <h1 class="hero-title text-xl sm:text-2xl text-slate-100">Wallet — Account &amp; Balances</h1>
-          <p class="text-sm text-slate-300">View your balances and request withdrawals after a verified partner task.</p>
+          <h1 class="hero-title text-xl sm:text-2xl text-slate-100">Your Pickr Profile</h1>
+          <p class="text-sm text-slate-300">Review your account details and your virtual practice-token balance. Tokens have no cash value.</p>
         </div>
       </header>
     </div>
@@ -215,31 +215,29 @@
               </div>
               <div class="text-sm text-gray-400">Balance</div>
             </div>
-            <p class="mt-4 text-xs text-gray-400">Use tokens for in-app rewards and special picks. 100 Tokens = $1 Cash.</p>
+            <p class="mt-4 text-xs text-gray-400">Tokens are virtual practice credits used to make sports predictions. They have no cash value.</p>
           </div>
 
-          <!-- Cash card -->
+          <!-- Virtual token info card -->
           <div class="md:col-span-2 panel p-6 shadow-xl text-white">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-4">
                 <div class="p-3 rounded-lg bg-white/5 text-white">
-                  <svg viewBox="0 0 24 24" fill="none" width="28" height="28" style="color:#fbbf24;">
-                    <rect x="3.5" y="7" width="17" height="10" rx="2.2" stroke="currentColor" stroke-width="1.6" />
-                    <path d="M12 9.2v5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                    <path d="M10.1 10.6c0-.7.8-1.2 1.8-1.2h0.7c1 0 1.8.5 1.8 1.2s-.8 1.2-1.8 1.2h-0.7c-1 0-1.8.5-1.8 1.2s.8 1.2 1.8 1.2h0.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                    <path d="M6.6 9.6h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
-                    <path d="M15.4 14.4h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                  <svg viewBox="0 0 24 24" fill="none" width="28" height="28" style="color:#34d399;">
+                    <circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.6" />
+                    <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M12 8.5v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
                   </svg>
                 </div>
                 <div>
-                  <div class="text-sm text-gray-400">Cash</div>
-                  <div id="walletCash" class="text-3xl font-extrabold">0.00</div>
+                  <div class="text-sm text-gray-400">Virtual token balance</div>
+                  <div id="walletTokensLarge" class="text-3xl font-extrabold">0</div>
                 </div>
               </div>
-              <div class="text-sm text-gray-400">Available</div>
+              <div class="text-sm text-gray-400">Practice credits</div>
             </div>
-            <p class="mt-4 text-sm text-gray-400 max-w-2xl">Cash reflects converted winnings. 1 Cash = $1 CAD. Withdrawals unlock after a verified partner task.</p>
-            <!-- Withdraw button intentionally removed to simplify UX and avoid accidental withdrawals -->
+            <p class="mt-4 text-sm text-gray-400 max-w-2xl">Pickr Tokens are virtual practice credits with no cash value. They cannot be purchased, withdrawn, transferred, or exchanged for money or prizes.</p>
+            <p class="mt-2 text-xs text-slate-500">Free-to-play. Virtual tokens only. No cash value. No deposits or withdrawals on Pickr. 19+.</p>
           </div>
         </div>
       </section>
@@ -325,41 +323,32 @@
         </button>
       </section>
 
-      <!-- Deposit & Withdraw (refined) -->
+      <!-- Recent activity -->
+      <section class="mt-6 panel p-6 shadow-md">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 class="text-xl font-semibold flex items-center space-x-2 text-white">
+              <i class="fa-solid fa-dice" style="color: var(--gold);"></i>
+              <span>Practice Casino</span>
+            </h2>
+            <p class="mt-1 text-sm text-slate-300">Sharpen your instincts with practice games using virtual tokens only. No cash, no deposits — just for fun.</p>
+          </div>
+          <a href="casino.html" class="inline-flex items-center justify-center px-5 py-2 rounded-full action-button font-semibold whitespace-nowrap">Open Casino</a>
+        </div>
+      </section>
+
       <section class="mt-6 panel p-6 shadow-md">
         <div class="flex items-center justify-between">
           <h2 class="text-2xl font-semibold flex items-center space-x-2 text-white">
-            <i class="fa-solid fa-money-bill-transfer" style="color: var(--sky);"></i>
-            <span>Withdraw Cash</span>
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--sky);"></i>
+            <span>Recent Activity</span>
           </h2>
-          <div class="text-sm text-gray-400">Quick actions</div>
+          <div class="text-sm text-gray-400">Virtual tokens</div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-          <div class="space-y-4 panel-muted rounded-lg p-4 shadow-sm">
-            <form id="cashWithdrawForm" class="space-y-4">
-              <div>
-                <label for="withdrawAmount" class="block text-xs uppercase tracking-widest text-slate-400">Amount (CAD)</label>
-                <input id="withdrawAmount" name="withdrawAmount" type="number" min="1" step="0.01" placeholder="Enter amount" class="mt-2 w-full rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/60" required />
-              </div>
-              <div>
-                <label for="withdrawEmail" class="block text-xs uppercase tracking-widest text-slate-400">Email for confirmation</label>
-                <input id="withdrawEmail" name="withdrawEmail" type="email" placeholder="you@email.com" class="mt-2 w-full rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/60" required />
-              </div>
-              <button id="withdrawSubmit" type="submit" class="w-full rounded-full action-button py-2 font-semibold">Withdraw Cash</button>
-              <p class="text-xs text-slate-400">We will email you next steps. Check your email after submitting.</p>
-            </form>
-          </div>
-
-          <!-- Recent transactions -->
-          <div class="panel rounded-lg p-4 shadow-sm">
-            <div class="flex items-center justify-between">
-              <h3 class="text-lg font-medium text-white">Recent Activity</h3>
-            </div>
-            <ul id="txList" class="mt-3 divide-y divide-gray-700 text-sm text-gray-300 max-h-56 overflow-auto">
-              <li class="py-3 text-gray-400">No recent transactions</li>
-            </ul>
-          </div>
-        </div>
+        <p class="mt-2 text-sm text-slate-400">Pickr is free-to-play. There are no deposits, withdrawals, or cash payouts — only virtual practice tokens.</p>
+        <ul id="txList" class="mt-4 divide-y divide-gray-700 text-sm text-gray-300 max-h-56 overflow-auto">
+          <li class="py-3 text-gray-400">No recent activity</li>
+        </ul>
       </section>
 
       <!-- Notification toast (hidden by default) -->
@@ -382,30 +371,26 @@
       &copy; 2026 Pickr Sports. All rights reserved.
     </footer>
     <!-- Bottom Navigation (standardized) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
-      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">⭐</span>
-        <span>Pickr Picks</span>
-      </a>
-      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">📝</span>
-        <span>Tasks</span>
-      </a>
-      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🏈</span>
+    <nav class="pk-tabbar" aria-label="Primary">
+      <a href="index.html" class="pk-tab" aria-label="Sports">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
         <span>Sports</span>
       </a>
-      <a href="casino.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🎰</span>
-        <span>Casino</span>
+      <a href="leaderboard.html" class="pk-tab" aria-label="Insights">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg>
+        <span>Insights</span>
       </a>
-      <a href="picks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🎯</span>
-        <span>Picks</span>
+      <a href="tasks.html" class="pk-tab" aria-label="Perks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <span>Perks</span>
       </a>
-      <a href="wallet.html" class="nav-link active flex-1 flex flex-col items-center py-2">
-        <div class="pickr-avatar" data-size="24" aria-hidden="true"></div>
-        <span>Wallet</span>
+      <a href="picks.html" class="pk-tab" aria-label="My Picks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>My Picks</span>
+      </a>
+      <a href="wallet.html" class="pk-tab is-active" aria-label="Profile" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span>Profile</span>
       </a>
     </nav>
     <!-- Include script -->
@@ -704,84 +689,20 @@
           txs.slice().reverse().slice(0,20).forEach(tx=>{
             const li = document.createElement('li');
             li.className='py-3 flex justify-between items-start';
-            li.innerHTML = `<div class="flex flex-col"><span class="font-medium text-slate-100">${tx.type}</span><span class="text-xs text-slate-400">${tx.date}</span></div><div class="text-sm ${tx.amount<0? 'text-red-400':'text-green-400'}">${tx.amount<0? '-$'+Math.abs(tx.amount).toFixed(2) : '$'+tx.amount.toFixed(2)}</div>`;
+            const amt = Number(tx.amount) || 0;
+            const amtLabel = (amt < 0 ? '-' : '+') + Math.abs(amt) + ' Tokens';
+            li.innerHTML = `<div class="flex flex-col"><span class="font-medium text-slate-100">${tx.type}</span><span class="text-xs text-slate-400">${tx.date}</span></div><div class="text-sm ${amt<0? 'text-red-400':'text-green-400'}">${amtLabel}</div>`;
             txList.appendChild(li);
           });
         }
 
         function refreshBalances(){
-          // Use canonical in-memory profile keys where possible. The server
-          // profile exposes `tokens` and `cash` (see /api/me and script.js).
+          // Pickr is free-to-play: show only the virtual token balance. No cash.
           const up = window.userProfile || {};
-          // prefer `tokens`/`cash` keys returned by /api/me; fall back to localStorage
           const tokens = (typeof up.tokens !== 'undefined') ? String(up.tokens) : (localStorage.getItem('tokens') || '0');
-          const cash = (typeof up.cash !== 'undefined')
-            ? Number(up.cash)
-            : (typeof up.cashBalance !== 'undefined')
-              ? Number(up.cashBalance)
-              : parseFloat(localStorage.getItem('cash') || '0');
           const tokensEl = document.getElementById('walletTokens'); if (tokensEl) tokensEl.textContent = tokens;
-          const cashEl = document.getElementById('walletCash'); if (cashEl) cashEl.textContent = Number(cash).toFixed(2);
+          const tokensBig = document.getElementById('walletTokensLarge'); if (tokensBig) tokensBig.textContent = tokens;
         }
-
-        document.getElementById('cashWithdrawForm')?.addEventListener('submit', async function(e){
-          e.preventDefault();
-          const amountInput = document.getElementById('withdrawAmount');
-          const emailInput = document.getElementById('withdrawEmail');
-          const submitBtn = document.getElementById('withdrawSubmit');
-          const val = parseFloat(amountInput.value);
-          const email = String(emailInput.value || '').trim();
-          if (isNaN(val) || val < 1) {
-            showToast('Enter an amount ≥ $1.00', 'red');
-            return;
-          }
-          if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-            showToast('Enter a valid email address', 'red');
-            return;
-          }
-          try {
-            const isLocalhost = ['localhost','127.0.0.1'].includes(window.location.hostname);
-            const devUid = localStorage.getItem('DEV_AUTH_UID') || (isLocalhost ? 'test-user-123' : null);
-            if (!window.firebase || !firebase.auth || !firebase.auth().currentUser) {
-              if (!devUid) { showToast('Sign in to withdraw cash', 'red'); return; }
-            }
-            if (submitBtn) {
-              submitBtn.disabled = true;
-              submitBtn.textContent = 'Submitting...';
-            }
-            let headers = { 'Content-Type': 'application/json' };
-            if (window.firebase && firebase.auth && firebase.auth().currentUser) {
-              const idToken = await firebase.auth().currentUser.getIdToken();
-              headers.Authorization = 'Bearer ' + idToken;
-            } else if (devUid) {
-              headers['x-dev-uid'] = devUid;
-            }
-            const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
-            const resp = await fetch(apiBase + '/api/wallet/withdraw-request', {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({ amount: val, email })
-            });
-            const payload = await resp.json().catch(() => ({}));
-            if (!resp.ok) {
-              showToast(payload.error || 'Withdrawal request failed', 'red');
-              return;
-            }
-            amountInput.value = '';
-            emailInput.value = '';
-            showToast('Check your email for next steps.');
-          } catch (err) {
-            console.error('Withdraw request error:', err && err.message);
-            showToast('Withdrawal request failed', 'red');
-          } finally {
-            if (submitBtn) {
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Withdraw Cash';
-            }
-          }
-        });
-
-        document.getElementById('withdrawQuickBtn')?.addEventListener('click', ()=>{ document.getElementById('withdrawAmount').focus(); });
 
         refreshBalances();
         renderTxs();

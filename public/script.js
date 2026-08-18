@@ -129,19 +129,18 @@
   // --- Header / balances ---
   function refreshHeaders() {
     const tokens = userProfile && typeof userProfile.tokens !== 'undefined' ? String(userProfile.tokens) : '0';
-    const cash = userProfile && typeof userProfile.cash !== 'undefined'
-      ? Number(userProfile.cash)
-      : (userProfile && typeof userProfile.cashBalance !== 'undefined' ? Number(userProfile.cashBalance) : 0);
     const xp = userProfile && typeof userProfile.xp !== 'undefined' ? String(userProfile.xp) : '0';
     document.querySelectorAll('.tokens').forEach(el => el.textContent = tokens);
-    document.querySelectorAll('.cash').forEach(el => el.textContent = `$${Number(cash).toFixed(2)}`);
+    // Pickr is free-to-play: tokens have no cash value. Any legacy cash element
+    // is hidden rather than showing a dollar amount.
+    document.querySelectorAll('.cash').forEach(el => { el.textContent = ''; el.style.display = 'none'; });
+    document.querySelectorAll('.banner-bal-cash').forEach(el => { el.style.display = 'none'; });
     document.querySelectorAll('.xp').forEach(el => el.textContent = xp);
     const xpEl = document.getElementById('xp'); if (xpEl) xpEl.textContent = xp;
     const walletTokensEl = document.getElementById('walletTokens'); if (walletTokensEl) walletTokensEl.textContent = tokens;
-    const walletCashEl = document.getElementById('walletCash'); if (walletCashEl) walletCashEl.textContent = Number(cash).toFixed(2);
+    const walletTokensLargeEl = document.getElementById('walletTokensLarge'); if (walletTokensLargeEl) walletTokensLargeEl.textContent = tokens;
     // Also update header-specific elements (some pages use ids instead of classes)
     const headerTokensEl = document.getElementById('headerTokens'); if (headerTokensEl) headerTokensEl.textContent = tokens;
-    const headerCashEl = document.getElementById('headerCash'); if (headerCashEl) headerCashEl.textContent = `$${Number(cash).toFixed(2)}`;
 
     const streakWinsEl = document.getElementById('streakWins');
     const bestStreakEl = document.getElementById('bestStreak');
@@ -229,69 +228,96 @@
   function renderBetSlip() {
     const betSlipList = document.getElementById('betSlipList');
     const confirmBtn = document.getElementById('confirmBet');
+    const countBadge = document.getElementById('slipCountBadge');
     if (!betSlipList) return;
     betSlipList.innerHTML = '';
     const entries = Object.entries(betSlip);
+
+    // Update count badge
+    if (countBadge) {
+      if (entries.length > 0) {
+        countBadge.style.display = 'inline-block';
+        countBadge.textContent = entries.length + (entries.length === 1 ? ' pick' : ' picks');
+      } else {
+        countBadge.style.display = 'none';
+      }
+    }
+
     if (entries.length === 0) {
-      betSlipList.innerHTML = '<div class="text-gray-400 text-sm">No selections yet.</div>';
+      betSlipList.innerHTML =
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 0 8px">' +
+          '<div style="font-size:32px;opacity:0.35">🎯</div>' +
+          '<div style="font-size:13px;color:#475569;text-align:center;line-height:1.5">No picks yet.<br>Tap a team on any card to add it here.</div>' +
+        '</div>';
       if (confirmBtn) confirmBtn.classList.add('hidden');
       return;
     }
     const useParlay = entries.length > 1 && betMode === 'parlay';
     if (confirmBtn) confirmBtn.classList.remove('hidden');
 
-    const currentCash = userProfile && typeof userProfile.cash !== 'undefined'
-      ? Number(userProfile.cash)
-      : (userProfile && typeof userProfile.cashBalance !== 'undefined' ? Number(userProfile.cashBalance) : getBalanceFromDom('.cash', 0));
-    const cashAvailable = Number.isFinite(currentCash) && currentCash > 0;
-    if (!cashAvailable && betCurrency === 'cash') betCurrency = 'tokens';
-    const stakeLabel = betCurrency === 'cash' ? 'Cash' : 'Tokens';
-    const switchLabel = betCurrency === 'cash' ? 'Switch to tokens' : 'Switch to cash';
-    const stakePlaceholder = betCurrency === 'cash' ? 'Stake ($)' : 'Stake (tokens)';
+    // Pickr is free-to-play: predictions always use virtual tokens only. There
+    // is no cash currency and no cash staking.
+    const cashAvailable = false;
+    betCurrency = 'tokens';
+    const stakeLabel = 'Tokens';
+    const stakePlaceholder = 'Stake (tokens)';
+    const currencyIcon = '🪙';
+
     if (useParlay) {
       const combinedOdds = computeParlayOdds(entries);
       const summary = document.createElement('div');
-      summary.className = 'flex flex-col gap-2 rounded-lg bg-gray-900/60 p-3 text-sm';
-      const legs = entries.map(([, info]) => escapeHtml(info.team)).join(', ');
-      summary.innerHTML = `
-        <div class="text-xs text-gray-400">Parlay legs</div>
-        <div class="text-gray-200">${legs}</div>
-        <div class="flex items-center justify-between text-xs text-gray-400">
-          <span>Combined odds</span>
-          <span>${combinedOdds ? escapeHtml(String(combinedOdds)) + 'x' : '—'}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <input id="parlayStake" type="number" inputmode="decimal" min="0" step="0.01" class="w-full px-2 py-1 rounded bg-gray-700 text-white" value="${parlayStake || ''}" placeholder="${stakePlaceholder}" />
-          <button id="toggleBetMode" type="button" class="px-2 py-1 rounded bg-gray-800 text-gray-200">Straight bets</button>
-          <button id="toggleBetCurrency" type="button" class="px-2 py-1 rounded ${cashAvailable ? 'bg-gray-800 text-gray-200' : 'bg-gray-800/50 text-gray-500 cursor-not-allowed'}" ${cashAvailable ? '' : 'disabled'}>${switchLabel}</button>
-        </div>
-      `;
+      summary.style.cssText = 'background:rgba(122,167,255,0.07);border:1px solid rgba(122,167,255,0.18);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;';
+      const legs = entries.map(([, info]) => escapeHtml(info.team)).join(' + ');
+      const amOdds = combinedOdds && Number.isFinite(combinedOdds) && combinedOdds > 1
+        ? (combinedOdds >= 2 ? '+' + Math.round((combinedOdds - 1) * 100) : '-' + Math.round(100 / (combinedOdds - 1)))
+        : '—';
+      summary.innerHTML =
+        '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;font-weight:700">Parlay · ' + entries.length + ' Legs</div>' +
+        '<div style="font-size:13px;color:#e2e8f0;font-weight:600;line-height:1.5">' + legs + '</div>' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid rgba(255,255,255,0.06)">' +
+          '<span style="font-size:12px;color:#94a3b8">Combined odds</span>' +
+          '<span style="font-size:14px;font-weight:800;color:#7aa7ff;font-family:Space Grotesk,sans-serif">' + amOdds + '</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center">' +
+          '<div style="position:relative;flex:1">' +
+            '<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px">' + currencyIcon + '</span>' +
+            '<input id="parlayStake" type="number" inputmode="decimal" min="0" step="0.01" class="slip-stake-input" style="padding-left:30px" value="' + (parlayStake || '') + '" placeholder="' + stakePlaceholder + '" />' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px">' +
+          '<button id="toggleBetMode" type="button" class="slip-mode-btn">↩ Straight bets</button>' +
+        '</div>';
       betSlipList.appendChild(summary);
     } else {
       entries.forEach(([matchId, info]) => {
-        const li = document.createElement('div'); li.className = 'flex items-center justify-between py-2';
-        const oddsLabel = info.odds ? `${Number(info.odds).toFixed(2)}x` : '—';
-        li.innerHTML = `
-          <div class="flex-1">
-            <div class="font-medium">${escapeHtml(info.team)}</div>
-            <div class="text-xs text-gray-400">Odds ${escapeHtml(String(oddsLabel))}</div>
-          </div>
-          <div class="w-36 flex items-center gap-2">
-            <input type="number" inputmode="decimal" min="0" step="0.01" data-match="${escapeHtml(matchId)}" class="stake-input w-full px-2 py-1 rounded bg-gray-700 text-white" value="${info.stake || ''}" placeholder="${stakePlaceholder}" />
-            <button data-match="${escapeHtml(matchId)}" class="remove-slip px-2 py-1 rounded bg-red-600 text-white">Remove</button>
-          </div>
-        `;
+        const amOdds = info.odds && Number.isFinite(Number(info.odds)) && Number(info.odds) > 1
+          ? (Number(info.odds) >= 2 ? '+' + Math.round((Number(info.odds) - 1) * 100) : '-' + Math.round(100 / (Number(info.odds) - 1)))
+          : '—';
+        const li = document.createElement('div');
+        li.className = 'slip-item';
+        li.innerHTML =
+          '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px">' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="font-size:14px;font-weight:700;color:#f1f5f9;font-family:Space Grotesk,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(info.team) + '</div>' +
+              '<div style="display:flex;align-items:center;gap:6px;margin-top:3px">' +
+                '<span style="font-size:11px;color:#64748b">Odds</span>' +
+                '<span style="font-size:12px;font-weight:800;color:#7aa7ff;font-family:Space Grotesk,sans-serif;background:rgba(122,167,255,0.1);padding:2px 8px;border-radius:999px;border:1px solid rgba(122,167,255,0.2)">' + amOdds + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<button data-match="' + escapeHtml(matchId) + '" class="remove-slip slip-remove-btn" title="Remove">✕</button>' +
+          '</div>' +
+          '<div style="position:relative">' +
+            '<span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px">' + currencyIcon + '</span>' +
+            '<input type="number" inputmode="decimal" min="0" step="0.01" data-match="' + escapeHtml(matchId) + '" class="stake-input slip-stake-input" style="padding-left:30px" value="' + (info.stake || '') + '" placeholder="' + stakePlaceholder + '" />' +
+          '</div>';
         betSlipList.appendChild(li);
       });
 
       const toggleWrap = document.createElement('div');
-      toggleWrap.className = 'pt-2';
-      toggleWrap.innerHTML = `
-        <div class="flex flex-col gap-2">
-          ${entries.length > 1 ? '<button id="toggleBetMode" type="button" class="w-full px-3 py-2 rounded bg-gray-800 text-gray-200 text-sm">Parlay these picks</button>' : ''}
-          <button id="toggleBetCurrency" type="button" class="w-full px-3 py-2 rounded text-sm ${cashAvailable ? 'bg-gray-800 text-gray-200' : 'bg-gray-800/50 text-gray-500 cursor-not-allowed'}" ${cashAvailable ? '' : 'disabled'}>${switchLabel}</button>
-        </div>
-      `;
+      toggleWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:4px;';
+      toggleWrap.innerHTML =
+        (entries.length > 1 ? '<button id="toggleBetMode" type="button" class="slip-mode-btn">⚡ Parlay these picks</button>' : '') +
+        '<div class="slip-mode-note" style="font-size:11px;color:#64748b;text-align:center;padding:4px 0">Practice picks use virtual tokens. No real money is wagered.</div>';
       betSlipList.appendChild(toggleWrap);
     }
 
@@ -299,7 +325,14 @@
     betSlipList.querySelectorAll('.remove-slip').forEach(btn => {
       btn.addEventListener('click', () => {
         const m = btn.getAttribute('data-match'); delete betSlip[m];
-        document.querySelectorAll(`.select-team[data-match="${m}"]`).forEach(s => { s.classList.remove('bg-red-600','text-white','opacity-50'); s.disabled = false; });
+        document.querySelectorAll(`.select-team[data-match="${m}"]`).forEach(s => {
+          s.classList.remove('selected');
+          s.style.background = 'rgba(255,255,255,0.04)';
+          s.style.borderColor = 'rgba(255,255,255,0.09)';
+          s.style.boxShadow = 'none';
+          s.style.opacity = '1';
+          s.disabled = false;
+        });
         renderBetSlip();
       });
     });
@@ -324,12 +357,7 @@
     const currencyBtn = document.getElementById('toggleBetCurrency');
     if (currencyBtn) {
       currencyBtn.addEventListener('click', () => {
-        if (!cashAvailable) {
-          alert('Add cash to your wallet to place cash bets.');
-          return;
-        }
-        betCurrency = betCurrency === 'tokens' ? 'cash' : 'tokens';
-        try { localStorage.setItem('PICKR_BET_CURRENCY', betCurrency); } catch (e) { /* ignore */ }
+        // Pickr is free-to-play: only virtual tokens are supported.
         renderBetSlip();
       });
     }
@@ -518,7 +546,7 @@
       const devUid = localStorage.getItem('DEV_AUTH_UID') || (isLocalhost ? 'test-user-123' : null);
       if (!window.firebase || !firebase.auth || !firebase.auth().currentUser) {
         if (!devUid) {
-          await failFlow('auth', 'Please sign in to place bets.');
+          await failFlow('auth', 'Please sign in to submit picks.');
           confirmBtn.disabled = false;
           confirmBtn.classList.remove('opacity-60', 'cursor-not-allowed');
           return;
@@ -548,21 +576,11 @@
       const currentTokens = userProfile && typeof userProfile.tokens !== 'undefined'
         ? Number(userProfile.tokens)
         : getBalanceFromDom('.tokens', 0);
-      const currentCash = userProfile && typeof userProfile.cash !== 'undefined'
-        ? Number(userProfile.cash)
-        : (userProfile && typeof userProfile.cashBalance !== 'undefined' ? Number(userProfile.cashBalance) : getBalanceFromDom('.cash', 0));
-      if (betCurrency === 'tokens') {
+      // Pickr is free-to-play: picks always use virtual tokens.
+      {
         const totalTokens = Math.trunc(total);
         if (totalTokens > currentTokens) {
           await failFlow('balance', 'Insufficient token balance.');
-          confirmBtn.disabled = false;
-          confirmBtn.classList.remove('opacity-60', 'cursor-not-allowed');
-          return;
-        }
-      } else {
-        const totalCash = Number(total) || 0;
-        if (totalCash > currentCash) {
-          await failFlow('balance', 'Insufficient cash balance.');
           confirmBtn.disabled = false;
           confirmBtn.classList.remove('opacity-60', 'cursor-not-allowed');
           return;
@@ -1118,11 +1136,14 @@
     if (picksCache.data && (Date.now() - picksCache.ts) < PICKS_CACHE_TTL) {
       return picksCache.data;
     }
+    const isGuest = !(window.firebase && firebase.auth && firebase.auth().currentUser);
     let headers = await getAuthHeaders();
-    if (!headers.Authorization && !headers['x-dev-uid']) {
+    if (!isGuest && !headers.Authorization && !headers['x-dev-uid']) {
       await waitForAuthReady();
       headers = await getAuthHeaders();
     }
+    // For guests, skip auth headers entirely so the server gets a clean request
+    if (isGuest) headers = {};
     const cacheBuster = `ts=${Date.now()}`;
     const fetchSport = async (sport) => {
       const res = await fetch(`${getAPIBase()}/api/games/${sport}?${cacheBuster}`, { headers, cache: 'no-store' });
@@ -1220,7 +1241,10 @@
 
   function createLiveScoreCard(pick, espnGame) {
     const card = document.createElement('article');
-    card.className = 'bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-sm relative overflow-hidden';
+    card.className = '';
+    card.style.cssText = 'background:rgba(13,18,32,0.92);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:18px;box-shadow:0 4px 28px rgba(0,0,0,0.45);overflow:hidden;position:relative;';
+    // Top accent bar
+    (function(){const a=document.createElement('div');a.style.cssText='position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(52,211,153,0.6),rgba(122,167,255,0.25),transparent);pointer-events:none;';card.appendChild(a);})();
 
     const matchId = pick.id || pick.matchId || '';
     const startTime = pick.commence_time || pick.startTime || pick.date || '';
@@ -1268,32 +1292,81 @@
     const espnId = espnGame ? espnGame.id : '';
     const sportParam = encodeURIComponent(sportKey);
 
+    // ── Playoff series badge ──
+    let seriesText = '';
+    if (espnGame) {
+      // Primary: notes array (e.g. "Series tied 2-2", "OKC leads series 3-1")
+      if (espnGame.notes && espnGame.notes.length > 0) {
+        seriesText = espnGame.notes[0];
+      }
+      // Secondary: structured series object
+      if (!seriesText && espnGame.series) {
+        const sr = espnGame.series;
+        if (sr.summary) {
+          seriesText = sr.summary;
+        } else if (sr.homeWins != null && sr.awayWins != null) {
+          const hw = sr.homeWins, aw = sr.awayWins;
+          const homeName = espnGame.homeTeam ? (espnGame.homeTeam.abbreviation || espnGame.homeTeam.name || '') : '';
+          const awayName = espnGame.awayTeam ? (espnGame.awayTeam.abbreviation || espnGame.awayTeam.name || '') : '';
+          if (hw === aw) seriesText = 'Series tied ' + hw + '-' + aw;
+          else if (hw > aw) seriesText = homeName + ' lead ' + hw + '-' + aw;
+          else seriesText = awayName + ' lead ' + aw + '-' + hw;
+        } else if (sr.title) {
+          seriesText = sr.title;
+        }
+      }
+    }
+    const seriesBadge = seriesText
+      ? '<div data-series-badge style="display:flex;align-items:center;gap:6px;margin-top:8px;padding:5px 10px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:8px">' +
+          '<span style="font-size:11px">🏆</span>' +
+          '<span style="font-size:11px;font-weight:600;color:#fbbf24;letter-spacing:0.02em;font-family:Space Grotesk,sans-serif">' + escapeHtml(seriesText) + '</span>' +
+        '</div>'
+      : '<div data-series-badge style="display:none"></div>';
+
+    const awayScoreColor = awayWinning ? '#34d399' : awayWon ? '#ffffff' : '#94a3b8';
+    const homeScoreColor = homeWinning ? '#34d399' : homeWon ? '#ffffff' : '#94a3b8';
+    const awayNameColor  = awayWinning || awayWon ? '#ffffff' : '#cbd5e1';
+    const homeNameColor  = homeWinning || homeWon ? '#ffffff' : '#cbd5e1';
+    const awayAbbr = escapeHtml((espnGame ? espnGame.awayTeam.abbreviation : '').slice(0,3));
+    const homeAbbr = escapeHtml((espnGame ? espnGame.homeTeam.abbreviation : '').slice(0,3));
+    const clockDisplay = isLive && espnGame && espnGame.status ? escapeHtml(espnGame.status.shortDetail || espnGame.status.detail || '') : '';
+
     card.innerHTML =
-      '<div class="flex items-center justify-between mb-3">' +
-        '<div class="flex items-center gap-2" data-live-status>' + statusHtml +
-          '<span class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">' + leagueText + '</span>' +
+      /* ── Header row ── */
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">' +
+        '<div style="display:flex;align-items:center;gap:8px" data-live-status>' + statusHtml +
+          '<span style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#475569;font-weight:600">' + leagueText + '</span>' +
         '</div>' +
-        clockHtml +
+        (clockDisplay ? '<span style="font-size:11px;font-weight:700;color:#34d399;font-family:Space Grotesk,sans-serif;font-variant-numeric:tabular-nums;background:rgba(52,211,153,0.08);padding:3px 10px;border-radius:999px;border:1px solid rgba(52,211,153,0.18)">' + clockDisplay + '</span>' : '') +
       '</div>' +
-      '<div class="space-y-2.5">' +
-        '<div class="flex items-center justify-between gap-3">' +
-          '<div class="flex items-center gap-3 flex-1 min-w-0">' +
-            (awayLogo ? '<img src="' + awayLogo + '" alt="" class="w-10 h-10 rounded-full object-contain bg-white/5 flex-shrink-0" onerror="this.onerror=null;this.style.display=\'none\';var d=document.createElement(\'div\');d.className=\'w-10 h-10 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center text-xs text-slate-400\';d.textContent=\'' + escapeHtml((espnGame ? espnGame.awayTeam.abbreviation : '').slice(0,3)) + '\';this.parentNode.insertBefore(d,this);">' : '<div class="w-10 h-10 rounded-full bg-slate-700 flex-shrink-0"></div>') +
-            '<div class="min-w-0"><div class="text-sm font-semibold truncate ' + (awayWinning || awayWon ? 'text-white' : 'text-slate-300') + '">' + awayFullName + '</div></div>' +
-          '</div>' +
-          '<div class="text-2xl font-bold tracking-wide ' + (awayWinning ? 'text-emerald-400' : awayWon ? 'text-white' : 'text-slate-300') + '" style="font-family:\'Space Grotesk\',sans-serif;min-width:32px;text-align:right" data-score-side="away">' + escapeHtml(awayScore) + '</div>' +
+      /* ── Away team row ── */
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">' +
+        '<div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">' +
+          (awayLogo ? '<img src="' + awayLogo + '" alt="" style="width:38px;height:38px;object-fit:contain;" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.innerHTML=\'<span style=\\\"font-size:11px;color:#94a3b8\\\">' + awayAbbr + '</span>\'">' : '<span style="font-size:11px;color:#94a3b8">' + awayAbbr + '</span>') +
         '</div>' +
-        '<div class="flex items-center justify-between gap-3">' +
-          '<div class="flex items-center gap-3 flex-1 min-w-0">' +
-            (homeLogo ? '<img src="' + homeLogo + '" alt="" class="w-10 h-10 rounded-full object-contain bg-white/5 flex-shrink-0" onerror="this.onerror=null;this.style.display=\'none\';var d=document.createElement(\'div\');d.className=\'w-10 h-10 rounded-full bg-slate-700 flex-shrink-0 flex items-center justify-center text-xs text-slate-400\';d.textContent=\'' + escapeHtml((espnGame ? espnGame.homeTeam.abbreviation : '').slice(0,3)) + '\';this.parentNode.insertBefore(d,this);">' : '<div class="w-10 h-10 rounded-full bg-slate-700 flex-shrink-0"></div>') +
-            '<div class="min-w-0"><div class="text-sm font-semibold truncate ' + (homeWinning || homeWon ? 'text-white' : 'text-slate-300') + '">' + homeFullName + '</div></div>' +
-          '</div>' +
-          '<div class="text-2xl font-bold tracking-wide ' + (homeWinning ? 'text-emerald-400' : homeWon ? 'text-white' : 'text-slate-300') + '" style="font-family:\'Space Grotesk\',sans-serif;min-width:32px;text-align:right" data-score-side="home">' + escapeHtml(homeScore) + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:15px;font-weight:700;color:' + awayNameColor + ';font-family:Space Grotesk,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + awayFullName + '</div>' +
         '</div>' +
+        '<div style="font-size:30px;font-weight:800;color:' + awayScoreColor + ';font-family:Space Grotesk,sans-serif;min-width:42px;text-align:right;line-height:1;letter-spacing:-0.02em' + (awayWinning ? ';text-shadow:0 0 18px rgba(52,211,153,0.55)' : '') + '" data-score-side="away">' + escapeHtml(awayScore) + '</div>' +
       '</div>' +
-      ((isLive || isFinal) && espnId ? '<div class="mt-3 flex items-center justify-between">' +
-        '<span data-live-updated class="text-[9px] text-slate-500" style="font-variant-numeric:tabular-nums"></span>' +
-        '<a href="live-game.html?id=' + escapeHtml(espnId) + '&sport=' + sportParam + '" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25 transition-all">' +
+      /* ── Divider ── */
+      '<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);margin:0 0 8px 0;"></div>' +
+      /* ── Home team row ── */
+      '<div style="display:flex;align-items:center;gap:12px">' +
+        '<div style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">' +
+          (homeLogo ? '<img src="' + homeLogo + '" alt="" style="width:38px;height:38px;object-fit:contain;" onerror="this.onerror=null;this.style.display=\'none\';this.parentNode.innerHTML=\'<span style=\\\"font-size:11px;color:#94a3b8\\\">' + homeAbbr + '</span>\'">' : '<span style="font-size:11px;color:#94a3b8">' + homeAbbr + '</span>') +
+        '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:15px;font-weight:700;color:' + homeNameColor + ';font-family:Space Grotesk,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + homeFullName + '</div>' +
+        '</div>' +
+        '<div style="font-size:30px;font-weight:800;color:' + homeScoreColor + ';font-family:Space Grotesk,sans-serif;min-width:42px;text-align:right;line-height:1;letter-spacing:-0.02em' + (homeWinning ? ';text-shadow:0 0 18px rgba(52,211,153,0.55)' : '') + '" data-score-side="home">' + escapeHtml(homeScore) + '</div>' +
+      '</div>' +
+      /* ── Series badge ── */
+      seriesBadge +
+      /* ── Footer: live info link ── */
+      ((isLive || isFinal) && espnId ? '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px">' +
+        '<span data-live-updated style="font-size:9px;color:#475569;font-variant-numeric:tabular-nums"></span>' +
+        '<a href="live-game.html?id=' + escapeHtml(espnId) + '&sport=' + sportParam + '" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:700;background:rgba(52,211,153,0.12);color:#34d399;border:1px solid rgba(52,211,153,0.25);text-decoration:none;transition:all 0.18s;font-family:Space Grotesk,sans-serif">' +
           'Live Info <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>' +
         '</a></div>' : '');
 
@@ -1352,15 +1425,20 @@
     }
 
     if (isLive) {
-      card.style.borderLeftColor = '#10b981';
-      card.style.borderLeftWidth = '3px';
+      card.style.borderLeft = '3px solid rgba(52,211,153,0.7)';
+      card.style.boxShadow = '0 4px 28px rgba(0,0,0,0.45), -2px 0 20px rgba(52,211,153,0.12)';
     }
     return card;
   }
 
-  function createPickCard(pick) {
+  function createPickCard(pick, espnGame) {
     const conf = computeConfidence(pick); const confBadge = confidenceLabel(conf);
-    const card = document.createElement('article'); card.className = 'bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-sm';
+    const card = document.createElement('article'); card.className = 'market-card bg-gray-800 border border-gray-700 rounded-xl p-4 shadow-sm';
+    card.style.cssText = 'background:rgba(15,20,36,0.88);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:18px;box-shadow:0 4px 24px rgba(0,0,0,0.35);overflow:hidden;position:relative;';
+    // Subtle top accent
+    const topAccent = document.createElement('div');
+    topAccent.style.cssText = 'position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(255,122,26,0.5),rgba(122,167,255,0.25),transparent);pointer-events:none;';
+    card.appendChild(topAccent);
     const matchId = pick.id || pick.matchId || '';
     const sportKey = pick.sport_key || pick.sportKey || '';
     const startTime = pick.commence_time || pick.startTime || pick.date || '';
@@ -1404,6 +1482,23 @@
     const time = document.createElement('div'); time.className = 'text-xs'; time.style.cssText = 'color:#64748b;'; time.textContent = fmtDate(pick.commence_time || pick.startTime || pick.date || '');
     top.appendChild(league); top.appendChild(time); card.appendChild(top);
 
+    // Series badge (playoffs)
+    let pregameSeriesText = '';
+    if (espnGame) {
+      if (espnGame.notes && espnGame.notes.length > 0) pregameSeriesText = espnGame.notes[0];
+      if (!pregameSeriesText && espnGame.series) {
+        const sr = espnGame.series;
+        if (sr.summary) pregameSeriesText = sr.summary;
+        else if (sr.title) pregameSeriesText = sr.title;
+      }
+    }
+    if (pregameSeriesText) {
+      const seriesDiv = document.createElement('div');
+      seriesDiv.style.cssText = 'display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25);margin-bottom:8px;font-size:0.72rem;font-weight:600;color:#fbbf24;';
+      seriesDiv.innerHTML = '🏆 <span>' + escapeHtml(pregameSeriesText) + '</span>';
+      card.appendChild(seriesDiv);
+    }
+
     // matchup text — only show for props, skip for regular H2H since logos show team names
     if (isProp) {
       const matchup = document.createElement('div'); matchup.className = 'flex items-center justify-between gap-4';
@@ -1417,19 +1512,96 @@
       matchup.appendChild(left); card.appendChild(matchup);
     }
 
+    // Hero matchup section — only for regular H2H moneyline games
+    if (!isProp) {
+      const heroRow = document.createElement('div');
+      heroRow.style.cssText = 'display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:14px 0 6px;';
+
+      const makeTeamBlock = (teamName, isHome) => {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isHome ? 'flex-end' : 'flex-start') + ';gap:6px;';
+        // Logo circle
+        const logoCircle = document.createElement('div');
+        logoCircle.style.cssText = 'width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;overflow:hidden;';
+        const img = document.createElement('img');
+        img.style.cssText = 'width:50px;height:50px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));';
+        applyTeamLogo(img, teamName, sportKey);
+        logoCircle.appendChild(img);
+        // Team name chip
+        const nameEl = document.createElement('div');
+        const shortTeam = teamName.length > 14 ? teamName.split(' ').slice(-1)[0] : teamName;
+        nameEl.textContent = shortTeam;
+        nameEl.style.cssText = 'font-size:12px;font-weight:700;color:#e2e8f0;font-family:Space Grotesk,sans-serif;text-align:' + (isHome ? 'right' : 'left') + ';line-height:1.2;letter-spacing:-0.01em;';
+        wrap.appendChild(logoCircle);
+        wrap.appendChild(nameEl);
+        return wrap;
+      };
+
+      const awayBlock = makeTeamBlock(pick.away_team || '', false);
+      const homeBlock = makeTeamBlock(pick.home_team || '', true);
+
+      // Center VS badge
+      const vsCenter = document.createElement('div');
+      vsCenter.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;';
+      const vsBadge = document.createElement('div');
+      vsBadge.style.cssText = 'width:36px;height:36px;border-radius:50%;background:rgba(255,122,26,0.14);border:1.5px solid rgba(255,122,26,0.4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#ff7a1a;font-family:Space Grotesk,sans-serif;letter-spacing:0.04em;';
+      vsBadge.textContent = 'VS';
+      const timeChip = document.createElement('div');
+      const fmtTime = pick.commence_time || pick.startTime || pick.date || '';
+      const tDate = fmtTime ? new Date(fmtTime) : null;
+      let timeStr = '';
+      if (tDate && !isNaN(tDate.getTime())) {
+        const h = tDate.getHours(), m = tDate.getMinutes();
+        timeStr = (h % 12 || 12) + (m ? ':' + String(m).padStart(2,'0') : '') + (h < 12 ? ' AM' : ' PM');
+      }
+      timeChip.textContent = timeStr || '—';
+      timeChip.style.cssText = 'font-size:9px;font-weight:600;color:#64748b;text-align:center;letter-spacing:0.04em;font-family:Space Grotesk,sans-serif;';
+      vsCenter.appendChild(vsBadge);
+      vsCenter.appendChild(timeChip);
+
+      heroRow.appendChild(awayBlock);
+      heroRow.appendChild(vsCenter);
+      heroRow.appendChild(homeBlock);
+      card.appendChild(heroRow);
+
+      // Thin separator
+      const sep = document.createElement('div');
+      sep.style.cssText = 'height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);margin:4px 0 0 0;';
+      card.appendChild(sep);
+    }
+
     // selection buttons
     const allowDraw = !!(oddsDraw && String(sportKey || '').toLowerCase().includes('soccer'));
-    const btns = document.createElement('div'); btns.className = allowDraw ? 'grid grid-cols-3 gap-2 mt-2' : 'grid grid-cols-2 gap-3 mt-2';
+    const btns = document.createElement('div'); btns.className = allowDraw ? 'grid grid-cols-3 gap-3 mt-3' : 'grid grid-cols-2 gap-3 mt-3';
+    btns.style.cssText = 'gap:10px;margin-top:12px;';
     const makeBtn = (team, odds, isDraw = false) => {
       if (!Number.isFinite(odds) || odds <= 1) return null;
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'select-team py-3 px-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm flex flex-col items-center gap-1.5';
-      // Disable the button if the game has already started
+      b.className = 'select-team';
+      // Core styles — dark glass card feel
+      b.style.cssText = [
+        'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px',
+        'padding:14px 10px 12px',
+        'border-radius:16px',
+        'background:rgba(255,255,255,0.04)',
+        'border:1.5px solid rgba(255,255,255,0.09)',
+        'cursor:pointer',
+        'transition:background 0.18s,border-color 0.18s,transform 0.12s,box-shadow 0.18s',
+        'position:relative;overflow:hidden',
+        '-webkit-tap-highlight-color:transparent',
+      ].join(';');
       if (gameStarted) {
         b.disabled = true;
-        b.classList.add('opacity-40', 'cursor-not-allowed');
-        b.classList.remove('hover:bg-gray-600');
+        b.style.opacity = '0.38';
+        b.style.cursor = 'not-allowed';
+      } else {
+        b.addEventListener('mouseenter', () => {
+          if (!b.classList.contains('selected')) b.style.borderColor = 'rgba(255,122,26,0.4)';
+        });
+        b.addEventListener('mouseleave', () => {
+          if (!b.classList.contains('selected')) b.style.borderColor = 'rgba(255,255,255,0.09)';
+        });
       }
       b.setAttribute('data-match', matchId);
       b.setAttribute('data-team', team);
@@ -1442,35 +1614,60 @@
       if (propTitle) b.setAttribute('data-prop-title', propTitle);
       if (propLine) b.setAttribute('data-prop-line', propLine);
 
+      // Sheen overlay
+      const sheen = document.createElement('div');
+      sheen.style.cssText = 'position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,transparent 60%);pointer-events:none;border-radius:16px;';
+      b.appendChild(sheen);
+
       let iconEl = null;
       if (isProp) {
         iconEl = document.createElement('div');
-        iconEl.className = 'w-12 h-12 rounded-full bg-slate-700 text-xs font-semibold flex items-center justify-center text-slate-200';
-        iconEl.textContent = isDraw ? 'DRAW' : (team && team.toLowerCase().includes('over') ? 'O' : (team && team.toLowerCase().includes('under') ? 'U' : (team && team.toLowerCase() === 'yes' ? 'Y' : (team && team.toLowerCase() === 'no' ? 'N' : 'P'))));
+        iconEl.style.cssText = 'width:44px;height:44px;border-radius:50%;background:rgba(122,167,255,0.1);border:1.5px solid rgba(122,167,255,0.22);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;color:#9fb8ff;font-family:Space Grotesk,sans-serif;';
+        iconEl.textContent = isDraw ? 'TIE' : (team && team.toLowerCase().includes('over') ? 'O' : (team && team.toLowerCase().includes('under') ? 'U' : (team && team.toLowerCase() === 'yes' ? 'Y' : (team && team.toLowerCase() === 'no' ? 'N' : 'P'))));
       } else {
+        const imgWrap = document.createElement('div');
+        imgWrap.style.cssText = 'width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;overflow:hidden;';
         const img = document.createElement('img');
-        img.className = 'w-14 h-14 object-contain';
-        img.style.cssText = 'filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));';
+        img.style.cssText = 'width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));';
         applyTeamLogo(img, team, sportKey);
-        iconEl = img;
+        imgWrap.appendChild(img);
+        iconEl = imgWrap;
       }
       const name = document.createElement('div');
-      name.className = 'text-xs text-center';
-      name.style.cssText = 'color:#e2e8f0;font-weight:600;font-size:0.72rem;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-      name.textContent = team;
-      const oddsEl = document.createElement('div');
-      oddsEl.className = 'text-xs';
-      oddsEl.style.cssText = 'color:#7aa7ff;font-weight:600;font-family:Space Grotesk,sans-serif;font-size:0.78rem;';
-      oddsEl.textContent = odds ? `${Number(odds).toFixed(2)}x` : '';
+      name.style.cssText = 'color:#e2e8f0;font-weight:700;font-size:0.74rem;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-family:Space Grotesk,sans-serif;letter-spacing:-0.01em;';
+      // Shorten long team names
+      const shortName = team.length > 16 ? team.split(' ').slice(-1)[0] : team;
+      name.textContent = shortName;
+      // Odds pill
+      const oddsPill = document.createElement('div');
+      const amOdds = odds >= 2 ? '+' + Math.round((odds - 1) * 100) : '-' + Math.round(100 / (odds - 1));
+      oddsPill.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:rgba(122,167,255,0.1);border:1px solid rgba(122,167,255,0.22);font-size:0.72rem;font-weight:700;color:#9fb8ff;font-family:Space Grotesk,sans-serif;letter-spacing:0.02em;';
+      oddsPill.textContent = amOdds;
 
       if (iconEl) b.appendChild(iconEl);
       b.appendChild(name);
-      b.appendChild(oddsEl);
+      b.appendChild(oddsPill);
       b.addEventListener('click', () => {
-        // mark selection
-        document.querySelectorAll(`.select-team[data-match="${b.getAttribute('data-match')}"]`).forEach(s=>{ s.classList.remove('bg-red-600','text-white','opacity-50'); s.disabled = false; });
-        b.classList.add('bg-red-600','text-white');
-        document.querySelectorAll(`.select-team[data-match="${b.getAttribute('data-match')}"]`).forEach(s=>{ if (s!==b && s.getAttribute('data-team')!==team){ s.disabled = true; s.classList.add('opacity-50'); }});
+        // Reset all sibling buttons
+        document.querySelectorAll(`.select-team[data-match="${b.getAttribute('data-match')}"]`).forEach(s => {
+          s.classList.remove('selected');
+          s.style.background = 'rgba(255,255,255,0.04)';
+          s.style.borderColor = 'rgba(255,255,255,0.09)';
+          s.style.boxShadow = 'none';
+          s.style.opacity = '1';
+          s.disabled = gameStarted;
+          const sp = s.querySelector('[data-odds-pill]');
+          if (sp) { sp.style.background = 'rgba(122,167,255,0.1)'; sp.style.color = '#9fb8ff'; sp.style.borderColor = 'rgba(122,167,255,0.22)'; }
+        });
+        document.querySelectorAll(`.select-team[data-match="${b.getAttribute('data-match')}"]`).forEach(s => {
+          if (s !== b) { s.style.opacity = '0.45'; }
+        });
+        // Style selected
+        b.classList.add('selected');
+        b.style.background = 'rgba(255,122,26,0.14)';
+        b.style.borderColor = 'rgba(255,122,26,0.55)';
+        b.style.boxShadow = '0 0 20px rgba(255,122,26,0.2)';
+        b.style.opacity = '1';
         const oddsVal = b.getAttribute('data-odds');
         addSelection(b.getAttribute('data-match'), team, oddsVal ? Number(oddsVal) : null, {
           sportKey: b.getAttribute('data-sport') || '',
@@ -1521,10 +1718,10 @@
       recBar.style.cssText = 'margin-top:0.75rem;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0.55rem 0.75rem;border-radius:12px;background:rgba(122,167,255,0.08);border:1px solid rgba(122,167,255,0.15);';
       recBar.innerHTML = `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:#94a3b8;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><path d="M9.663 17h4.674M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke="#7aa7ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="color:#cbd5e1;font-weight:600;">${escapeHtml(rec.team)}</span><span style="color:#64748b;">• ${Math.round(rec.prob*100)}%</span></div>`;
       const recBtn = document.createElement('button'); recBtn.type = 'button';
-      recBtn.style.cssText = 'padding:0.3rem 0.7rem;border-radius:999px;background:rgba(122,167,255,0.15);color:#7aa7ff;font-size:0.68rem;font-weight:600;border:1px solid rgba(122,167,255,0.25);cursor:pointer;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.06em;';
-      recBtn.textContent = 'Select';
-      recBtn.addEventListener('mouseenter', () => { recBtn.style.background = 'rgba(122,167,255,0.25)'; });
-      recBtn.addEventListener('mouseleave', () => { recBtn.style.background = 'rgba(122,167,255,0.15)'; });
+      recBtn.style.cssText = 'padding:0.35rem 0.85rem;border-radius:999px;background:linear-gradient(135deg,rgba(255,122,26,0.25),rgba(255,122,26,0.12));color:#ffb37a;font-size:0.72rem;font-weight:700;border:1px solid rgba(255,122,26,0.4);cursor:pointer;white-space:nowrap;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.06em;font-family:Space Grotesk,sans-serif;';
+      recBtn.textContent = 'Select →';
+      recBtn.addEventListener('mouseenter', () => { recBtn.style.background = 'linear-gradient(135deg,rgba(255,122,26,0.4),rgba(255,122,26,0.22))'; });
+      recBtn.addEventListener('mouseleave', () => { recBtn.style.background = 'linear-gradient(135deg,rgba(255,122,26,0.25),rgba(255,122,26,0.12))'; });
       recBtn.addEventListener('click', () => { const selector = `.select-team[data-match="${pick.id || pick.matchId}"][data-team="${rec.team}"]`; const el = document.querySelector(selector); if (el) el.click(); });
       recBar.appendChild(recBtn);
       card.appendChild(recBar);
@@ -1622,7 +1819,8 @@
           const card = createLiveScoreCard(p, espnGame);
           if (card) { container.appendChild(card); rendered++; }
         } else {
-          const card = createPickCard(p);
+          const pregameEspn = matchPickToEspnGame(p, liveGames);
+          const card = createPickCard(p, pregameEspn);
           if (card) { container.appendChild(card); rendered++; }
         }
       });
@@ -1670,15 +1868,15 @@
       } else {
         const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
         const devUid = localStorage.getItem('DEV_AUTH_UID') || (isLocalhost ? 'test-user-123' : null);
-        if (!devUid) { historyContainer.innerHTML = '<div class="text-gray-500">Please sign in to view your bets and wallet.</div>'; return; }
+        if (!devUid) { historyContainer.innerHTML = '<div class="text-gray-500">Please sign in to view your picks and profile.</div>'; return; }
         headers['x-dev-uid'] = devUid;
       }
       const betsUrl = getAPIBase() + '/api/bets?ts=' + Date.now();
       const resp = await fetch(betsUrl, { headers, cache: 'no-store' });
-      if (!resp.ok) { historyContainer.innerHTML = '<div class="text-gray-500">No bets yet.</div>'; return; }
+      if (!resp.ok) { historyContainer.innerHTML = '<div class="text-gray-500">No picks yet.</div>'; return; }
       const data = await resp.json();
       const bets = Array.isArray(data.bets) ? data.bets : [];
-      if (bets.length === 0) { historyContainer.innerHTML = '<div class="text-gray-500">No bets yet.</div>'; return; }
+      if (bets.length === 0) { historyContainer.innerHTML = '<div class="text-gray-500">No picks yet.</div>'; return; }
       bets.forEach(item => {
         const d = document.createElement('div'); d.className = 'py-2 flex justify-between items-start';
         const stake = Number(item.stake || item.amount || 0).toFixed(2);
@@ -1688,7 +1886,7 @@
       });
     } catch (e) {
       console.warn('Failed to load wallet bets:', e && e.message);
-      historyContainer.innerHTML = '<div class="text-gray-500">Failed to load bets.</div>';
+      historyContainer.innerHTML = '<div class="text-gray-500">Failed to load picks.</div>';
     }
   }
 
@@ -2300,7 +2498,7 @@
     const cutoff = resolveRangeStart();
     const label = range === 'month' ? 'This month' : range === 'year' ? 'This year' : 'This week';
     if (summaryRange) summaryRange.textContent = label;
-    if (summaryText) summaryText.textContent = `Showing your bets from ${label.toLowerCase()}.`;
+    if (summaryText) summaryText.textContent = `Showing your picks from ${label.toLowerCase()}.`;
     if (summaryChip) summaryChip.textContent = label;
 
     if (loader) loader.classList.remove('hidden');
@@ -2319,9 +2517,9 @@
         const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
         const devUid = localStorage.getItem('DEV_AUTH_UID') || (isLocalhost ? 'test-user-123' : null);
         if (!devUid) {
-          container.innerHTML = '<div class="empty-state">Please sign in to view your recent bets.</div>';
+          container.innerHTML = '<div class="empty-state">Please sign in to view your recent picks.</div>';
           if (summaryCount) summaryCount.textContent = '0';
-          if (summaryStake) summaryStake.textContent = '$0.00';
+          if (summaryStake) summaryStake.textContent = '0';
           return;
         }
         headers['x-dev-uid'] = devUid;
@@ -2331,21 +2529,21 @@
       if (requestId !== recentBetsRequestId) return;
       if (resp.status === 401 || resp.status === 403) {
         if (requestId !== recentBetsRequestId) return;
-        container.innerHTML = '<div class="empty-state">Session expired. Please sign in again to view your bets.</div>';
+        container.innerHTML = '<div class="empty-state">Session expired. Please sign in again to view your picks.</div>';
         if (summaryCount) summaryCount.textContent = '0';
         if (summaryWins) summaryWins.textContent = '0';
         if (summaryLosses) summaryLosses.textContent = '0';
-        if (summaryCash) summaryCash.textContent = '$0.00';
+        if (summaryCash) summaryCash.textContent = '0';
         if (summaryTokens) summaryTokens.textContent = '0';
         return;
       }
       if (!resp.ok) {
         if (requestId !== recentBetsRequestId) return;
-        container.innerHTML = `<div class="empty-state">No bets found for ${label.toLowerCase()}.</div>`;
+        container.innerHTML = `<div class="empty-state">No picks found for ${label.toLowerCase()}.</div>`;
         if (summaryCount) summaryCount.textContent = '0';
         if (summaryWins) summaryWins.textContent = '0';
         if (summaryLosses) summaryLosses.textContent = '0';
-        if (summaryCash) summaryCash.textContent = '$0.00';
+        if (summaryCash) summaryCash.textContent = '0';
         if (summaryTokens) summaryTokens.textContent = '0';
         return;
       }
@@ -2388,7 +2586,7 @@
       if (countBadge) countBadge.textContent = String(recent.length);
       if (summaryWins) summaryWins.textContent = String(wins);
       if (summaryLosses) summaryLosses.textContent = String(losses);
-      if (summaryCash) summaryCash.textContent = `$${cashWagered.toFixed(2)}`;
+      if (summaryCash) summaryCash.textContent = String(Math.round(tokensWagered));
       if (summaryTokens) summaryTokens.textContent = `${Math.round(tokensWagered)}`;
 
       if (recent.length === 0) {
@@ -2400,10 +2598,10 @@
           setTimeout(() => {
             loadRecentBets({ containerId, days, attempt: attempt + 1 });
           }, 1200);
-          container.innerHTML = '<div class="empty-state">Syncing your bets. One moment...</div>';
+          container.innerHTML = '<div class="empty-state">Syncing your picks. One moment...</div>';
           return;
         }
-        const emptyMessage = `No bets for ${label.toLowerCase()}. Try the Sports tab to place a new one.`;
+        const emptyMessage = `No picks for ${label.toLowerCase()}. Try the Sports tab to make a new one.`;
         container.innerHTML = `
           <div class="empty-state">
             <div>${emptyMessage}</div>
@@ -2426,11 +2624,9 @@
         const stakeValue = Number(item.stake || 0);
         const tokenToCashRate = Number(item.tokenToCashRate || 0.01);
         const isToken = stakeCurrency === 'tokens';
-        const stakeTokensValue = stakeTokens || (isToken ? stakeValue : 0);
+        const stakeTokensValue = stakeTokens || (isToken ? stakeValue : Math.round(stakeCash / (tokenToCashRate || 0.01)));
         const stakeCashValue = stakeCash || (!isToken ? stakeValue : Math.round(stakeTokensValue * tokenToCashRate * 100) / 100);
-        const stakeDisplay = isToken
-          ? `${stakeTokensValue.toFixed(0)} Tokens`
-          : `$${stakeCashValue.toFixed(2)} Cash`;
+        const stakeDisplay = `${Math.round(stakeTokensValue)} Tokens`;
         const selectionItems = (item.selections && item.selections.length)
           ? item.selections
           : [{ pick: item.team || item.description || 'Selection' }];
@@ -2468,17 +2664,12 @@
           : 'Awaiting results';
         const combinedOdds = Number(item.combinedOdds || 0);
         const oddsLabel = combinedOdds > 0 ? `${combinedOdds.toFixed(2)}x` : '—';
-        const stakeLabel = isToken ? 'Tokens' : 'Cash';
-        const potentialRaw = Number(item.potentialPayout || 0);
-        const potentialWin = potentialRaw > 0
-          ? potentialRaw
-          : (combinedOdds > 1 ? stakeCashValue * combinedOdds : 0);
-        const potentialDisplay = potentialWin ? `$${potentialWin.toFixed(2)}` : '—';
+        const stakeLabel = 'Tokens';
+        const potentialWin = combinedOdds > 1 ? Math.round(stakeTokensValue * combinedOdds) : 0;
+        const potentialDisplay = potentialWin ? `${potentialWin} Tokens` : '—';
         const isParlay = String(item.type || '').toLowerCase() === 'parlay' || selectionItems.length > 1;
         const typeLabel = isParlay ? `PARLAY ${selectionItems.length}-LEG` : 'SINGLE';
-        const cashNote = isToken
-          ? `<div class="bet-card__sub"><span>Token value</span><span>$${escapeHtml(stakeCashValue.toFixed(2))} cash</span></div>`
-          : '';
+        const cashNote = '';
         const card = document.createElement('article');
         card.className = `bet-card ${statusClass}`;
         card.innerHTML = `
@@ -2507,7 +2698,7 @@
           </div>
           ${cashNote}
           <div class="bet-card__sub">
-            <span>Potential win</span>
+            <span>Potential return</span>
             <span>${escapeHtml(potentialDisplay)}</span>
           </div>
         `;
@@ -2586,9 +2777,9 @@
     } catch (e) {
       console.warn('Failed to load recent bets:', e && e.message);
       if (requestId !== recentBetsRequestId) return;
-      container.innerHTML = '<div class="empty-state">Failed to load bets. Try again shortly.</div>';
+      container.innerHTML = '<div class="empty-state">Failed to load picks. Try again shortly.</div>';
       if (summaryCount) summaryCount.textContent = '0';
-      if (summaryStake) summaryStake.textContent = '$0.00';
+      if (summaryStake) summaryStake.textContent = '0';
       if (loader) loader.classList.add('hidden');
     }
   }
@@ -2632,7 +2823,7 @@
 
   // ── Reveal page helper ──
   // Hides spinner + makes .pickr-page-content visible in one shot.
-  // Called after syncUserProfile so real data is in the header.
+  // Waits for all resources (images, fonts) to finish loading first.
   window.__pickrPageRevealed = false;
   window.__pickrAuthGatePending = false;
   function revealPage() {
@@ -2641,14 +2832,25 @@
     if (window.__pickrOnboardingRedirect) return;
     // Keep loader visible while initial auth/profile gate is still running
     if (window.__pickrAuthGatePending) return;
-    window.__pickrPageRevealed = true;
-    // Show page content
-    document.querySelectorAll('.pickr-page-content').forEach(function(el) {
-      el.style.visibility = 'visible';
-    });
-    // Dismiss spinner — slightly longer fade so bouncing ball exit is smooth
-    var pl = document.getElementById('pageLoader');
-    if (pl) { pl.classList.add('loaded'); setTimeout(function(){ pl.remove(); }, 800); }
+
+    function doReveal() {
+      if (window.__pickrPageRevealed) return;
+      if (window.__pickrOnboardingRedirect) return;
+      window.__pickrPageRevealed = true;
+      document.querySelectorAll('.pickr-page-content').forEach(function(el) {
+        el.style.visibility = 'visible';
+      });
+      var pl = document.getElementById('pageLoader');
+      if (pl) { pl.classList.add('loaded'); setTimeout(function(){ pl.remove(); }, 800); }
+    }
+
+    // If page resources are fully loaded, reveal immediately.
+    // Otherwise defer until window 'load' fires (images, fonts, etc. all done).
+    if (document.readyState === 'complete') {
+      doReveal();
+    } else {
+      window.addEventListener('load', doReveal, { once: true });
+    }
   }
 
   // Setup page interactions when DOM ready
@@ -2778,6 +2980,34 @@
         return list.filter((pick) => String(pick.league || '').toLowerCase() === String(selectedLeague).toLowerCase());
       };
 
+      // Enable only the soccer leagues that currently have games; disable the empty ones
+      // so users never land on an empty league view.
+      const refreshLeagueTabs = (soccerList) => {
+        if (!leagueButtons.length) return;
+        const list = Array.isArray(soccerList) ? soccerList : [];
+        const leaguesWithGames = new Set(
+          list.map((pick) => String(pick.league || '').toLowerCase()).filter(Boolean)
+        );
+        leagueButtons.forEach((btn) => {
+          const lg = btn.dataset.league || 'all';
+          const has = lg === 'all' ? list.length > 0 : leaguesWithGames.has(String(lg).toLowerCase());
+          setTabState(btn, has);
+        });
+      };
+
+      // Highlight and select the first league tab that has games (prefers "All leagues").
+      const selectFirstAvailableLeague = () => {
+        const firstAvailable = leagueButtons.find((b) => !b.classList.contains('is-disabled'));
+        leagueButtons.forEach((b) => b.classList.remove('bg-red-600'));
+        if (firstAvailable) {
+          firstAvailable.classList.add('bg-red-600');
+          selectedLeague = firstAvailable.dataset.league || 'all';
+        } else {
+          selectedLeague = 'all';
+        }
+        return firstAvailable;
+      };
+
       const refreshActivePicks = async () => {
         picksCache = { data: null, ts: 0 };
         try { localStorage.setItem('PICKR_LAST_PICKS_REFRESH', '0'); } catch (e) {}
@@ -2787,7 +3017,9 @@
         if (s === 'soccer') {
           try {
             const { data } = await getAllPicksData();
-            const list = applyLeagueFilter((data.picksBySport && data.picksBySport.soccer) || []);
+            const soccerList = (data.picksBySport && data.picksBySport.soccer) || [];
+            refreshLeagueTabs(soccerList);
+            const list = applyLeagueFilter(soccerList);
             loadPicks(s, null, list);
           } catch (err) {
             loadPicks(s);
@@ -2822,14 +3054,12 @@
           soccerLeagueTabs.classList.toggle('hidden', s !== 'soccer');
         }
         if (s === 'soccer') {
-          // Reset league filter to "All" and highlight it
-          selectedLeague = 'all';
-          leagueButtons.forEach((b) => b.classList.remove('bg-red-600'));
-          const allBtn = leagueButtons.find((b) => (b.dataset.league || 'all') === 'all');
-          if (allBtn) allBtn.classList.add('bg-red-600');
           try {
             const { picksBySport } = await getAllPicksData();
-            const list = applyLeagueFilter((picksBySport && picksBySport.soccer) || []);
+            const soccerList = (picksBySport && picksBySport.soccer) || [];
+            refreshLeagueTabs(soccerList);
+            selectFirstAvailableLeague();
+            const list = applyLeagueFilter(soccerList);
             loadPicks(s, null, list);
           } catch (err) {
             loadPicks(s);
@@ -2842,6 +3072,7 @@
 
       leagueButtons.forEach((btn) => {
         btn.addEventListener('click', async () => {
+          if (btn.classList.contains('is-disabled')) return;
           leagueButtons.forEach((b) => b.classList.remove('bg-red-600'));
           btn.classList.add('bg-red-600');
           selectedLeague = btn.dataset.league || 'all';
@@ -2872,18 +3103,13 @@
         const s = firstAvailable.dataset.sport || 'all';
         if (soccerLeagueTabs) {
           soccerLeagueTabs.classList.toggle('hidden', s !== 'soccer');
-          const defaultLeague = leagueButtons[0];
-          if (defaultLeague) {
-            leagueButtons.forEach((b) => b.classList.remove('bg-red-600'));
-            defaultLeague.classList.add('bg-red-600');
-            selectedLeague = defaultLeague.dataset.league || 'all';
-          }
         }
-        const lastRefresh = Number(localStorage.getItem('PICKR_LAST_PICKS_REFRESH') || 0);
         if (s === 'soccer') {
           try {
-            const { picksBySport } = await getAllPicksData();
-            const list = applyLeagueFilter((picksBySport && picksBySport.soccer) || []);
+            const soccerList = (data.picksBySport && data.picksBySport.soccer) || [];
+            refreshLeagueTabs(soccerList);
+            selectFirstAvailableLeague();
+            const list = applyLeagueFilter(soccerList);
             loadPicks(s, null, list);
           } catch (err) {
             loadPicks(s);
@@ -2962,6 +3188,30 @@
                 if (!_gameEndTimes[game.id]) _gameEndTimes[game.id] = now;
                 card.style.borderLeftColor = '';
                 card.style.borderLeftWidth = '';
+              }
+            }
+
+            // Update series badge
+            const seriesBadgeEl = card.querySelector('[data-series-badge]');
+            if (seriesBadgeEl) {
+              let updatedSeriesText = '';
+              if (game.notes && game.notes.length > 0) updatedSeriesText = game.notes[0];
+              if (!updatedSeriesText && game.series) {
+                const sr = game.series;
+                if (sr.summary) updatedSeriesText = sr.summary;
+                else if (sr.homeWins != null && sr.awayWins != null) {
+                  const hw = sr.homeWins, aw = sr.awayWins;
+                  const homeName = game.homeTeam ? (game.homeTeam.abbreviation || game.homeTeam.name || '') : '';
+                  const awayName = game.awayTeam ? (game.awayTeam.abbreviation || game.awayTeam.name || '') : '';
+                  if (hw === aw) updatedSeriesText = 'Series tied ' + hw + '-' + aw;
+                  else if (hw > aw) updatedSeriesText = homeName + ' lead ' + hw + '-' + aw;
+                  else updatedSeriesText = awayName + ' lead ' + aw + '-' + hw;
+                } else if (sr.title) updatedSeriesText = sr.title;
+              }
+              if (updatedSeriesText) {
+                seriesBadgeEl.style.display = 'flex';
+                const textEl = seriesBadgeEl.querySelector('span:last-child');
+                if (textEl) textEl.textContent = updatedSeriesText;
               }
             }
 

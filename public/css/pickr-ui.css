@@ -1,0 +1,287 @@
+/* ==========================================================================
+   Pickr shared design system  (css/pickr-ui.css)
+   --------------------------------------------------------------------------
+   Single source of truth for design tokens + reusable components used across
+   every page. Additive & namespaced (pk-*) so it never clashes with existing
+   per-page inline CSS. Colours adapted from Pickr's existing brand
+   (ink / ember / mint / sky / gold) rather than replacing it.
+   ========================================================================== */
+
+:root {
+  /* Brand */
+  --pk-ink: #0b0f1a;
+  --pk-ember: #ff7a1a;
+  --pk-ember-hover: #ff9e50;
+  --pk-mint: #40d9b5;
+  --pk-sky: #7aa7ff;
+  --pk-gold: #f0c842;
+
+  /* Semantic surfaces */
+  --pk-bg: #0b0f1a;
+  --pk-surface: rgba(17, 25, 40, 0.82);
+  --pk-surface-raised: rgba(30, 41, 59, 0.9);
+  --pk-border: rgba(255, 255, 255, 0.08);
+  --pk-border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Text */
+  --pk-text: #f1f5f9;
+  --pk-text-secondary: #b5b9c5;
+  --pk-text-muted: #7f8698;
+
+  /* Status */
+  --pk-success: #34d399;
+  --pk-warning: #f0c842;
+  --pk-error: #f87171;
+
+  /* Radius */
+  --pk-radius-sm: 8px;
+  --pk-radius-md: 14px;
+  --pk-radius-lg: 20px;
+  --pk-radius-pill: 999px;
+
+  /* Shadow */
+  --pk-shadow-card: 0 12px 30px rgba(0, 0, 0, 0.28);
+  --pk-shadow-raised: 0 18px 44px rgba(0, 0, 0, 0.42);
+
+  /* Spacing scale */
+  --pk-space-1: 4px;
+  --pk-space-2: 8px;
+  --pk-space-3: 12px;
+  --pk-space-4: 16px;
+  --pk-space-5: 24px;
+  --pk-space-6: 32px;
+  --pk-space-7: 48px;
+
+  /* Layout */
+  --pk-content-width: 1200px;
+  --pk-tabbar-height: 60px;
+
+  /* Motion */
+  --pk-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --pk-dur: 180ms;
+
+  /* Fonts (already loaded per page) */
+  --pk-font-head: 'Space Grotesk', system-ui, sans-serif;
+  --pk-font-body: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: visible focus + reduced motion (global, safe, additive)
+   -------------------------------------------------------------------------- */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--pk-sky);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visually-hidden helper for screen-reader-only labels */
+.pk-sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* ==========================================================================
+   Standardized bottom navigation (mobile-first tab bar)
+   5 primary items: Sports · Insights · Perks · My Picks · Profile
+   ========================================================================== */
+.pk-tabbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: stretch;
+  background: rgba(11, 15, 26, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--pk-border);
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.32);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pk-tab {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--pk-tabbar-height);
+  padding: 8px 4px;
+  color: var(--pk-text-muted);
+  font-family: var(--pk-font-head);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  text-align: center;
+  position: relative;
+  transition: color var(--pk-dur) var(--pk-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pk-tab svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform var(--pk-dur) var(--pk-ease);
+}
+
+.pk-tab:hover { color: var(--pk-text-secondary); }
+
+.pk-tab.is-active {
+  color: var(--pk-ember);
+}
+
+.pk-tab.is-active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 26px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--pk-ember);
+  box-shadow: 0 0 12px rgba(255, 122, 26, 0.55);
+}
+
+.pk-tab.is-active svg { transform: translateY(-1px); }
+
+.pk-tab:focus-visible {
+  outline: 2px solid var(--pk-sky);
+  outline-offset: -3px;
+  border-radius: 8px;
+}
+
+/* Desktop: keep the tab bar but widen tap areas and centre it */
+@media (min-width: 769px) {
+  .pk-tabbar { justify-content: center; gap: 8px; padding-inline: 12px; }
+  .pk-tab { flex: 0 1 128px; font-size: 12px; }
+  .pk-tab svg { width: 20px; height: 20px; }
+}
+
+/* ==========================================================================
+   Reusable components (opt-in via class) for later redesign stages
+   ========================================================================== */
+
+/* Buttons ------------------------------------------------------------------ */
+.pk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--pk-radius-md);
+  font-family: var(--pk-font-head);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform var(--pk-dur) var(--pk-ease),
+              box-shadow var(--pk-dur) var(--pk-ease),
+              background var(--pk-dur) var(--pk-ease),
+              border-color var(--pk-dur) var(--pk-ease);
+}
+.pk-btn:disabled, .pk-btn[aria-disabled="true"] {
+  opacity: 0.5; cursor: not-allowed; transform: none !important;
+}
+.pk-btn-primary {
+  background: linear-gradient(135deg, var(--pk-ember), var(--pk-ember-hover));
+  color: var(--pk-ink);
+  box-shadow: 0 6px 20px rgba(255, 122, 26, 0.32);
+}
+.pk-btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(255, 122, 26, 0.46); }
+.pk-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--pk-text);
+  border-color: var(--pk-border-strong);
+}
+.pk-btn-secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+.pk-btn-ghost {
+  background: transparent;
+  color: var(--pk-text-secondary);
+}
+.pk-btn-ghost:hover:not(:disabled) { color: var(--pk-text); }
+
+/* Cards -------------------------------------------------------------------- */
+.pk-card {
+  background: var(--pk-surface);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  box-shadow: var(--pk-shadow-card);
+  padding: var(--pk-space-5);
+}
+
+/* Badges ------------------------------------------------------------------- */
+.pk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--pk-radius-pill);
+  font-family: var(--pk-font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+.pk-badge-mint { background: rgba(64, 217, 181, 0.14); color: #7de6c9; border-color: rgba(64, 217, 181, 0.4); }
+.pk-badge-ember { background: rgba(255, 122, 26, 0.16); color: #ffb37a; border-color: rgba(255, 122, 26, 0.4); }
+.pk-badge-muted { background: rgba(148, 163, 184, 0.12); color: var(--pk-text-secondary); border-color: var(--pk-border); }
+
+/* Skeleton loaders --------------------------------------------------------- */
+.pk-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--pk-radius-md);
+}
+.pk-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation: pk-shimmer 1.3s infinite;
+}
+@keyframes pk-shimmer { to { transform: translateX(100%); } }
+
+/* Empty / error states ----------------------------------------------------- */
+.pk-state {
+  text-align: center;
+  padding: var(--pk-space-6) var(--pk-space-4);
+  color: var(--pk-text-secondary);
+}
+.pk-state-icon { font-size: 32px; margin-bottom: var(--pk-space-3); opacity: 0.85; }
+.pk-state-title { font-family: var(--pk-font-head); font-size: 16px; font-weight: 700; color: var(--pk-text); margin-bottom: 6px; }
+.pk-state-text { font-size: 13px; max-width: 34ch; margin: 0 auto var(--pk-space-4); line-height: 1.5; }
+
+/* Disclosure notice -------------------------------------------------------- */
+.pk-notice {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--pk-text-secondary);
+  background: rgba(122, 167, 255, 0.08);
+  border: 1px solid rgba(122, 167, 255, 0.18);
+  border-radius: var(--pk-radius-md);
+  padding: var(--pk-space-3) var(--pk-space-4);
+}

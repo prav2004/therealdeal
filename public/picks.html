@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Pickr – My Bets</title>
+    <title>Pickr – My Picks</title>
     <!-- Firebase auth guard (keeps unauthenticated users on the login page) -->
     <script src="config.js?v=20260410a"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -39,10 +39,7 @@
           console.warn('Failed to configure Auth emulator on client:', e && e.message);
         }
         async function enforceProfile(user) {
-          if (!user) {
-            window.location.replace('/login.html');
-            return;
-          }
+          if (!user) return; // unauthenticated visitors can browse freely
           try {
             const idToken = await user.getIdToken();
             const apiBase = (window.PICKR_CONFIG && window.PICKR_CONFIG.API_BASE_URL) || '';
@@ -62,10 +59,7 @@
         }
 
         auth.onAuthStateChanged(async (user) => {
-          if (!user) {
-            window.location.replace('/login.html');
-            return;
-          }
+          if (!user) return; // unauthenticated visitors can browse freely
 
           // Keep compatibility cache for existing UI code
           localStorage.setItem('pickrUser', JSON.stringify({
@@ -96,6 +90,7 @@
     <link rel="icon" type="image/png" sizes="48x48" href="tablogo.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="tablogo.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="tablogo.png" />
+    <script src="js/guest.js?v=1"></script>
     <link rel="manifest" href="manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -105,6 +100,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pickr-ui.css?v=1" />
     <style>
       :root {
         --ink: #0b0f1a;
@@ -698,10 +694,6 @@
             <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#34d399" stroke-width="2"/><path d="M12 7v10" stroke="#34d399" stroke-width="2" stroke-linecap="round"/><path d="M9 9.5c0-1 1.3-1.5 3-1.5s3 .5 3 1.5-1.3 1.5-3 1.5-3 .5-3 1.5 1.3 1.5 3 1.5 3 .5 3 1.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span class="tokens">0</span>
           </div>
-          <div class="banner-bal banner-bal-cash">
-            <svg class="bal-icon" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" stroke="#fbbf24" stroke-width="2"/><path d="M12 9v6" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/><path d="M10 10.5c0-.8 .9-1.2 2-1.2s2 .4 2 1.2-.9 1.2-2 1.2-2 .4-2 1.2.9 1.2 2 1.2 2 .4 2 1.2" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span class="cash">$0</span>
-          </div>
         </div>
       </div>
     </div>
@@ -726,7 +718,7 @@
             <div class="stat-icon stat-icon--blue">
               <svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="9" y="3" width="6" height="4" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
             </div>
-            <div class="stat-label">Bets</div>
+            <div class="stat-label">Picks</div>
             <div id="recentBetsCount" class="stat-value">0</div>
           </div>
           <div class="stat-card">
@@ -747,8 +739,8 @@
             <div class="stat-icon stat-icon--amber">
               <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 10.5c0-.8.9-1.2 2-1.2s2 .4 2 1.2-.9 1.2-2 1.2-2 .4-2 1.2.9 1.2 2 1.2 2 .4 2 1.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
             </div>
-            <div class="stat-label">Cash</div>
-            <div id="recentCashWagered" class="stat-value">$0</div>
+            <div class="stat-label">Tokens used</div>
+            <div id="recentCashWagered" class="stat-value">0</div>
           </div>
           <div class="stat-card">
             <div class="stat-icon stat-icon--mint">
@@ -769,7 +761,7 @@
         <!-- Bets section -->
         <div class="bets-section">
           <div class="bets-title-row">
-            <h3 class="bets-heading">My Bets</h3>
+            <h3 class="bets-heading">My Picks</h3>
             <div class="pill-tabs">
               <button id="rangeWeek" class="pill-tab" type="button">Week</button>
               <button id="rangeMonth" class="pill-tab" type="button">Month</button>
@@ -786,34 +778,30 @@
     </main>
 
     <!-- Bottom Navigation (standardized) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 border-t border-white/5 shadow-inner flex text-xs bottom-nav">
-      <a href="leaderboard.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">⭐</span>
-        <span>Pickr Picks</span>
-      </a>
-      <a href="tasks.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">📝</span>
-        <span>Tasks</span>
-      </a>
-      <a href="index.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🏈</span>
+    <nav class="pk-tabbar" aria-label="Primary">
+      <a href="index.html" class="pk-tab" aria-label="Sports">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
         <span>Sports</span>
       </a>
-      <a href="casino.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🎰</span>
-        <span>Casino</span>
+      <a href="leaderboard.html" class="pk-tab" aria-label="Insights">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg>
+        <span>Insights</span>
       </a>
-      <a href="picks.html" class="nav-link active flex-1 flex flex-col items-center py-2">
-        <span class="text-xl">🎯</span>
-        <span>Picks</span>
+      <a href="tasks.html" class="pk-tab" aria-label="Perks">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        <span>Perks</span>
       </a>
-      <a href="wallet.html" class="nav-link flex-1 flex flex-col items-center py-2">
-        <div class="pickr-avatar" data-size="24" aria-hidden="true"></div>
-        <span>Wallet</span>
+      <a href="picks.html" class="pk-tab is-active" aria-label="My Picks" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>My Picks</span>
+      </a>
+      <a href="wallet.html" class="pk-tab" aria-label="Profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span>Profile</span>
       </a>
     </nav>
 
-    <script src="script.js?v=20260327-spinfix"></script>
+    <script src="script.js?v=20260327-autoselect"></script>
     <footer class="mt-14 border-t border-white/10 bg-white/5 footer-safe">
       <div class="mx-auto w-full max-w-6xl px-4 py-10">
         <div class="grid gap-8 md:grid-cols-3">

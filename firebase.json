@@ -1,4 +1,7 @@
 {
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  },
   "hosting": {
     "public": "public",
     "ignore": [
@@ -12,6 +15,13 @@
         "headers": [
           { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
         ]
+      }
+    ],
+    "redirects": [
+      {
+        "source": "/",
+        "type": 302,
+        "destination": "/tasks.html"
       }
     ],
     "rewrites": [

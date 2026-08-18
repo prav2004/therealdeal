@@ -1390,9 +1390,13 @@ settlePendingBets().catch((err) => {
 // --------------------------------------------------------------------------
 app.get('/api/leaderboard/players', async (req, res) => {
   try {
-    const limit = Math.min(100, Math.max(10, Number(req.query.limit || 50)));
+    const limit = Math.min(500, Math.max(10, Number(req.query.limit || 50)));
     const startAfterPointsRaw = req.query.startAfterPoints;
-    let query = firestore.collection('users').orderBy('points', 'desc');
+    // Filter at query level so we never waste limit slots on incomplete profiles
+    let query = firestore.collection('users')
+      .where('profileComplete', '==', true)
+      .where('ageVerified', '==', true)
+      .orderBy('points', 'desc');
     if (typeof startAfterPointsRaw !== 'undefined') {
       const startAfterPoints = Number(startAfterPointsRaw);
       if (!Number.isFinite(startAfterPoints)) {
@@ -1404,11 +1408,12 @@ app.get('/api/leaderboard/players', async (req, res) => {
     const rows = [];
     snap.forEach((doc) => {
       const u = doc.data() || {};
-      const email = String(u.email || '');
-      const name = u.screenName || u.fullName || (email ? email.split('@')[0] : 'Player');
+      // Still require a screen name (set during onboarding)
+      const screenName = String(u.screenName || '').trim();
+      if (!screenName) return;
       rows.push({
         uid: u.uid || doc.id,
-        name,
+        name: screenName,
         avatarId: u.avatarId || null,
         points: Number(u.points || 0),
         level: u.level || 'Bronze',
@@ -1644,7 +1649,23 @@ function parseScoreboardEvents(events, leagueLabel) {
         score: away.score || '0',
         record: (away.records && away.records[0] && away.records[0].summary) || ''
       },
-      situation: mlbSituation
+      situation: mlbSituation,
+      seasonType: (ev.season && ev.season.type) || 2,
+      notes: (ev.notes && ev.notes.length > 0)
+        ? ev.notes.map(n => n.headline || n.text || '').filter(Boolean)
+        : null,
+      series: (function() {
+        const s = comp.series;
+        if (!s) return null;
+        const hc = (s.competitors || []).find(c => c.id && home.team && c.id === (home.team.id || ''));
+        const ac = (s.competitors || []).find(c => c.id && away.team && c.id === (away.team.id || ''));
+        return {
+          title: s.title || '',
+          summary: s.summary || '',
+          homeWins: hc ? (Number(hc.wins) || 0) : 0,
+          awayWins: ac ? (Number(ac.wins) || 0) : 0
+        };
+      })()
     };
   }).filter(Boolean);
 }
@@ -2313,77 +2334,27 @@ app.post('/api/wallet/buy-tokens', authMiddleware, ensureProfileComplete, async 
 });
 
 /**
- * POST /api/wallet/deposit-cash
- * Body: { amount?: number }
- * Auth: Bearer <idToken>
- * Credits the authenticated user with cash and returns updated balance.
+ * POST /api/wallet/deposit-cash  — RETIRED
+ * Pickr is a free-to-play practice platform. It does not accept deposits,
+ * hold funds, or process real money. This endpoint is retired and no longer
+ * performs any cash operation. Existing Firestore fields are left untouched.
  */
-app.post('/api/wallet/deposit-cash', authMiddleware, ensureProfileComplete, async (req, res) => {
-  try {
-    const uid = req.uid;
-    const amount = req.body && Number(req.body.amount) ? Number(req.body.amount) : 25;
-    if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
-    const updated = await firestoreBets.creditCash(uid, amount);
-    return res.json({ ok: true, cashBalance: Number(updated.cashBalance || 0) });
-  } catch (err) {
-    console.error('Deposit cash failed:', err && err.message);
-    return res.status(500).json({ error: String(err && err.message) });
-  }
+app.post('/api/wallet/deposit-cash', authMiddleware, async (req, res) => {
+  return res.status(410).json({
+    error: 'Deposits are not supported. Pickr is free-to-play and uses virtual tokens with no cash value.'
+  });
 });
 
 /**
- * POST /api/wallet/withdraw-request
- * Body: { amount: number, email: string }
- * Auth: Bearer <idToken>
- * Creates a withdrawal request and emails support + user confirmation.
+ * POST /api/wallet/withdraw-request  — RETIRED
+ * Pickr does not pay users, offer cash prizes, or support withdrawals.
+ * This endpoint is retired and no longer creates withdrawal requests or sends
+ * emails. Existing Firestore fields/documents are left untouched.
  */
-app.post('/api/wallet/withdraw-request', authMiddleware, ensureProfileComplete, async (req, res) => {
-  try {
-    const uid = req.uid;
-    const amount = Number(req.body && req.body.amount);
-    const emailRaw = req.body && req.body.email ? String(req.body.email).trim() : '';
-    if (!Number.isFinite(amount) || amount < 1) return res.status(400).json({ error: 'Invalid amount' });
-    if (amount > MAX_WITHDRAW_AMOUNT) return res.status(400).json({ error: `Amount exceeds max $${MAX_WITHDRAW_AMOUNT}` });
-    if (!emailRaw || emailRaw.length > MAX_EMAIL_LENGTH || !/^\S+@\S+\.\S+$/.test(emailRaw)) return res.status(400).json({ error: 'Invalid email' });
-
-    const ip = getClientIp(req);
-    const ipAllowed = checkRateLimit(`withdraw:ip:${ip}`, RATE_LIMITS.withdraw.windowMs, RATE_LIMITS.withdraw.max);
-    const uidAllowed = checkRateLimit(`withdraw:uid:${uid}`, RATE_LIMITS.withdraw.windowMs, RATE_LIMITS.withdraw.max);
-    if (!ipAllowed || !uidAllowed) return res.status(429).json({ error: 'Too many withdrawal requests. Please wait and try again.' });
-
-    const userSnap = await firestore.collection('users').doc(uid).get();
-    const user = userSnap.exists ? userSnap.data() : {};
-    const currentCash = Number(user.cashBalance || 0);
-    if (Number.isFinite(currentCash) && amount > currentCash) {
-      return res.status(400).json({ error: 'Amount exceeds available cash balance' });
-    }
-    const requestRef = firestore.collection('withdrawalRequests').doc();
-    const requestDoc = {
-      requestId: requestRef.id,
-      userId: uid,
-      email: emailRaw,
-      amount: Math.round(amount * 100) / 100,
-      status: 'requested',
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      cashBalance: Number(user.cashBalance || 0),
-      tokenBalance: Number(user.tokenBalance || 0),
-      ip,
-      userAgent: String(req.headers['user-agent'] || '')
-    };
-    await requestRef.set(requestDoc);
-
-    await sendWithdrawEmails({
-      amount: requestDoc.amount,
-      email: requestDoc.email,
-      uid,
-      requestId: requestRef.id
-    });
-
-    return res.json({ ok: true, requestId: requestRef.id });
-  } catch (err) {
-    console.error('Withdraw request failed:', err && err.message);
-    return res.status(500).json({ error: String(err && err.message) });
-  }
+app.post('/api/wallet/withdraw-request', authMiddleware, async (req, res) => {
+  return res.status(410).json({
+    error: 'Withdrawals are not supported. Pickr is free-to-play; tokens are virtual and have no cash value.'
+  });
 });
 
 /**
@@ -3302,6 +3273,44 @@ if (process.env.NODE_ENV !== 'production') {
     }
   });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/props  — Player prop recommendations (powered by recommendationEngine)
+// Query params: sport (nba|nhl|nfl|mlb|soccer), home, away, homeId, awayId
+// ─────────────────────────────────────────────────────────────────────────────
+const { generatePropsForGame } = require('./server/services/recommendationEngine');
+
+app.get('/api/props', authMiddleware, ensureProfileComplete, async (req, res) => {
+  try {
+    const sport = String(req.query.sport || 'nba').toLowerCase();
+    const home  = String(req.query.home  || '').trim();
+    const away  = String(req.query.away  || '').trim();
+    const homeTeamId = req.query.homeId || null;
+    const awayTeamId = req.query.awayId || null;
+
+    const props = await generatePropsForGame(sport, {
+      homeTeamId,
+      awayTeamId,
+      homeTeam: home,
+      awayTeam: away,
+      maxProps: 18,
+    });
+
+    return res.json({
+      props,
+      sport,
+      home,
+      away,
+      generatedAt: new Date().toISOString(),
+      disclaimer: 'Recommendations are trend-based and for virtual-token practice only. Not financial advice.',
+    });
+  } catch (err) {
+    console.error('Props engine error:', err.message);
+    return res.status(500).json({ error: 'Failed to generate props' });
+  }
+});
+
+// Start the server
 
 // Start the server
 const PORT = process.env.PORT || 3000;
