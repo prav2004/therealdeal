@@ -2229,9 +2229,21 @@
                 container.innerHTML = '<div class="p-6 text-center text-red-600">Please sign in again to load picks.</div>';
                 return;
               }
-              const data = await res.json();
-              picks = Array.isArray(data) ? data.slice(0, MAX_PICKS) : (Array.isArray(data.picks) ? data.picks.slice(0, MAX_PICKS) : []);
-              meta = data.meta || data;
+              if (res.ok) {
+                const data = await res.json();
+                picks = Array.isArray(data) ? data.slice(0, MAX_PICKS) : (Array.isArray(data.picks) ? data.picks.slice(0, MAX_PICKS) : []);
+                meta = data.meta || data;
+              } else {
+                console.warn(`Pickr recommendations unavailable (${res.status}); using ESPN matchup fallback.`);
+                const fallbackGames = await Promise.all(
+                  Object.values(sportMap).map(async (info) => ({
+                    info,
+                    games: await loadGamesWithFallback(info.key, headers)
+                  }))
+                );
+                picks = fallbackGames.flatMap(({ info, games }) => buildMoneylinePicks(games, info.label, info.key));
+                meta = null;
+              }
             }
             const next = getNextUpdateFromAPI(meta) || getNextUpdateFromAPI(null);
             startCountdown(next);
