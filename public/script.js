@@ -2590,7 +2590,8 @@
       }
       if (!resp.ok) {
         if (requestId !== recentBetsRequestId) return;
-        container.innerHTML = `<div class="empty-state">No picks found for ${label.toLowerCase()}.</div>`;
+        console.error('Bets API failed:', resp.status, resp.statusText);
+        container.innerHTML = '<div class="empty-state">We could not load your picks right now. Please refresh in a moment.</div>';
         if (summaryCount) summaryCount.textContent = '0';
         if (summaryWins) summaryWins.textContent = '0';
         if (summaryLosses) summaryLosses.textContent = '0';

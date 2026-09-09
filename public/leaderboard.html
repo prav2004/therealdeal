@@ -2066,6 +2066,68 @@
           return valid[0];
         }
 
+        const ESPN_SCOREBOARD_PATHS = {
+          nba: 'basketball/nba',
+          nhl: 'hockey/nhl',
+          nfl: 'football/nfl',
+          mlb: 'baseball/mlb',
+          soccer: 'soccer/eng.1'
+        };
+
+        function scoreRecord(record) {
+          const match = String(record || '').match(/(\d+)\s*-\s*(\d+)/);
+          if (!match) return 0.5;
+          const wins = Number(match[1]);
+          const losses = Number(match[2]);
+          return wins + losses ? wins / (wins + losses) : 0.5;
+        }
+
+        async function fetchEspnFallbackGames(sportKey) {
+          const sportPath = ESPN_SCOREBOARD_PATHS[sportKey];
+          if (!sportPath) return [];
+          const start = new Date();
+          const end = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+          const dateKey = (date) => date.toISOString().slice(0, 10).replace(/-/g, '');
+          const endpoint = `https://site.api.espn.com/apis/site/v2/sports/${sportPath}/scoreboard?limit=100&dates=${dateKey(start)}-${dateKey(end)}`;
+          const response = await fetch(endpoint, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`espn:${response.status}`);
+          const payload = await response.json();
+          return (payload.events || []).map((event) => {
+            const competition = event.competitions && event.competitions[0];
+            const competitors = competition && competition.competitors || [];
+            const home = competitors.find((team) => team.homeAway === 'home');
+            const away = competitors.find((team) => team.homeAway === 'away');
+            if (!home || !away) return null;
+            const homeRecord = home.records && home.records[0] && home.records[0].summary || '';
+            const awayRecord = away.records && away.records[0] && away.records[0].summary || '';
+            return {
+              gameId: event.id,
+              league: event.league && event.league.name || sportKey.toUpperCase(),
+              homeTeam: home.team && home.team.displayName || home.team && home.team.name || '',
+              awayTeam: away.team && away.team.displayName || away.team && away.team.name || '',
+              startTime: event.date,
+              homeTeamRecord: homeRecord,
+              awayTeamRecord: awayRecord,
+              // ESPN's scoreboard is used only when Pickr's backend is down.
+              // Select by the published season record without inventing odds.
+              pickTeam: scoreRecord(homeRecord) >= scoreRecord(awayRecord)
+                ? (home.team && home.team.displayName || '')
+                : (away.team && away.team.displayName || '')
+            };
+          }).filter(Boolean);
+        }
+
+        async function loadGamesWithFallback(sportKey, headers) {
+          const response = await fetch(`${GAME_APIS[sportKey]}?ts=${Date.now()}`, { headers, cache: 'no-store' });
+          if (response.status === 401) throw new Error('auth');
+          if (response.ok) {
+            const data = await response.json();
+            return Array.isArray(data) ? data : (Array.isArray(data.games) ? data.games : []);
+          }
+          console.warn(`Pickr game feed unavailable (${response.status}); using ESPN matchup fallback.`);
+          return fetchEspnFallbackGames(sportKey);
+        }
+
         function buildMoneylinePicks(games, sportLabel, sportKey) {
           return (games || []).map((game) => {
             const homeOdds = normalizeOdd(game && (game.moneyline && game.moneyline.home) || (game.odds && game.odds.moneyline && game.odds.moneyline.home));
@@ -2080,7 +2142,9 @@
               { team: game.awayTeam, odds: awayOdds }
             ];
             if (Number.isFinite(drawOdds)) options.push({ team: 'Draw', odds: drawOdds });
-            const recommended = pickRecommendedByOdds(options);
+            const recommended = game.pickTeam
+              ? { team: game.pickTeam, odds: null }
+              : pickRecommendedByOdds(options);
             return {
               id: `${sportKey}-${game.gameId || slugify(game.homeTeam || '')}-${slugify(game.awayTeam || '')}-ml`,
               league: game.league || sportLabel,
@@ -2141,14 +2205,20 @@
             };
             const sportInfo = sportMap[sport];
             if (sportInfo) {
-              const url = GAME_APIS[sportInfo.key];
-              const res = await fetch(`${url}?ts=${Date.now()}`, { headers, cache: 'no-store' });
-              if (res.status === 401) {
+              let games;
+              try {
+                games = await loadGamesWithFallback(sportInfo.key, headers);
+              } catch (err) {
+                if (err && err.message === 'auth') {
+                  container.innerHTML = '<div class="p-6 text-center text-red-600">Please sign in again to load picks.</div>';
+                  return;
+                }
+                throw err;
+              }
+              if (!Array.isArray(games)) {
                 container.innerHTML = '<div class="p-6 text-center text-red-600">Please sign in again to load picks.</div>';
                 return;
               }
-              const data = await res.json();
-              const games = Array.isArray(data) ? data : (Array.isArray(data.games) ? data.games : []);
               picks = buildMoneylinePicks(games, sportInfo.label, sportInfo.key);
               meta = { nextUpdate: null };
             } else {
@@ -2223,10 +2293,7 @@
             const info = sportMap[sport];
             let picks = [];
             if (info) {
-              const res = await fetch(`${GAME_APIS[info.key]}?ts=${Date.now()}`, { headers, cache: 'no-store' });
-              if (!res.ok) return false;
-              const data = await res.json();
-              const games = Array.isArray(data) ? data : (Array.isArray(data.games) ? data.games : []);
+              const games = await loadGamesWithFallback(info.key, headers);
               picks = buildMoneylinePicks(games, info.label, info.key);
             } else {
               const qs = sport && sport !== 'all' ? `?sport=${encodeURIComponent(sport)}` : '';

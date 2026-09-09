@@ -1419,6 +1419,9 @@ app.get('/api/leaderboard/players', async (req, res) => {
         level: u.level || 'Bronze',
         xp: Number(u.xp || 0),
         wins: Number(u.stats && u.stats.wins || 0),
+        losses: Number(u.stats && u.stats.losses || 0),
+        pending: Number(u.stats && u.stats.pending || 0),
+        totalBets: Number(u.stats && u.stats.totalBets || 0),
         streakWins: Number(u.streakWins || 0)
       });
     });
