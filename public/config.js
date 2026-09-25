@@ -12,5 +12,18 @@ window.PICKR_CONFIG = {
     ontario: 'tasks.html',
     canada: '',
     uk: ''
+  },
+
+  REGION_PERKS_OFFERS: {
+    canada: [
+      { name: 'Atefia', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5480&utm_campaign=SEO_CA_CPA_ATF' },
+      { name: 'Spinfin', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5473&utm_campaign=SEO_CA_CPA_SPF' },
+      { name: 'X3B', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5472&utm_campaign=SEO_CA_CPA_X3B' }
+    ],
+    uk: [
+      { name: 'Atefia', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5465&utm_campaign=SEO_UK_CPA_ATF' },
+      { name: 'Spinfin', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5356&utm_campaign=SEO_UK_CPA_SPF' },
+      { name: 'X3B', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5370&utm_campaign=SEO_UK_CPA_X3B' }
+    ]
   }
 };

@@ -806,6 +806,17 @@
         <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,122,26,.14);border:1px solid rgba(255,122,26,.32);border-radius:999px;padding:.35rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.22em;color:#ff9a4a;margin-bottom:1rem;">⭐ Perks</div>
         <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.9rem,5vw,3rem);font-weight:700;background:linear-gradient(135deg,#fff 30%,rgba(255,122,26,.85));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.65rem;line-height:1.15;">Unlock More With Pickr</h1>
         <p style="color:rgba(226,232,240,.65);font-size:1rem;max-width:38rem;margin:0 auto 1.75rem;">Complete challenges and partner experiences to level up your account and unlock exclusive perks.</p>
+        <section style="max-width:42rem;margin:0 auto 1.5rem;padding:1rem;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(3,8,20,.42);text-align:left;">
+          <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;">
+            <div><div style="font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6ee7c7;">Perks region</div><div style="margin-top:.2rem;font-size:.9rem;font-weight:600;color:#fff;">Currently showing: <span data-region-label>Ontario, Canada</span></div></div>
+            <div style="font-size:.7rem;color:rgba(226,232,240,.45);text-align:right;line-height:1.45;">Change region to view<br>available partner offers.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:.9rem;">
+            <button type="button" data-region-choice="ontario" style="padding:.68rem .45rem;border-radius:10px;border:1px solid rgba(255,122,26,.6);background:rgba(255,122,26,.14);color:#ffcca6;font-size:.72rem;font-weight:700;cursor:pointer;">Ontario</button>
+            <button type="button" data-region-choice="canada" style="padding:.68rem .45rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#cbd5e1;font-size:.72rem;font-weight:700;cursor:pointer;">Rest of Canada</button>
+            <button type="button" data-region-choice="uk" style="padding:.68rem .45rem;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#cbd5e1;font-size:.72rem;font-weight:700;cursor:pointer;">United Kingdom</button>
+          </div>
+        </section>
         <!-- Level progress card -->
         <div style="background:rgba(17,25,40,.82);border:1px solid rgba(255,122,26,.22);border-radius:18px;padding:1.25rem 1.5rem;max-width:30rem;margin:0 auto 1.5rem;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;">
@@ -1328,6 +1339,13 @@
     <script src="js/guest.js?v=1"></script>
     <script src="script.js?v=20260818-curated-character-avatars"></script>
     <script>
+      document.querySelectorAll('[data-region-choice]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const region = button.dataset.regionChoice;
+          if (window.PickrRegion) window.PickrRegion.setRegion(region);
+          if (region !== 'ontario') window.location.href = 'region-perks.html';
+        });
+      });
       (function () {
         const modal = document.getElementById('partnerTaskModal');
         const openBtn = document.getElementById('partnerTaskButton');

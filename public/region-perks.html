@@ -7,18 +7,66 @@
     <link rel="icon" type="image/png" href="tablogo.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="config.js"></script>
-    <script src="js/region.js"></script>
+    <script src="js/region.js?v=20260925b"></script>
+    <style>
+      .region-choice { border: 1px solid rgba(255,255,255,.13); background: rgba(255,255,255,.04); color: #cbd5e1; transition: .2s ease; }
+      .region-choice:hover { border-color: rgba(255,179,122,.6); color: white; }
+      .region-choice.is-selected { border-color: rgba(255,122,26,.8); background: rgba(255,122,26,.16); color: #ffcca6; }
+      .offer-card { border: 1px solid rgba(255,255,255,.11); background: rgba(15,23,42,.8); transition: transform .2s ease, border-color .2s ease; }
+      .offer-card:hover { transform: translateY(-3px); border-color: rgba(255,122,26,.5); }
+      .offer-art { background: linear-gradient(135deg, rgba(64,217,181,.22), rgba(122,167,255,.17) 50%, rgba(255,122,26,.22)); }
+    </style>
   </head>
   <body class="min-h-screen bg-slate-950 px-5 text-slate-100" style="background:radial-gradient(circle at 12% 12%,rgba(64,217,181,.16),transparent 30%),radial-gradient(circle at 88% 10%,rgba(255,122,26,.17),transparent 34%),#0b0f1a;">
-    <main class="mx-auto flex min-h-screen max-w-xl items-center py-10">
-      <section class="w-full rounded-3xl border border-white/10 bg-slate-900/80 p-7 text-center shadow-2xl backdrop-blur sm:p-10">
+    <main class="mx-auto flex min-h-screen max-w-6xl items-center py-10">
+      <section class="w-full rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl backdrop-blur sm:p-10">
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-400/15 text-3xl">🎁</div>
-        <p class="mt-6 text-xs font-bold uppercase tracking-[.25em] text-emerald-300">Regional Pickr Perks</p>
-        <h1 class="mt-3 text-3xl font-bold tracking-tight">Perks for <span data-region-label></span></h1>
-        <p class="mx-auto mt-4 max-w-md text-sm leading-6 text-slate-400">This regional perks destination is being connected. Your sports picks, insights, and profile stay the same.</p>
-        <a href="index.html" class="mt-7 inline-flex rounded-full bg-orange-400 px-5 py-3 text-sm font-bold text-slate-950">Back to Sports</a>
-        <p class="mt-5 text-xs text-slate-500">Need a different region? Change it on the Sports page.</p>
+        <p class="mt-6 text-center text-xs font-bold uppercase tracking-[.25em] text-emerald-300">Regional Pickr Perks</p>
+        <h1 class="mt-3 text-center text-3xl font-bold tracking-tight">Perks for <span data-region-label></span></h1>
+        <p class="mx-auto mt-3 max-w-xl text-center text-sm leading-6 text-slate-400">Choose your region to see its partner offers. Sports, picks, insights, and your profile stay the same.</p>
+        <div class="mx-auto mt-6 grid max-w-2xl gap-2 sm:grid-cols-3" role="group" aria-label="Choose your perks region">
+          <button type="button" data-region-choice="ontario" class="region-choice rounded-xl px-3 py-3 text-sm font-bold">🇨🇦 Ontario</button>
+          <button type="button" data-region-choice="canada" class="region-choice rounded-xl px-3 py-3 text-sm font-bold">🇨🇦 Rest of Canada</button>
+          <button type="button" data-region-choice="uk" class="region-choice rounded-xl px-3 py-3 text-sm font-bold">🇬🇧 United Kingdom</button>
+        </div>
+        <div id="offersGrid" class="mt-8 grid gap-4 sm:grid-cols-3" aria-live="polite"></div>
+        <div class="mt-7 border-t border-white/10 pt-5 text-center text-xs leading-5 text-slate-500">Partner links open in a new tab. Pickr may receive compensation from partner referrals. 19+ only. Please play responsibly and review each partner's eligibility rules and terms.</div>
+        <div class="mt-5 text-center"><a href="index.html" class="inline-flex rounded-full border border-white/15 px-5 py-3 text-sm font-bold text-slate-200 hover:border-orange-300/60 hover:text-white">Back to Sports</a></div>
       </section>
     </main>
+    <script>
+      (function () {
+        const offersGrid = document.getElementById('offersGrid');
+        const fallbackArt = 'Partner image coming soon';
+
+        function renderOffers() {
+          const region = window.PickrRegion.getRegion();
+          if (region === 'ontario') {
+            window.location.replace('tasks.html');
+            return;
+          }
+          const offers = (window.PICKR_CONFIG.REGION_PERKS_OFFERS || {})[region] || [];
+          offersGrid.innerHTML = offers.map((offer, index) => `
+            <article class="offer-card overflow-hidden rounded-2xl p-3">
+              <div class="offer-art flex aspect-[16/9] items-center justify-center rounded-xl border border-white/10 text-center text-xs font-semibold uppercase tracking-[.16em] text-slate-200">${fallbackArt}</div>
+              <div class="px-1 pb-1 pt-4">
+                <p class="text-[10px] font-bold uppercase tracking-[.2em] text-emerald-300">Partner ${index + 1}</p>
+                <h2 class="mt-1 text-xl font-bold text-white">${offer.name}</h2>
+                <a href="${offer.url}" target="_blank" rel="noopener sponsored" class="mt-4 flex w-full items-center justify-center rounded-xl bg-orange-400 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-orange-300">View offer <span class="ml-2" aria-hidden="true">↗</span></a>
+              </div>
+            </article>`).join('');
+        }
+
+        document.querySelectorAll('[data-region-choice]').forEach((button) => {
+          button.addEventListener('click', () => {
+            window.PickrRegion.setRegion(button.dataset.regionChoice);
+            window.PickrRegion.refreshRegionUI();
+            renderOffers();
+          });
+        });
+        document.addEventListener('pickr:regionchange', renderOffers);
+        renderOffers();
+      })();
+    </script>
   </body>
 </html>
