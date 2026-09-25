@@ -6,6 +6,7 @@
     <title>Pickr Picks</title>
     <script src="js/product-rules.js?v=20260709a"></script>
     <script src="config.js?v=20260410a"></script>
+    <script src="js/region.js?v=20260925a"></script>
     <!-- Firebase auth guard (prevents the "login but nothing happens" loop) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -176,6 +177,9 @@
         font-weight: 700; letter-spacing: 0.1em; padding: 0.42rem 0.7rem; text-transform: uppercase;
       }
       .market-status-dot { width: 0.45rem; height: 0.45rem; border-radius: 999px; background: #40d9b5; box-shadow: 0 0 0 0.24rem rgba(64, 217, 181, 0.12); }
+      .region-choice { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #cbd5e1; transition: .2s ease; }
+      .region-choice:hover { border-color: rgba(255,179,122,.55); color: #fff; }
+      .region-choice.is-selected { border-color: rgba(255,122,26,.8); background: rgba(255,122,26,.16); color: #ffcca6; box-shadow: 0 0 0 1px rgba(255,122,26,.15); }
       .sports-toolbar { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin: 1.2rem 0 0.8rem; }
       .sports-toolbar-title { color: #f8fafc; font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; }
       .sports-toolbar-copy { color: #64748b; font-size: 0.72rem; margin-top: 0.15rem; }
@@ -612,6 +616,21 @@
                 <span class="rounded-full border border-white/10 bg-black/10 px-3 py-1.5">Games refresh automatically</span>
               </div>
             </header>
+            <section class="mt-4 rounded-2xl border border-white/10 bg-slate-950/45 p-4 sm:p-5" aria-labelledby="regionTitle">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="text-[10px] font-bold uppercase tracking-[.2em] text-emerald-300">Your Pickr region</p>
+                  <h2 id="regionTitle" class="mt-1 text-base font-semibold text-white"><span data-region-label></span></h2>
+                  <p class="mt-1 text-xs leading-5 text-slate-400">Sports, picks, and your profile stay the same. Only your Perks destination changes.</p>
+                </div>
+                <a data-region-perks-link href="tasks.html" class="rounded-full border border-orange-300/30 bg-orange-400/10 px-3 py-2 text-xs font-semibold text-orange-200 hover:bg-orange-400/20">View Perks</a>
+              </div>
+              <div class="mt-4 grid gap-2 sm:grid-cols-3" role="group" aria-label="Choose your Pickr region">
+                <button type="button" class="region-choice rounded-xl px-3 py-3 text-left text-sm font-semibold" data-region-choice="ontario" aria-pressed="true">🇨🇦 Ontario</button>
+                <button type="button" class="region-choice rounded-xl px-3 py-3 text-left text-sm font-semibold" data-region-choice="canada" aria-pressed="false">🇨🇦 Rest of Canada</button>
+                <button type="button" class="region-choice rounded-xl px-3 py-3 text-left text-sm font-semibold" data-region-choice="uk" aria-pressed="false">🇬🇧 United Kingdom</button>
+              </div>
+            </section>
             <div class="sports-toolbar">
               <div><div class="sports-toolbar-title">Game board</div><div class="sports-toolbar-copy">Select a sport to see available matchups.</div></div>
             </div>
@@ -687,7 +706,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="11"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="8"/></svg>
         <span>Insights</span>
       </a>
-      <a href="tasks.html" class="pk-tab" aria-label="Perks">
+      <a data-region-perks-link href="tasks.html" class="pk-tab" aria-label="Perks">
         <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
         <span>Perks</span>
       </a>

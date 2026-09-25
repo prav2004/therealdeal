@@ -12,6 +12,17 @@
     <link rel="manifest" href="manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <script src="config.js?v=20260925a"></script>
+    <script src="js/region.js?v=20260925a"></script>
+    <script>
+      (function () {
+        const region = window.PickrRegion && window.PickrRegion.getRegion();
+        const destination = window.PickrRegion && window.PickrRegion.getPerksUrl(region);
+        if (region && region !== 'ontario' && destination && destination !== 'tasks.html') {
+          window.location.replace(destination);
+        }
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
