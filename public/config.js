@@ -16,14 +16,14 @@ window.PICKR_CONFIG = {
 
   REGION_PERKS_OFFERS: {
     canada: [
-      { name: 'Atefia', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5480&utm_campaign=SEO_CA_CPA_ATF' },
-      { name: 'Spinfin', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5473&utm_campaign=SEO_CA_CPA_SPF' },
-      { name: 'X3B', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5472&utm_campaign=SEO_CA_CPA_X3B' }
+      { name: 'Atefia', image: 'atefia.png', reward: '+500 XP', rewardDetail: 'Sign up to unlock a Pickr progress boost.', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5480&utm_campaign=SEO_CA_CPA_ATF' },
+      { name: 'Spinfin', image: 'Spinfin.png', reward: '+250 XP', rewardDetail: 'Sign up to unlock a Pickr progress boost.', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5473&utm_campaign=SEO_CA_CPA_SPF' },
+      { name: 'X3B', image: 'x3bet.png', reward: '+1,000 virtual tokens', rewardDetail: 'A game-only token bonus with no cash value.', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5472&utm_campaign=SEO_CA_CPA_X3B' }
     ],
     uk: [
-      { name: 'Atefia', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5465&utm_campaign=SEO_UK_CPA_ATF' },
-      { name: 'Spinfin', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5356&utm_campaign=SEO_UK_CPA_SPF' },
-      { name: 'X3B', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5370&utm_campaign=SEO_UK_CPA_X3B' }
+      { name: 'Atefia', image: 'atefia.png', reward: '+500 XP', rewardDetail: 'Sign up to unlock a Pickr progress boost.', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5465&utm_campaign=SEO_UK_CPA_ATF' },
+      { name: 'Spinfin', image: 'Spinfin.png', reward: '+250 XP', rewardDetail: 'Sign up to unlock a Pickr progress boost.', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5356&utm_campaign=SEO_UK_CPA_SPF' },
+      { name: 'X3B', image: 'x3bet.png', reward: '+1,000 virtual tokens', rewardDetail: 'A game-only token bonus with no cash value.', url: 'https://go.driveaffiliates.com/visit/?bta=36624&nci=5370&utm_campaign=SEO_UK_CPA_X3B' }
     ]
   }
 };
