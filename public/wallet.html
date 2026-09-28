@@ -154,11 +154,6 @@
         background: radial-gradient(circle at 30% 30%, #fbbf24, #f59e0b 55%, #b45309 100%);
         border: 1px solid rgba(251, 191, 36, 0.55);
       }
-      .region-settings { background:#101722; border:1px solid rgba(255,255,255,.09); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.2); }
-      .region-settings-label { color:#7c899c; font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
-      .region-option { min-height:46px; border:1px solid rgba(255,255,255,.1); border-radius:7px; background:#0d131d; color:#b7c0cf; font-size:.8rem; font-weight:700; transition:background .18s,border-color .18s,color .18s; }
-      .region-option:hover { border-color:rgba(255,122,26,.38); color:#f7f9fc; }
-      .region-option.is-selected { border-color:#ff7a1a; background:rgba(255,122,26,.12); color:#ffbf8e; box-shadow:inset 0 0 0 1px rgba(255,122,26,.18); }
       /* ── Page loader — bouncing ball ── */
       #pageLoader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:#0b0f1a;transition:opacity .6s ease}
       #pageLoader.loaded{opacity:0;pointer-events:none}
@@ -173,7 +168,6 @@
     <!-- Firebase (Compat) for login/profile data -->
     <script src="js/product-rules.js"></script>
     <script src="config.js"></script>
-    <script src="js/region.js?v=20260928-profile-region"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -327,22 +321,6 @@
         >
           Log Out
         </button>
-      </section>
-
-      <section class="region-settings p-5 sm:p-6" aria-labelledby="regionSettingsTitle">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <div class="region-settings-label">Experience settings</div>
-            <h2 id="regionSettingsTitle" class="mt-1 text-lg font-semibold text-slate-100">Your region</h2>
-            <p class="mt-1 text-sm text-slate-400">This controls the partner offers shown in Perks.</p>
-          </div>
-          <span class="rounded-md border border-white/10 bg-white/[.03] px-2.5 py-1 text-xs font-semibold text-slate-300" data-region-label>Ontario, Canada</span>
-        </div>
-        <div class="mt-4 grid gap-2 sm:grid-cols-3" role="group" aria-label="Choose your Pickr region">
-          <button type="button" class="region-option px-3 text-left" data-region-choice="ontario" aria-pressed="true">Ontario</button>
-          <button type="button" class="region-option px-3 text-left" data-region-choice="canada" aria-pressed="false">Rest of Canada</button>
-          <button type="button" class="region-option px-3 text-left" data-region-choice="uk" aria-pressed="false">United Kingdom</button>
-        </div>
       </section>
 
       <!-- Recent activity -->

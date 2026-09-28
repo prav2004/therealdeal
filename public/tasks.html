@@ -786,6 +786,9 @@
       main > section:first-child { max-width:64rem!important;padding-top:1.5rem!important;padding-bottom:1.25rem!important;text-align:left!important; }
       .perks-kicker { display:inline-flex;align-items:center;padding:.32rem .55rem;border:1px solid rgba(255,122,26,.32);border-radius:6px;background:rgba(255,122,26,.08);color:#ffad70;font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase; }
       .perks-region-note { margin-top:1rem;color:#758195;font-size:.78rem; }
+      .perks-region-choice { min-height:42px;border:1px solid rgba(255,255,255,.1);border-radius:7px;background:#0d131d;color:#b7c0cf;font-size:.78rem;font-weight:700;transition:background .18s,border-color .18s,color .18s; }
+      .perks-region-choice:hover { border-color:rgba(255,122,26,.38);color:#f7f9fc; }
+      .perks-region-choice.is-selected { border-color:#ff7a1a;background:rgba(255,122,26,.12);color:#ffbf8e;box-shadow:inset 0 0 0 1px rgba(255,122,26,.18); }
       main > section:first-child h1 { background:none!important;-webkit-text-fill-color:#f3f5f7!important;color:#f3f5f7!important;letter-spacing:-.04em; }
       main > section:first-child h1 + p { max-width:36rem!important;margin-left:0!important;color:#8b96a8!important; }
       main > section:first-child > div[style*="background:rgba(17,25,40"] { max-width:100%!important;margin:1.15rem 0 0!important;padding:1rem!important;border-radius:10px!important;border-color:rgba(255,255,255,.09)!important;background:#101722!important;box-shadow:none!important; }
@@ -832,7 +835,17 @@
         <div class="perks-kicker">Perks</div>
         <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.9rem,5vw,3rem);font-weight:700;background:linear-gradient(135deg,#fff 30%,rgba(255,122,26,.85));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.65rem;line-height:1.15;">Perks</h1>
         <p style="color:rgba(226,232,240,.65);font-size:1rem;max-width:38rem;margin:0 auto 1.75rem;">Explore optional partner offers and account extras available in your region.</p>
-        <p class="perks-region-note">Showing offers for <strong class="text-slate-300" data-region-label>Ontario, Canada</strong>. Change your region from <a href="wallet.html" class="text-orange-300 hover:text-orange-200">Profile</a>.</p>
+        <div class="mt-4 border border-white/[.09] bg-[#101722] p-3 sm:p-4" style="border-radius:10px;">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div><div class="text-[.65rem] font-bold uppercase tracking-[.14em] text-slate-500">Offer region</div><div class="mt-1 text-sm font-semibold text-slate-100">Showing offers for <span data-region-label>Ontario, Canada</span></div></div>
+            <span class="text-xs text-slate-500">Sports and picks stay the same.</span>
+          </div>
+          <div class="mt-3 grid gap-2 sm:grid-cols-3" role="group" aria-label="Choose your offer region">
+            <button type="button" class="perks-region-choice px-3 text-left" data-region-choice="ontario" aria-pressed="true">Ontario</button>
+            <button type="button" class="perks-region-choice px-3 text-left" data-region-choice="canada" aria-pressed="false">Rest of Canada</button>
+            <button type="button" class="perks-region-choice px-3 text-left" data-region-choice="uk" aria-pressed="false">United Kingdom</button>
+          </div>
+        </div>
         <!-- Level progress card -->
         <div style="background:rgba(17,25,40,.82);border:1px solid rgba(255,122,26,.22);border-radius:18px;padding:1.25rem 1.5rem;max-width:30rem;margin:0 auto 1.5rem;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.55rem;">
@@ -1355,6 +1368,9 @@
     <script src="js/guest.js?v=1"></script>
     <script src="script.js?v=20260818-curated-character-avatars"></script>
     <script>
+      document.addEventListener('pickr:regionchange', (event) => {
+        if (event.detail && event.detail.region !== 'ontario') window.location.href = 'region-perks.html';
+      });
       (function () {
         const modal = document.getElementById('partnerTaskModal');
         const openBtn = document.getElementById('partnerTaskButton');
