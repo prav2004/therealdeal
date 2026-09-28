@@ -715,6 +715,33 @@
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
       }
+
+      /* Second-pass density and product polish */
+      .top-banner { background:rgba(8,11,16,.92);border-bottom-color:rgba(255,255,255,.07);box-shadow:0 6px 24px rgba(0,0,0,.2); }
+      .banner-bal { border-radius:8px;padding-left:11px;padding-right:11px; }
+      .banner-bal::before { border-radius:8px; }
+      .sports-intro { border-radius:12px;background:linear-gradient(112deg,#111722,#0c1119 72%,#14110f); }
+      .sports-intro::after { opacity:.45; }
+      .sports-controls { border-radius:10px;padding:.7rem; }
+      .region-choice { border-radius:7px!important; }
+      .market-card { border-radius:10px!important; }
+      .matchup-team-logo { width:52px!important;height:52px!important;border-radius:10px!important;background:#111824!important;border-color:rgba(255,255,255,.075)!important; }
+      .matchup-team-logo img { width:43px!important;height:43px!important; }
+      .pick-team-logo { width:38px!important;height:38px!important;border-radius:8px!important;background:rgba(255,255,255,.045)!important; }
+      .pick-team-logo img { width:32px!important;height:32px!important; }
+      .market-card .select-team { min-height:78px;padding:9px 8px!important;border-radius:8px!important; }
+      .market-card .select-team > div:first-child { border-radius:8px!important; }
+      .odds-pill { border-radius:5px!important;min-width:52px;justify-content:center;padding:4px 8px!important;background:rgba(122,167,255,.07)!important; }
+      .market-recommendation { border-radius:8px!important;background:#0f1621!important;border-color:rgba(255,255,255,.07)!important; }
+      .market-recommendation button { border-radius:6px!important;background:rgba(255,122,26,.1)!important; }
+      .bet-slip { border-radius:10px; }
+      .slip-item,.slip-mode-btn,.slip-stake-input { border-radius:7px; }
+      .slip-remove-btn { border-radius:6px; }
+      @media (max-width:640px) {
+        .sports-controls { margin-left:-.15rem;margin-right:-.15rem; }
+        #picksContainer { gap:.65rem; }
+        .market-card { padding:11px!important; }
+      }
     </style>
   </head>
   <!--
@@ -905,7 +932,7 @@
     </div>
 
     <script src="config.js?v=20260410a"></script>
-    <script src="script.js?v=20260928-sports-dashboard"></script>
+    <script src="script.js?v=20260928-sports-polish-2"></script>
     <footer class="mt-14 border-t border-white/15 bg-white/12 footer-safe">
       <div class="mx-auto w-full max-w-6xl px-4 py-10">
         <div class="grid gap-8 md:grid-cols-3">

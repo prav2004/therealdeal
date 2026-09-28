@@ -1611,6 +1611,7 @@
         wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isHome ? 'flex-end' : 'flex-start') + ';gap:6px;';
         // Logo circle
         const logoCircle = document.createElement('div');
+        logoCircle.className = 'matchup-team-logo';
         logoCircle.style.cssText = 'width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;overflow:hidden;';
         const img = document.createElement('img');
         img.style.cssText = 'width:50px;height:50px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4));';
@@ -1715,6 +1716,7 @@
         iconEl.textContent = isDraw ? 'TIE' : (team && team.toLowerCase().includes('over') ? 'O' : (team && team.toLowerCase().includes('under') ? 'U' : (team && team.toLowerCase() === 'yes' ? 'Y' : (team && team.toLowerCase() === 'no' ? 'N' : 'P'))));
       } else {
         const imgWrap = document.createElement('div');
+        imgWrap.className = 'pick-team-logo';
         imgWrap.style.cssText = 'width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;overflow:hidden;';
         const img = document.createElement('img');
         img.style.cssText = 'width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));';
@@ -1729,6 +1731,7 @@
       name.textContent = shortName;
       // Odds pill
       const oddsPill = document.createElement('div');
+      oddsPill.className = 'odds-pill';
       const amOdds = odds >= 2 ? '+' + Math.round((odds - 1) * 100) : '-' + Math.round(100 / (odds - 1));
       oddsPill.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;background:rgba(122,167,255,0.1);border:1px solid rgba(122,167,255,0.22);font-size:0.72rem;font-weight:700;color:#9fb8ff;font-family:Space Grotesk,sans-serif;letter-spacing:0.02em;';
       oddsPill.textContent = amOdds;
@@ -1804,6 +1807,7 @@
       inv.sort((a,b)=>b.prob - a.prob);
       const rec = inv[0];
       const recBar = document.createElement('div');
+      recBar.className = 'market-recommendation';
       recBar.style.cssText = 'margin-top:0.75rem;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0.55rem 0.75rem;border-radius:12px;background:rgba(122,167,255,0.08);border:1px solid rgba(122,167,255,0.15);';
       recBar.innerHTML = `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:#94a3b8;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><path d="M9.663 17h4.674M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke="#7aa7ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="color:#cbd5e1;font-weight:600;">${escapeHtml(rec.team)}</span><span style="color:#64748b;">• ${Math.round(rec.prob*100)}%</span></div>`;
       const recBtn = document.createElement('button'); recBtn.type = 'button';

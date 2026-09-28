@@ -113,20 +113,75 @@
       /* Safe-area for notch / Dynamic Island */
       .safe-top { padding-top: max(1rem, env(safe-area-inset-top)); }
       .safe-top-fixed { top: max(1rem, env(safe-area-inset-top)); }
+
+      /* ── Live Action professional polish ─────────────────────────────── */
+      :root { --live-bg:#070a0f; --live-panel:#0d121b; --live-line:rgba(255,255,255,.085); }
+      body { background:radial-gradient(760px 300px at 50% -170px,rgba(255,122,26,.11),transparent 72%),var(--live-bg); }
+      .live-shell { max-width:900px; padding-top:max(.65rem,env(safe-area-inset-top)); }
+      .live-back { display:inline-flex;align-items:center;gap:.4rem;min-height:38px;padding:0 .75rem;border:1px solid var(--live-line);border-radius:8px;background:rgba(9,13,20,.9);color:#b6c0ce;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:.18s ease; }
+      .live-back:hover { color:#fff;border-color:rgba(255,122,26,.4);background:#121925; }
+      #gameHeader { min-height:184px;padding:1.2rem 3.75rem 1rem;border:1px solid var(--live-line);border-radius:14px;background:linear-gradient(120deg,#101722,#0b1018 65%,#15110e);box-shadow:0 14px 36px rgba(0,0,0,.3);overflow:hidden;position:relative; }
+      #gameHeader::before { content:'';position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,#ff7a1a,rgba(255,122,26,.2),transparent 72%); }
+      .live-status-row { min-height:22px; }
+      .live-status-dot,.live-status-ping { background:#ef4444!important; }
+      .live-status-text { color:#f87171!important;font-size:.66rem!important; }
+      .live-clock { color:#dce3ec!important;font:700 .78rem 'Space Grotesk',sans-serif; }
+      .live-league { color:#ff9b52!important; }
+      .live-scoreboard { gap:clamp(.75rem,4vw,2rem)!important; }
+      .live-team { width:clamp(88px,22vw,150px)!important;gap:.4rem!important; }
+      .live-team-logo { width:54px!important;height:54px!important;filter:drop-shadow(0 6px 9px rgba(0,0,0,.35)); }
+      .live-team-placeholder { width:54px!important;height:54px!important;border-radius:10px!important; }
+      .live-team-name { font-size:.8rem!important;line-height:1.15; }
+      .live-score-pair { gap:.6rem!important;min-width:110px;justify-content:center; }
+      .live-score { font-size:clamp(2rem,7vw,3.25rem)!important;letter-spacing:-.05em;font-variant-numeric:tabular-nums; }
+      .live-score-divider { color:#384354!important; }
+      #gameTabs { position:sticky;top:0;z-index:35;flex-wrap:nowrap!important;justify-content:flex-start!important;gap:.15rem!important;margin:.7rem 0!important;padding:.35rem;overflow-x:auto;border:1px solid var(--live-line);border-radius:10px;background:rgba(7,10,15,.93);backdrop-filter:blur(14px);scrollbar-width:none; }
+      #gameTabs::-webkit-scrollbar { display:none; }
+      .tab-chip { flex:0 0 auto;min-height:38px;padding:0 .75rem!important;border:0;border-radius:7px!important;background:transparent;color:#778397;font-size:.67rem!important;letter-spacing:.04em; }
+      .tab-chip:hover { background:rgba(255,255,255,.045);color:#dce3ec; }
+      .tab-chip.active { color:#fff;background:#171e29;border:0;box-shadow:inset 0 -2px 0 #ff7a1a; }
+      .tab-chip:focus-visible,.live-back:focus-visible { outline:2px solid #ffad70;outline-offset:2px; }
+      #gameContent { display:grid;gap:.65rem; }
+      .info-card,.live-command-card { border-radius:10px;border-color:var(--live-line);background:var(--live-panel);box-shadow:0 8px 22px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.025); }
+      .info-card { padding:.8rem; }
+      .live-command-card { border-radius:11px;background:var(--live-panel); }
+      .live-metric { border-radius:7px;padding:.55rem;background:#111824; }
+      .live-player-row { border-radius:8px;padding:.65rem;background:#111824; }
+      .live-signal-label { color:#758195;font-size:.56rem;letter-spacing:.13em; }
+      #gameContent table { border-collapse:collapse;font-variant-numeric:tabular-nums; }
+      #gameContent thead { border-bottom:1px solid var(--live-line); }
+      #gameContent tbody tr + tr { border-top:1px solid rgba(255,255,255,.045); }
+      #gameContent th { color:#6f7a8c!important;text-transform:uppercase;letter-spacing:.08em;font-size:.58rem!important; }
+      #gameContent td { padding-top:.6rem!important;padding-bottom:.6rem!important; }
+      .diamond { width:72px;height:72px; }
+      .diamond-base { width:12px;height:12px;border-width:1px;border-radius:1px; }
+      .diamond-base.occupied { background:#ff9b52;border-color:#ffb37a;box-shadow:0 0 0 3px rgba(255,122,26,.1); }
+      #lastUpdated { display:flex;align-items:center;justify-content:center;width:max-content;margin:.9rem auto 0!important;min-height:26px;padding:0 .65rem;border:1px solid rgba(255,255,255,.06);border-radius:6px;color:#667286;background:rgba(255,255,255,.025);font-variant-numeric:tabular-nums; }
+      .live-loading { display:grid;grid-template-columns:1fr 120px 1fr;align-items:center;gap:1rem;width:100%;height:130px; }
+      .live-loading-team,.live-loading-score { border-radius:8px;background:#171f2b;position:relative;overflow:hidden; }
+      .live-loading-team { height:76px; }.live-loading-score { height:48px; }
+      .live-loading-team::after,.live-loading-score::after { content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent);animation:liveShimmer 1.25s infinite; }
+      @keyframes liveShimmer { to { transform:translateX(100%); } }
+      @media (min-width:768px) { .live-shell{padding-left:1.25rem;padding-right:1.25rem} #gameHeader{padding-left:5rem;padding-right:5rem} }
+      @media (max-width:520px) {
+        .live-shell{padding-left:.65rem;padding-right:.65rem}.safe-top-fixed{top:max(.65rem,env(safe-area-inset-top));right:.65rem!important}.live-back{min-height:34px;padding:0 .6rem;font-size:.6rem!important}
+        #gameHeader{min-height:170px;padding:2.65rem .45rem .8rem;border-radius:11px}.live-scoreboard{gap:.3rem!important}.live-team{width:82px!important}.live-team-logo,.live-team-placeholder{width:46px!important;height:46px!important}.live-team-name{font-size:.68rem!important;max-width:82px}.live-score-pair{min-width:88px;gap:.35rem!important}.live-score{font-size:2rem!important}#gameTabs{margin-top:.5rem!important}.info-card{padding:.7rem}
+      }
+      @media (prefers-reduced-motion:reduce) { *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important} }
     </style>
   </head>
   <body>
     <!-- Back Button -->
     <div class="fixed safe-top-fixed right-4 z-50">
-      <button onclick="history.back()" class="rounded-full border border-white/10 bg-slate-900/80 backdrop-blur-sm px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-200 hover:border-white/30 hover:text-white shadow-lg">
+      <button onclick="history.back()" class="live-back text-xs font-semibold uppercase tracking-widest" aria-label="Back to Sports">
         &larr; Back
       </button>
     </div>
 
-    <main class="max-w-2xl mx-auto px-4 pb-24 safe-top">
+    <main class="live-shell mx-auto px-4 pb-24 safe-top">
       <!-- Game Header -->
       <div id="gameHeader" class="text-center py-6">
-        <div class="text-slate-400 text-sm animate-pulse">Loading game data...</div>
+        <div class="live-loading" role="status" aria-label="Loading live game"><div class="live-loading-team"></div><div class="live-loading-score"></div><div class="live-loading-team"></div></div>
       </div>
 
       <!-- Info Tabs -->
@@ -219,7 +274,7 @@
       function renderTabs() {
         const tabs = tabConfigs[sportCat] || tabConfigs.nba;
         tabsEl.innerHTML = tabs.map(t =>
-          '<button class="tab-chip px-4 py-2 rounded-full text-xs font-semibold' + (t === activeTab ? ' active' : '') + '" data-tab="' + esc(t) + '">' + esc(t) + '</button>'
+          '<button class="tab-chip px-4 py-2 text-xs font-semibold' + (t === activeTab ? ' active' : '') + '" data-tab="' + esc(t) + '" aria-pressed="' + (t === activeTab ? 'true' : 'false') + '">' + esc(t) + '</button>'
         ).join('');
         tabsEl.querySelectorAll('.tab-chip').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -240,12 +295,12 @@
         const isFinal = g.status && g.status.state === 'post';
 
         const statusHtml = isLive
-          ? '<div class="flex items-center justify-center gap-2 mb-2"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span><span class="text-sm font-bold uppercase tracking-widest text-emerald-400">LIVE</span></div>'
+          ? '<div class="live-status-row flex items-center justify-center gap-2 mb-1"><span class="relative flex h-2 w-2"><span class="live-status-ping animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"></span><span class="live-status-dot relative inline-flex rounded-full h-2 w-2"></span></span><span class="live-status-text text-sm font-bold uppercase tracking-widest">LIVE</span></div>'
           : isFinal
           ? '<div class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-2">FINAL</div>'
           : '<div class="text-sm font-semibold text-sky-400 mb-2">' + esc(g.status ? g.status.shortDetail || g.status.detail || 'Scheduled' : 'Scheduled') + '</div>';
 
-        const clockHtml = isLive && g.status ? '<div class="text-sm font-semibold text-emerald-300 mb-3">' + esc(g.status.shortDetail || g.status.detail || '') + '</div>' : '';
+        const clockHtml = isLive && g.status ? '<div class="live-clock mb-2">' + esc(g.status.shortDetail || g.status.detail || '') + '</div>' : '';
 
         const aN = Number(g.awayTeam.score), hN = Number(g.homeTeam.score);
         const awayBold = (isLive && aN > hN) || (isFinal && aN > hN);
@@ -255,21 +310,21 @@
 
         headerEl.innerHTML =
           statusHtml + clockHtml +
-          (g.league ? '<div class="text-[10px] uppercase tracking-widest text-amber-400/70 font-semibold mb-4">' + esc(g.league) + '</div>' : '') +
-          '<div class="flex items-center justify-center gap-6">' +
-            '<div class="flex flex-col items-center gap-2 w-28">' +
-              (g.awayTeam.logo ? '<img src="' + esc(g.awayTeam.logo) + '" alt="" class="w-16 h-16 object-contain">' : '<div class="w-16 h-16 rounded-full bg-slate-700"></div>') +
-              '<div class="text-sm font-semibold ' + awayColor + ' text-center">' + esc(g.awayTeam.name) + '</div>' +
+          (g.league ? '<div class="live-league text-[10px] uppercase tracking-widest font-semibold mb-3">' + esc(g.league) + '</div>' : '') +
+          '<div class="live-scoreboard flex items-center justify-center gap-6">' +
+            '<div class="live-team flex flex-col items-center gap-2 w-28">' +
+              (g.awayTeam.logo ? '<img src="' + esc(g.awayTeam.logo) + '" alt="" class="live-team-logo w-16 h-16 object-contain">' : '<div class="live-team-placeholder w-16 h-16 rounded-full bg-slate-700"></div>') +
+              '<div class="live-team-name text-sm font-semibold ' + awayColor + ' text-center">' + esc(g.awayTeam.name) + '</div>' +
               (g.awayTeam.record ? '<div class="text-[10px] text-slate-500">' + esc(g.awayTeam.record) + '</div>' : '') +
             '</div>' +
-            '<div class="flex items-center gap-3">' +
-              '<span class="text-3xl font-bold ' + awayColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(g.awayTeam.score) + '</span>' +
-              '<span class="text-lg text-slate-500">-</span>' +
-              '<span class="text-3xl font-bold ' + homeColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(g.homeTeam.score) + '</span>' +
+            '<div class="live-score-pair flex items-center gap-3">' +
+              '<span class="live-score text-3xl font-bold ' + awayColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(g.awayTeam.score) + '</span>' +
+              '<span class="live-score-divider text-lg text-slate-500">-</span>' +
+              '<span class="live-score text-3xl font-bold ' + homeColor + '" style="font-family:\'Space Grotesk\',sans-serif">' + esc(g.homeTeam.score) + '</span>' +
             '</div>' +
-            '<div class="flex flex-col items-center gap-2 w-28">' +
-              (g.homeTeam.logo ? '<img src="' + esc(g.homeTeam.logo) + '" alt="" class="w-16 h-16 object-contain">' : '<div class="w-16 h-16 rounded-full bg-slate-700"></div>') +
-              '<div class="text-sm font-semibold ' + homeColor + ' text-center">' + esc(g.homeTeam.name) + '</div>' +
+            '<div class="live-team flex flex-col items-center gap-2 w-28">' +
+              (g.homeTeam.logo ? '<img src="' + esc(g.homeTeam.logo) + '" alt="" class="live-team-logo w-16 h-16 object-contain">' : '<div class="live-team-placeholder w-16 h-16 rounded-full bg-slate-700"></div>') +
+              '<div class="live-team-name text-sm font-semibold ' + homeColor + ' text-center">' + esc(g.homeTeam.name) + '</div>' +
               (g.homeTeam.record ? '<div class="text-[10px] text-slate-500">' + esc(g.homeTeam.record) + '</div>' : '') +
             '</div>' +
           '</div>';
