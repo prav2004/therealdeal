@@ -177,9 +177,6 @@
         font-weight: 700; letter-spacing: 0.1em; padding: 0.42rem 0.7rem; text-transform: uppercase;
       }
       .market-status-dot { width: 0.45rem; height: 0.45rem; border-radius: 999px; background: #40d9b5; box-shadow: 0 0 0 0.24rem rgba(64, 217, 181, 0.12); }
-      .region-choice { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #cbd5e1; transition: .2s ease; }
-      .region-choice:hover { border-color: rgba(255,179,122,.55); color: #fff; }
-      .region-choice.is-selected { border-color: rgba(255,122,26,.8); background: rgba(255,122,26,.16); color: #ffcca6; box-shadow: 0 0 0 1px rgba(255,122,26,.15); }
       .sports-toolbar { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin: 1.2rem 0 0.8rem; }
       .sports-toolbar-title { color: #f8fafc; font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; }
       .sports-toolbar-copy { color: #64748b; font-size: 0.72rem; margin-top: 0.15rem; }
@@ -689,7 +686,6 @@
       .mobile-slip-label { font-size: .75rem; font-weight: 800; }
       .mobile-slip-potential { color: #8591a3; font-size: .62rem; font-weight: 600; }
       .mobile-slip-action { padding: .55rem .72rem; border-radius: 8px; background: var(--sports-accent); color: #111; font-size: .66rem; font-weight: 800; }
-      .region-panel { margin-top: .75rem; border: 0; background: transparent; }
       @media (max-width: 1023px) {
         .bet-slip-mobile { left: .5rem; right: .5rem; bottom: calc(4.65rem + env(safe-area-inset-bottom)); max-height: min(72vh,620px); border-radius: 16px; }
         body.slip-open { overflow: hidden; }
@@ -723,7 +719,6 @@
       .sports-intro { border-radius:12px;background:linear-gradient(112deg,#111722,#0c1119 72%,#14110f); }
       .sports-intro::after { opacity:.45; }
       .sports-controls { border-radius:10px;padding:.7rem; }
-      .region-choice { border-radius:7px!important; }
       .market-card { border-radius:10px!important; }
       .matchup-team-logo { width:52px!important;height:52px!important;border-radius:10px!important;background:#111824!important;border-color:rgba(255,255,255,.075)!important; }
       .matchup-team-logo img { width:43px!important;height:43px!important; }
@@ -794,19 +789,6 @@
                 <div class="sports-metric"><span class="sports-metric-icon" aria-hidden="true">⚡</span><div><div class="sports-metric-label">Win streak</div><div class="sports-metric-value"><span id="streakWins">0</span></div></div></div>
               </div>
             </header>
-            <section class="region-panel px-1 py-2" aria-labelledby="regionTitle">
-              <div class="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p class="text-[10px] font-bold uppercase tracking-[.2em] text-slate-500">Region · <span id="regionTitle" data-region-label></span></p>
-                </div>
-                <a data-region-perks-link href="tasks.html" class="text-xs font-semibold text-orange-300 hover:text-orange-200">View Perks →</a>
-              </div>
-              <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Choose your Pickr region">
-                <button type="button" class="region-choice rounded-lg px-3 py-2 text-left text-xs font-semibold" data-region-choice="ontario" aria-pressed="true">🇨🇦 Ontario</button>
-                <button type="button" class="region-choice rounded-lg px-3 py-2 text-left text-xs font-semibold" data-region-choice="canada" aria-pressed="false">🇨🇦 Rest of Canada</button>
-                <button type="button" class="region-choice rounded-lg px-3 py-2 text-left text-xs font-semibold" data-region-choice="uk" aria-pressed="false">🇬🇧 United Kingdom</button>
-              </div>
-            </section>
             <section class="sports-controls" aria-label="Sports and date navigation">
             <div id="sportTabs">
               <button class="sport-tab py-2 px-4 rounded-full text-sm font-semibold bg-gray-800 focus:outline-none" data-sport="nba"><span class="sport-tab-icon" aria-hidden="true">🏀</span>NBA</button>
