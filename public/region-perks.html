@@ -26,6 +26,9 @@
       .offer-reward { border:1px solid rgba(255,255,255,.08);background:#111924; }
       .offer-card,.offer-art,.offer-reward,.offer-card a { border-radius:8px!important; }
       .offer-card a { background:#ff7a1a!important; }
+      .regional-offers-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin-top:1rem; }
+      .regional-offers-grid .offer-card { min-width:0;padding:.85rem; }
+      .regional-offers-grid .offer-art { aspect-ratio:3/2; }
       .perks-section { margin-top:2.5rem; }
       .section-kicker { color:#748196;font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase; }
       .section-title { margin-top:.3rem;color:#f3f5f7;font:700 1.35rem 'Space Grotesk',sans-serif;letter-spacing:-.025em; }
@@ -42,7 +45,8 @@
       .milestone strong { display:block;color:#e7ebf0;font:700 .82rem 'Space Grotesk',sans-serif;line-height:1.3; }
       .milestone span { display:block;margin-top:.35rem;color:#7c8798;font-size:.7rem;line-height:1.4; }
       .regional-disclosure { margin-top:2.5rem;border-top:1px solid rgba(255,255,255,.09);padding-top:1.25rem;color:#667285;font-size:.72rem;line-height:1.55; }
-      @media (max-width:640px) { .task-grid { grid-template-columns:1fr; } .milestone-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+      @media (max-width:760px) { .regional-offers-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+      @media (max-width:520px) { .regional-offers-grid { grid-template-columns:1fr; } .task-grid { grid-template-columns:1fr; } .milestone-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     </style>
   </head>
   <body class="min-h-screen bg-slate-950 px-5 text-slate-100" style="background:radial-gradient(circle at 12% 12%,rgba(64,217,181,.16),transparent 30%),radial-gradient(circle at 88% 10%,rgba(255,122,26,.17),transparent 34%),#0b0f1a;">
@@ -60,7 +64,7 @@
           <div class="section-kicker">Featured experiences</div>
           <h2 id="featuredOffersTitle" class="section-title">Top partner offers</h2>
           <p class="section-copy">Operators shown here are specific to <span data-region-label>your region</span>.</p>
-          <div id="featuredOffersGrid" class="mt-4 grid gap-4 sm:grid-cols-2" aria-live="polite"></div>
+          <div id="featuredOffersGrid" class="regional-offers-grid" aria-live="polite"></div>
         </section>
 
         <section class="perks-section" aria-labelledby="dailyGoalsTitle">
@@ -73,13 +77,6 @@
             <article class="task-card"><span class="task-icon">03</span><h3>Explore insights</h3><p>Use leaderboard and sports insight pages to inform your next pick.</p><a href="leaderboard.html">View Insights →</a></article>
             <article class="task-card"><span class="task-icon">04</span><h3>Try another sport</h3><p>Switch leagues and build experience across the sports board.</p><a href="index.html">Browse matchups →</a></article>
           </div>
-        </section>
-
-        <section id="moreOperatorsSection" class="perks-section" aria-labelledby="moreOperatorsTitle">
-          <div class="section-kicker">More partner experiences</div>
-          <h2 id="moreOperatorsTitle" class="section-title">More offers in your region</h2>
-          <p class="section-copy">Availability and eligibility are determined by each operator.</p>
-          <div id="moreOffersGrid" class="mt-4 grid gap-4 sm:grid-cols-2" aria-live="polite"></div>
         </section>
 
         <section class="perks-section" aria-labelledby="weeklyMilestonesTitle">
@@ -101,12 +98,10 @@
     <script>
       (function () {
         const featuredOffersGrid = document.getElementById('featuredOffersGrid');
-        const moreOffersGrid = document.getElementById('moreOffersGrid');
-        const moreOperatorsSection = document.getElementById('moreOperatorsSection');
         const fallbackArt = 'Partner image coming soon';
 
         function renderOffer(offer, index, featured) {
-          const label = featured ? 'Featured operator' : `Operator ${index + 1}`;
+          const label = featured ? 'Featured operator' : 'Partner offer';
           return `
             <article class="offer-card overflow-hidden p-3">
               <div class="offer-art flex aspect-[16/9] items-center justify-center overflow-hidden border border-white/10 text-center text-xs font-semibold uppercase tracking-[.16em] text-slate-200">${offer.image ? `<img src="${offer.image}" alt="${offer.name}" />` : fallbackArt}</div>
@@ -130,12 +125,9 @@
             return;
           }
           const offers = (window.PICKR_CONFIG.REGION_PERKS_OFFERS || {})[region] || [];
-          const [featuredOffer, ...moreOffers] = offers;
-          featuredOffersGrid.innerHTML = featuredOffer
-            ? renderOffer(featuredOffer, 0, true)
+          featuredOffersGrid.innerHTML = offers.length
+            ? offers.map((offer, index) => renderOffer(offer, index, index === 0)).join('')
             : '<p class="text-sm text-slate-400">No partner offers are currently available for this region.</p>';
-          moreOffersGrid.innerHTML = moreOffers.map((offer, index) => renderOffer(offer, index, false)).join('');
-          moreOperatorsSection.hidden = moreOffers.length === 0;
         }
 
         document.addEventListener('pickr:regionchange', renderOffers);
