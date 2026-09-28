@@ -798,15 +798,9 @@ async function fetchLatestPicks() {
   // there is no API key or the request fails, we'll gracefully fall back
   // to generating synthetic picks further down. The goal is always to
   // build up a list of relevant picks.
-  // Pull the Odds API key from the environment. If none is provided
-  // (e.g. when deploying without a .env file), fall back to the user‑supplied
-  // key. This default key was provided by the user for demo purposes and
-  // allows the app to work out of the box without additional configuration.
-  // Use the new Odds API key if one is not provided via the environment.
-  // This default value comes from the user and enables the app to function
-  // without requiring manual configuration.  To override it, set the
-  // ODDS_API_KEY environment variable when starting the server.
-  const apiKey = process.env.ODDS_API_KEY || 'd755e7e122f6e9009bf011fde6ea75eb';
+  // The credential is supplied by the runtime environment and is never
+  // embedded in source control.
+  const apiKey = process.env.ODDS_API_KEY || '';
   let events = [];
   if (apiKey) {
     try {
@@ -942,7 +936,7 @@ computeDailyPicks().catch((err) => {
 // Auto-settlement system using The Odds API scores
 // --------------------------------------------------------------------------
 function getOddsApiKey() {
-  return process.env.ODDS_API_KEY || '0254dcc218e487f9523bf40edda8640f';
+  return process.env.ODDS_API_KEY || '';
 }
 
 function normalizeName(name) {
@@ -2820,12 +2814,15 @@ app.get('/api/check-screenname', authMiddleware, async (req, res) => {
     const name = (req.query.name || '').trim().toUpperCase();
     if (!name || name.length < 2) return res.json({ available: false, reason: 'Too short' });
     if (!/^[A-Z0-9_.]+$/.test(name)) return res.json({ available: false, reason: 'Invalid characters' });
-    const snap = await firestore.collection('users')
-      .where('screenName', '==', name)
-      .limit(1)
-      .get();
-    // If the only match is the requesting user, the name is still "available" for them
-    const taken = !snap.empty && snap.docs[0].id !== req.uid;
+    const claim = await firestore.collection('screenNameClaims').doc(name).get();
+    if (claim.exists && claim.data().uid !== req.uid) {
+      return res.json({ available: false, reason: 'Already taken' });
+    }
+    // Older profiles predate `screenNameNormalized`; inspect them until a
+    // one-time claims backfill has completed, so mixed-case legacy names stay reserved.
+    const snap = await firestore.collection('users').select('screenName').get();
+    const taken = snap.docs.some((doc) => doc.id !== req.uid
+      && String((doc.data() || {}).screenName || '').trim().toUpperCase() === name);
     return res.json({ available: !taken, reason: taken ? 'Already taken' : null });
   } catch (err) {
     console.error('check-screenname error:', err && err.message);
@@ -2855,6 +2852,10 @@ app.post('/api/profile', authMiddleware, async (req, res) => {
     const termsAccepted = !!payload.termsAccepted;
 
     if (!fullName) return res.status(400).json({ error: 'fullName is required' });
+    if (!screenName) return res.status(400).json({ error: 'screenName is required' });
+    if (!/^[A-Z0-9_.]{2,}$/.test(screenName.toUpperCase())) {
+      return res.status(400).json({ error: 'screenName must contain at least two letters, numbers, underscores, or periods' });
+    }
     if (!dateOfBirth || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateOfBirth))) return res.status(400).json({ error: 'dateOfBirth is required in YYYY-MM-DD format' });
     // Compute age (UTC-safe)
     const dob = new Date(String(dateOfBirth) + 'T00:00:00Z');
@@ -2891,26 +2892,62 @@ app.post('/api/profile', authMiddleware, async (req, res) => {
 
     // Save screenName and avatarId if provided
     if (screenName) {
-      // Enforce screen name uniqueness (case-insensitive, uppercase stored)
-      const normalized = screenName.toUpperCase();
-      const snap = await firestore.collection('users')
-        .where('screenName', '==', normalized)
-        .limit(1)
-        .get();
-      if (!snap.empty && snap.docs[0].id !== uid) {
-        return res.status(409).json({ error: 'Screen name is already taken. Please choose another.' });
-      }
-      toSave.screenName = normalized;
+      toSave.screenName = screenName.toUpperCase();
+      toSave.screenNameNormalized = toSave.screenName;
     }
     if (avatarId) toSave.avatarId = avatarId;
 
-    // Set createdAt if missing (merge will not overwrite existing createdAt)
-    const existing = await firestoreBets.getUserProfile(uid);
-    if (!existing || !existing.createdAt) {
-      toSave.createdAt = admin.firestore.FieldValue.serverTimestamp();
-    }
+    const userRef = firestore.collection('users').doc(uid);
+    let updated;
+    try {
+      updated = await firestore.runTransaction(async (transaction) => {
+        const existingSnap = await transaction.get(userRef);
+        const existing = existingSnap.exists ? existingSnap.data() : {};
+        const savedScreenName = toSave.screenName;
 
-    const updated = await firestoreBets.updateUserProfile(uid, toSave);
+        if (savedScreenName) {
+          const claimRef = firestore.collection('screenNameClaims').doc(savedScreenName);
+          const legacyQuery = firestore.collection('users').select('screenName');
+          const [claimSnap, legacySnap] = await Promise.all([
+            transaction.get(claimRef),
+            transaction.get(legacyQuery)
+          ]);
+          const claimedByAnotherUser = claimSnap.exists && claimSnap.data().uid !== uid;
+          const usedByAnotherUser = legacySnap.docs.some((doc) => doc.id !== uid
+            && String((doc.data() || {}).screenName || '').trim().toUpperCase() === savedScreenName);
+          if (claimedByAnotherUser || usedByAnotherUser) {
+            const error = new Error('Screen name is already taken. Please choose another.');
+            error.code = 'SCREEN_NAME_TAKEN';
+            throw error;
+          }
+          transaction.set(claimRef, {
+            uid,
+            screenName: savedScreenName,
+            claimedAt: claimSnap.exists ? claimSnap.data().claimedAt : admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+          if (!existing.screenNameClaimedAt) {
+            toSave.screenNameClaimedAt = admin.firestore.FieldValue.serverTimestamp();
+          }
+        }
+
+        if (!existing.createdAt) {
+          toSave.createdAt = admin.firestore.FieldValue.serverTimestamp();
+          toSave.accountCreatedAt = admin.firestore.FieldValue.serverTimestamp();
+        }
+        if (!existing.profileComplete) {
+          toSave.profileCompletedAt = admin.firestore.FieldValue.serverTimestamp();
+        }
+        toSave.accountStatus = 'active';
+        toSave.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+        transaction.set(userRef, toSave, { merge: true });
+      });
+      updated = await firestoreBets.getUserProfile(uid);
+    } catch (err) {
+      if (err && err.code === 'SCREEN_NAME_TAKEN') {
+        return res.status(409).json({ error: err.message });
+      }
+      throw err;
+    }
     return res.json({ ok: true, user: Object.assign({ uid }, updated) });
   } catch (err) {
     console.error('Failed to update profile:', err && err.message);

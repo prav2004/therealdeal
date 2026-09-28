@@ -34,7 +34,7 @@
   </div>
   <div id="status"></div>
   <table id="usersTable" style="display:none">
-    <thead><tr><th>UID</th><th>Email</th><th>Name</th><th>Profile Complete</th><th>Tokens</th></tr></thead>
+    <thead><tr><th>UID</th><th>Email</th><th>Screen Name</th><th>Profile Complete</th><th>Created</th><th>Last Login</th><th>Tokens</th></tr></thead>
     <tbody></tbody>
   </table>
   <div id="detail"></div>
@@ -46,6 +46,12 @@
     const usersTable = document.getElementById('usersTable');
     const tbody = usersTable.querySelector('tbody');
     const detail = document.getElementById('detail');
+
+    function formatTimestamp(value) {
+      if (!value) return '—';
+      const date = value.toDate ? value.toDate() : new Date(value._seconds ? value._seconds * 1000 : value);
+      return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString();
+    }
 
     async function fetchUsers() {
       status.textContent = 'Loading...';
@@ -64,7 +70,19 @@
         tbody.innerHTML = '';
         data.users.forEach(u => {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${u.uid}</td><td>${u.email || ''}</td><td>${u.fullName || ''}</td><td>${u.profileComplete ? 'yes' : 'no'}</td><td>${u.tokenBalance || 0}</td>`;
+          [
+            u.uid,
+            u.email || '',
+            u.screenName || '—',
+            u.profileComplete ? 'yes' : 'no',
+            formatTimestamp(u.accountCreatedAt || u.createdAt),
+            formatTimestamp(u.lastLogin),
+            u.tokenBalance || 0
+          ].forEach((value) => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            tr.appendChild(cell);
+          });
           tr.addEventListener('click', () => showDetail(u.uid, key));
           tbody.appendChild(tr);
         });

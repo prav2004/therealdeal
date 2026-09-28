@@ -119,6 +119,7 @@ async function createUserProfile(uid, email, profileData = {}) {
     const doc = {
       uid,
       email: email || '',
+      emailNormalized: String(email || '').trim().toLowerCase(),
       authProvider: profileData.authProvider || 'password',
       fullName: profileData.fullName || '',
       // Use the canonical field name required by the product
@@ -128,6 +129,8 @@ async function createUserProfile(uid, email, profileData = {}) {
       termsAccepted: !!profileData.termsAccepted,
       profileComplete: false,
       createdAt: now,
+      accountCreatedAt: now,
+      accountStatus: 'onboarding',
       lastLogin: now,
       tokenBalance: NEW_USER_TOKENS,
       cashBalance: 0,

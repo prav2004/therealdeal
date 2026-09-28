@@ -12,7 +12,7 @@ const axios = require('axios');
 const { cache, DEFAULT_TTL } = require('./cache');
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-const ODDS_API_KEY  = process.env.ODDS_API_KEY || '0254dcc218e487f9523bf40edda8640f';
+const ODDS_API_KEY  = process.env.ODDS_API_KEY || '';
 const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
