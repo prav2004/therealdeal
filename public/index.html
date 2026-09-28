@@ -444,6 +444,7 @@
         padding: 1px;
         background: var(--bal-border);
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
         pointer-events: none;
@@ -564,6 +565,156 @@
       .loader-shadow{width:38px;height:8px;border-radius:50%;background:rgba(255,122,26,.25);filter:blur(3px);margin-top:4px;animation:shadowPulse 0.55s cubic-bezier(0.3,0,0.7,1) infinite alternate}
       @keyframes ballBounce{0%{transform:translateY(0) scaleX(1) scaleY(1)}80%{transform:translateY(36px) scaleX(1) scaleY(1)}100%{transform:translateY(36px) scaleX(1.18) scaleY(0.82)}}
       @keyframes shadowPulse{0%{transform:scaleX(0.6);opacity:0.3}100%{transform:scaleX(1.2);opacity:0.7}}
+
+      /* ── 2026 Sports dashboard ─────────────────────────────────────────── */
+      :root {
+        --sports-bg: #070a0f;
+        --sports-panel: #0d121b;
+        --sports-panel-2: #111824;
+        --sports-line: rgba(255,255,255,.085);
+        --sports-muted: #8490a3;
+        --sports-accent: #ff7a1a;
+      }
+      body {
+        background:
+          radial-gradient(900px 420px at 50% -180px, rgba(255,122,26,.12), transparent 70%),
+          var(--sports-bg);
+      }
+      .page-main { padding-top: 1.1rem !important; }
+      .sports-board { max-width: 1280px; }
+      .sports-layout { align-items: start; }
+      .sports-main-column { min-width: 0; }
+      .sports-intro {
+        border-radius: 18px;
+        background: linear-gradient(120deg, #121925 0%, #0d121b 65%, #16130f 100%);
+        border-color: var(--sports-line);
+        box-shadow: 0 18px 50px rgba(0,0,0,.3);
+      }
+      .sports-intro::after {
+        width: 22rem; height: 22rem; right: -9rem; top: -14rem;
+        border-color: rgba(255,122,26,.13);
+        box-shadow: 0 0 0 3.5rem rgba(255,122,26,.025), 0 0 0 7rem rgba(255,122,26,.015);
+      }
+      .sports-kicker { color: #ffad70; font-size: .68rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+      .sports-title { color: #fff; font-size: clamp(2rem, 5vw, 3.15rem); line-height: 1; font-weight: 700; }
+      .sports-subtitle { color: #9aa5b5; font-size: .92rem; }
+      .sports-metrics { display: flex; flex-wrap: wrap; gap: .5rem; }
+      .sports-metric {
+        display: flex; align-items: center; gap: .6rem; min-width: 92px;
+        padding: .65rem .8rem; border: 1px solid var(--sports-line); border-radius: 11px;
+        background: rgba(3,7,13,.42);
+      }
+      .sports-metric-icon { color: var(--sports-accent); font-size: .9rem; }
+      .sports-metric-label { color: #687489; font-size: .57rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+      .sports-metric-value { color: #f5f7fa; font: 700 .82rem 'Space Grotesk', sans-serif; }
+      .sports-help-btn {
+        display: inline-flex; align-items: center; gap: .45rem; min-height: 38px; padding: 0 .85rem;
+        border: 1px solid var(--sports-line); border-radius: 9px; background: rgba(255,255,255,.035);
+        color: #c7d0dc; font-size: .72rem; font-weight: 700; transition: .2s ease;
+      }
+      .sports-help-btn:hover { border-color: rgba(255,122,26,.4); color: #fff; background: rgba(255,122,26,.08); }
+      .sports-controls {
+        margin-top: 1rem; padding: .85rem; border: 1px solid var(--sports-line); border-radius: 14px;
+        background: rgba(13,18,27,.8); box-shadow: 0 12px 32px rgba(0,0,0,.2);
+      }
+      #sportTabs { margin: 0; padding: 0 0 .2rem; gap: .4rem; }
+      #sportTabs .sport-tab {
+        min-height: 42px; padding: .6rem .82rem; border-radius: 9px; background: #0a0f17;
+        border-color: rgba(255,255,255,.08); color: #8995a7; font-size: .76rem;
+      }
+      #sportTabs .sport-tab:hover { transform: translateY(-1px); background: #121925; border-color: rgba(255,122,26,.32); }
+      #sportTabs .sport-tab.bg-red-600 {
+        color: #fff; background: #202028; border-color: rgba(255,122,26,.72);
+        box-shadow: inset 0 -2px 0 var(--sports-accent), 0 8px 18px rgba(0,0,0,.2);
+      }
+      .sport-tab-icon { width: 1.45rem; height: 1.45rem; border-radius: 6px; }
+      .date-strip {
+        display: grid; grid-template-columns: 40px repeat(3, minmax(74px,1fr)) 40px; gap: .35rem;
+        margin-top: .7rem; padding-top: .7rem; border-top: 1px solid rgba(255,255,255,.065);
+      }
+      .date-nav, .date-day {
+        min-height: 43px; border: 1px solid transparent; border-radius: 8px; background: transparent;
+        color: #707d90; font-size: .67rem; font-weight: 700; line-height: 1.3; transition: .18s ease;
+      }
+      .date-nav { font-size: 1rem; border-color: rgba(255,255,255,.07); }
+      .date-nav[aria-disabled="true"], .date-day[aria-disabled="true"] { cursor: default; }
+      .date-day span { display: block; color: #4f5b6c; font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; }
+      .date-day.is-today { color: #fff; background: rgba(255,122,26,.1); border-color: rgba(255,122,26,.42); }
+      .date-day.is-today span { color: #ff9b52; }
+      .sports-toolbar { margin: 1.1rem 0 .7rem; }
+      .sports-toolbar-title { font-size: 1.08rem; }
+      .market-toolbar { display: flex; gap: .35rem; overflow-x: auto; scrollbar-width: none; }
+      .market-filter {
+        flex: 0 0 auto; min-height: 34px; padding: 0 .7rem; border: 1px solid var(--sports-line);
+        border-radius: 8px; background: #0b1018; color: #7e899a; font-size: .66rem; font-weight: 700;
+      }
+      .market-filter.is-active { color: #fff; border-color: rgba(255,122,26,.35); background: rgba(255,122,26,.09); }
+      #soccerLeagueTabs { border-radius: 12px; background: #0b1018; }
+      #picksContainer { display: grid; gap: .8rem; }
+      #picksContainer > article { margin: 0 !important; }
+      .market-card {
+        border-radius: 14px !important; background: var(--sports-panel) !important;
+        border-color: var(--sports-line) !important; padding: 16px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,.22) !important;
+      }
+      .market-card:hover { transform: translateY(-1px); border-color: rgba(255,122,26,.28) !important; box-shadow: 0 14px 30px rgba(0,0,0,.3) !important; }
+      .market-card .select-team {
+        min-height: 92px; padding: 11px 9px !important; gap: 5px !important; border-radius: 10px !important;
+        background: #101722 !important; border: 1px solid rgba(255,255,255,.085) !important;
+      }
+      .market-card .select-team:hover:not(:disabled) { transform: translateY(-1px); background: #161e2b !important; border-color: rgba(255,122,26,.46) !important; }
+      .market-card .select-team:active:not(:disabled) { transform: scale(.98); }
+      .market-card .select-team.selected { background: rgba(255,122,26,.15) !important; border-color: #ff7a1a !important; box-shadow: inset 0 0 0 1px rgba(255,122,26,.25), 0 7px 20px rgba(255,122,26,.1) !important; }
+      .market-card .select-team:focus-visible, .sport-tab:focus-visible, #confirmBet:focus-visible, .sports-help-btn:focus-visible {
+        outline: 2px solid #ffad70; outline-offset: 3px;
+      }
+      .sports-skeleton { height: 240px; border: 1px solid var(--sports-line); border-radius: 14px; background: #0d121b; overflow: hidden; position: relative; }
+      .sports-skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg,transparent,rgba(255,255,255,.045),transparent); animation: sportsShimmer 1.35s infinite; }
+      .sports-skeleton-lines { position: absolute; inset: 18px; background: linear-gradient(#19212e 0 0) 0 0/35% 10px no-repeat, linear-gradient(#151d29 0 0) 0 28px/70% 48px no-repeat, linear-gradient(#151d29 0 0) 0 96px/48% 70px no-repeat, linear-gradient(#151d29 0 0) 100% 96px/48% 70px no-repeat; }
+      @keyframes sportsShimmer { to { transform: translateX(100%); } }
+      .sports-empty { padding: 3.5rem 1.5rem; border: 1px dashed rgba(255,255,255,.12); border-radius: 14px; background: rgba(13,18,27,.65); text-align: center; }
+      .sports-empty-icon { width: 52px; height: 52px; margin: 0 auto 1rem; display: grid; place-items: center; border: 1px solid rgba(255,122,26,.24); border-radius: 14px; background: rgba(255,122,26,.07); font-size: 1.4rem; }
+      .sports-empty h3 { color: #eef2f7; font: 700 1rem 'Space Grotesk',sans-serif; }
+      .sports-empty p { margin-top: .35rem; color: #768296; font-size: .8rem; }
+      .bet-slip {
+        border-radius: 14px; padding: 1rem; background: #0d121b; border-color: var(--sports-line);
+        box-shadow: 0 15px 40px rgba(0,0,0,.3);
+      }
+      .bet-slip::before { background: var(--sports-accent); }
+      .slip-item { border-radius: 10px; background: #111824; }
+      #confirmBet { border-radius: 9px; min-height: 46px; box-shadow: none; }
+      #confirmBet:hover { box-shadow: 0 9px 22px rgba(255,122,26,.22); }
+      .bet-slip-toggle { left: .75rem !important; right: .75rem !important; bottom: calc(4.9rem + env(safe-area-inset-bottom)) !important; width: auto; min-height: 52px; padding: 8px 10px 8px 15px !important; border-radius: 12px !important; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #141b26 !important; color: #fff !important; border: 1px solid rgba(255,122,26,.35) !important; box-shadow: 0 14px 35px rgba(0,0,0,.48) !important; }
+      .mobile-slip-copy { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+      .mobile-slip-label { font-size: .75rem; font-weight: 800; }
+      .mobile-slip-potential { color: #8591a3; font-size: .62rem; font-weight: 600; }
+      .mobile-slip-action { padding: .55rem .72rem; border-radius: 8px; background: var(--sports-accent); color: #111; font-size: .66rem; font-weight: 800; }
+      .region-panel { margin-top: .75rem; border: 0; background: transparent; }
+      @media (max-width: 1023px) {
+        .bet-slip-mobile { left: .5rem; right: .5rem; bottom: calc(4.65rem + env(safe-area-inset-bottom)); max-height: min(72vh,620px); border-radius: 16px; }
+        body.slip-open { overflow: hidden; }
+      }
+      @media (min-width: 1024px) {
+        .sports-layout { display: grid !important; grid-template-columns: minmax(0,1fr) 330px !important; gap: 1rem !important; }
+        .bet-slip { top: calc(96px + env(safe-area-inset-top)) !important; }
+        .bet-slip-toggle { display: none !important; }
+      }
+      @media (max-width: 640px) {
+        .page-main { padding-left: .75rem !important; padding-right: .75rem !important; }
+        .sports-intro { padding: 1rem !important; }
+        .sports-title { font-size: 2rem; }
+        .sports-subtitle { font-size: .82rem; }
+        .sports-metric { flex: 1; min-width: 78px; padding: .55rem .6rem; }
+        .date-strip { grid-template-columns: 34px repeat(3,minmax(64px,1fr)) 34px; }
+        .date-day { font-size: .61rem; }
+        .sports-toolbar { align-items: flex-end; }
+        .sports-toolbar-copy { display: none; }
+        .market-card { padding: 13px !important; }
+        .market-card .select-team { min-height: 84px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      }
     </style>
   </head>
   <!--
@@ -599,50 +750,52 @@
            tokens — no real money is wagered. The slip lets users choose how many
            virtual tokens to use before submitting each practice pick. -->
       <section class="max-w-6xl mx-auto sports-board">
-        <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div>
+        <div class="sports-layout flex flex-col gap-6">
+          <div class="sports-main-column">
             <header class="sports-intro px-5 py-5 sm:px-6">
-              <div class="relative z-10 flex flex-wrap items-start justify-between gap-4">
+              <div class="relative z-10 flex flex-wrap items-start justify-between gap-5">
                 <div>
-                  <div class="market-status"><span class="market-status-dot" aria-hidden="true"></span> Practice market board</div>
-                  <h1 class="hero-title mt-3 text-3xl sm:text-4xl" style="background:linear-gradient(100deg,#ffffff 18%,#d7e4ff 60%,#ffb37a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Make your read.</h1>
-                  <p class="mt-2 max-w-md text-sm leading-6 text-slate-400">Explore the latest matchups, compare practice odds, and build picks with virtual tokens.</p>
+                  <div class="sports-kicker">Pickr game board</div>
+                  <h1 class="sports-title hero-title mt-2">Sports</h1>
+                  <p class="sports-subtitle mt-2">Make your picks. Build your record.</p>
                 </div>
-                <button id="picksRefreshButton" type="button" class="relative rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-200 hover:border-white/30 hover:text-white" aria-haspopup="dialog" aria-controls="bettingHelpModal">How it works</button>
+                <button id="picksRefreshButton" type="button" class="sports-help-btn" aria-haspopup="dialog" aria-controls="bettingHelpModal"><span aria-hidden="true">?</span> How it works</button>
               </div>
-              <div class="relative z-10 mt-5 flex flex-wrap gap-2 text-[11px] text-slate-400">
-                <span class="rounded-full border border-white/10 bg-black/10 px-3 py-1.5">Virtual tokens only</span>
-                <span class="rounded-full border border-white/10 bg-black/10 px-3 py-1.5">No deposits or withdrawals</span>
-                <span class="rounded-full border border-white/10 bg-black/10 px-3 py-1.5">Games refresh automatically</span>
+              <div class="sports-metrics relative z-10 mt-5" aria-label="Player overview">
+                <div class="sports-metric"><span class="sports-metric-icon" aria-hidden="true">◈</span><div><div class="sports-metric-label">Tokens</div><div class="sports-metric-value"><span class="tokens">0</span></div></div></div>
+                <div class="sports-metric"><span class="sports-metric-icon" aria-hidden="true">↗</span><div><div class="sports-metric-label">XP</div><div class="sports-metric-value"><span class="xp">0</span></div></div></div>
+                <div class="sports-metric"><span class="sports-metric-icon" aria-hidden="true">⚡</span><div><div class="sports-metric-label">Win streak</div><div class="sports-metric-value"><span id="streakWins">0</span></div></div></div>
               </div>
             </header>
-            <section class="mt-4 rounded-2xl border border-white/10 bg-slate-950/45 p-4 sm:p-5" aria-labelledby="regionTitle">
+            <section class="region-panel px-1 py-2" aria-labelledby="regionTitle">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p class="text-[10px] font-bold uppercase tracking-[.2em] text-emerald-300">Your Pickr region</p>
-                  <h2 id="regionTitle" class="mt-1 text-base font-semibold text-white"><span data-region-label></span></h2>
-                  <p class="mt-1 text-xs leading-5 text-slate-400">Sports, picks, and your profile stay the same. Only your Perks destination changes.</p>
+                  <p class="text-[10px] font-bold uppercase tracking-[.2em] text-slate-500">Region · <span id="regionTitle" data-region-label></span></p>
                 </div>
-                <a data-region-perks-link href="tasks.html" class="rounded-full border border-orange-300/30 bg-orange-400/10 px-3 py-2 text-xs font-semibold text-orange-200 hover:bg-orange-400/20">View Perks</a>
+                <a data-region-perks-link href="tasks.html" class="text-xs font-semibold text-orange-300 hover:text-orange-200">View Perks →</a>
               </div>
-              <div class="mt-4 grid gap-2 sm:grid-cols-3" role="group" aria-label="Choose your Pickr region">
-                <button type="button" class="region-choice rounded-xl px-3 py-3 text-left text-sm font-semibold" data-region-choice="ontario" aria-pressed="true">🇨🇦 Ontario</button>
-                <button type="button" class="region-choice rounded-xl px-3 py-3 text-left text-sm font-semibold" data-region-choice="canada" aria-pressed="false">🇨🇦 Rest of Canada</button>
-                <button type="button" class="region-choice rounded-xl px-3 py-3 text-left text-sm font-semibold" data-region-choice="uk" aria-pressed="false">🇬🇧 United Kingdom</button>
+              <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Choose your Pickr region">
+                <button type="button" class="region-choice rounded-lg px-3 py-2 text-left text-xs font-semibold" data-region-choice="ontario" aria-pressed="true">🇨🇦 Ontario</button>
+                <button type="button" class="region-choice rounded-lg px-3 py-2 text-left text-xs font-semibold" data-region-choice="canada" aria-pressed="false">🇨🇦 Rest of Canada</button>
+                <button type="button" class="region-choice rounded-lg px-3 py-2 text-left text-xs font-semibold" data-region-choice="uk" aria-pressed="false">🇬🇧 United Kingdom</button>
               </div>
             </section>
-            <div class="sports-toolbar">
-              <div><div class="sports-toolbar-title">Game board</div><div class="sports-toolbar-copy">Select a sport to see available matchups.</div></div>
-            </div>
-
-      <!-- Sport category tabs -->
-            <div id="sportTabs" class="flex flex-wrap gap-2 mb-4">
+            <section class="sports-controls" aria-label="Sports and date navigation">
+            <div id="sportTabs">
               <button class="sport-tab py-2 px-4 rounded-full text-sm font-semibold bg-gray-800 focus:outline-none" data-sport="nba"><span class="sport-tab-icon" aria-hidden="true">🏀</span>NBA</button>
               <button class="sport-tab py-2 px-4 rounded-full text-sm font-semibold bg-gray-800 focus:outline-none" data-sport="nfl"><span class="sport-tab-icon" aria-hidden="true">🏈</span>NFL</button>
               <button class="sport-tab py-2 px-4 rounded-full text-sm font-semibold bg-gray-800 focus:outline-none" data-sport="nhl"><span class="sport-tab-icon" aria-hidden="true">🏒</span>NHL</button>
               <button class="sport-tab py-2 px-4 rounded-full text-sm font-semibold bg-gray-800 focus:outline-none" data-sport="mlb"><span class="sport-tab-icon" aria-hidden="true">⚾</span>MLB</button>
               <button class="sport-tab py-2 px-4 rounded-full text-sm font-semibold bg-gray-800 focus:outline-none" data-sport="soccer"><span class="sport-tab-icon" aria-hidden="true">⚽</span>Soccer</button>
             </div>
+            <div class="date-strip" aria-label="Date range preview">
+              <button type="button" class="date-nav" aria-label="Previous dates unavailable" aria-disabled="true">‹</button>
+              <button type="button" class="date-day" data-date-offset="-1" aria-disabled="true"><span>Previous</span>—</button>
+              <button type="button" class="date-day is-today" data-date-offset="0" aria-current="date" aria-disabled="true"><span>Today</span>—</button>
+              <button type="button" class="date-day" data-date-offset="1" aria-disabled="true"><span>Next</span>—</button>
+              <button type="button" class="date-nav" aria-label="More dates unavailable" aria-disabled="true">›</button>
+            </div>
+            </section>
             <div id="soccerLeagueTabs" class="hidden flex flex-wrap gap-2 mb-4">
               <button class="sport-tab py-2 px-4 rounded-full text-xs font-semibold bg-gray-800 focus:outline-none" data-league="all">All leagues</button>
               <button class="sport-tab py-2 px-4 rounded-full text-xs font-semibold bg-gray-800 focus:outline-none" data-league="EPL">EPL</button>
@@ -653,6 +806,13 @@
               <button class="sport-tab py-2 px-4 rounded-full text-xs font-semibold bg-gray-800 focus:outline-none" data-league="MLS">MLS</button>
               <button class="sport-tab py-2 px-4 rounded-full text-xs font-semibold bg-gray-800 focus:outline-none" data-league="UEFA Champions League">Champions League</button>
               <button class="sport-tab py-2 px-4 rounded-full text-xs font-semibold bg-gray-800 focus:outline-none" data-league="Liga MX">Liga MX</button>
+            </div>
+            <div class="sports-toolbar">
+              <div><div class="sports-toolbar-title">Matchups</div><div class="sports-toolbar-copy">Live and upcoming games with available Pickr odds.</div></div>
+              <div class="market-toolbar" aria-label="Market view">
+                <button type="button" class="market-filter is-active" aria-pressed="true">All games</button>
+                <button type="button" class="market-filter" aria-disabled="true" title="Moneyline markets currently shown">Moneyline</button>
+              </div>
             </div>
       <!-- Dynamic match list. Games and odds will be loaded from the server
            via script.js and injected here. Each match card includes multiple
@@ -669,16 +829,17 @@
               </div>
               <span id="slipCountBadge" style="display:none;background:rgba(255,122,26,0.18);border:1px solid rgba(255,122,26,0.4);color:#ffb37a;font-size:11px;font-weight:700;font-family:Space Grotesk,sans-serif;padding:3px 10px;border-radius:999px">0 picks</span>
             </div>
-            <p style="font-size:12px;color:#64748b;margin:8px 0 16px;line-height:1.5">Practice pick using virtual tokens. No real money is wagered. Pick teams, choose how many tokens to use, then submit your pick.</p>
+            <p style="font-size:12px;color:#7f8a9c;margin:8px 0 16px;line-height:1.5">Review selections, set virtual tokens, and submit when ready.</p>
             <div id="betSlipList" class="space-y-2"></div>
-            <button id="confirmBet" class="hidden">🔒 Submit Pick</button>
+            <button id="confirmBet" class="hidden">Submit Picks</button>
           </aside>
         </div>
       </section>
     </main>
     <div id="betSlipOverlay" class="bet-slip-overlay hidden"></div>
-    <button id="betSlipToggle" class="bet-slip-toggle lg:hidden" style="padding:11px 22px;border-radius:999px;background:linear-gradient(135deg,#ff7a1a,#ff9e50);color:#0b0f1a;font-weight:800;font-family:Space Grotesk,sans-serif;font-size:13px;letter-spacing:0.04em;box-shadow:0 4px 20px rgba(255,122,26,0.4);border:none;cursor:pointer">
-      🎟️ Pick Slip
+    <button id="betSlipToggle" class="bet-slip-toggle lg:hidden" aria-label="View Pick Slip">
+      <span class="mobile-slip-copy"><span class="mobile-slip-label"><span id="mobileSlipCount">0 Picks</span></span><span class="mobile-slip-potential" id="mobileSlipPotential">Build your Pick Slip</span></span>
+      <span class="mobile-slip-action">View Pick Slip</span>
     </button>
     <div id="betPlacementOverlay" class="bet-overlay fixed inset-0 z-[70] hidden items-center justify-center bg-black/70 px-4 backdrop-blur-sm" aria-live="polite">
       <div class="flex w-full max-w-xs flex-col items-center gap-4 rounded-2xl border border-white/10 bg-slate-900/95 px-8 py-7 text-center text-slate-100 shadow-2xl">
@@ -744,7 +905,7 @@
     </div>
 
     <script src="config.js?v=20260410a"></script>
-    <script src="script.js?v=20260818-curated-character-avatars"></script>
+    <script src="script.js?v=20260928-sports-dashboard"></script>
     <footer class="mt-14 border-t border-white/15 bg-white/12 footer-safe">
       <div class="mx-auto w-full max-w-6xl px-4 py-10">
         <div class="grid gap-8 md:grid-cols-3">

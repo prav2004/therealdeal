@@ -276,6 +276,25 @@
     return Number(legs.reduce((acc, v) => acc * v, 1).toFixed(2));
   }
 
+  function updateMobileSlipSummary(entries) {
+    const countEl = document.getElementById('mobileSlipCount');
+    const potentialEl = document.getElementById('mobileSlipPotential');
+    const list = Array.isArray(entries) ? entries : Object.entries(betSlip);
+    if (countEl) countEl.textContent = list.length + (list.length === 1 ? ' Pick' : ' Picks');
+    if (!potentialEl) return;
+    if (!list.length) {
+      potentialEl.textContent = 'Build your Pick Slip';
+      return;
+    }
+    const useParlay = list.length > 1 && betMode === 'parlay';
+    const potential = useParlay
+      ? Number(parlayStake || 0) * computeParlayOdds(list)
+      : list.reduce((total, entry) => total + (Number(entry[1].stake || 0) * Number(entry[1].odds || 0)), 0);
+    potentialEl.textContent = potential > 0
+      ? 'Potential: ' + potential.toFixed(2) + ' tokens'
+      : 'Add token amounts to continue';
+  }
+
   function renderBetSlip() {
     const betSlipList = document.getElementById('betSlipList');
     const confirmBtn = document.getElementById('confirmBet');
@@ -283,6 +302,7 @@
     if (!betSlipList) return;
     betSlipList.innerHTML = '';
     const entries = Object.entries(betSlip);
+    updateMobileSlipSummary(entries);
 
     // Update count badge
     if (countBadge) {
@@ -390,12 +410,14 @@
     betSlipList.querySelectorAll('.stake-input').forEach(input => {
       input.addEventListener('input', () => {
         const m = input.getAttribute('data-match'); const v = parseFloat(input.value); if (!betSlip[m]) betSlip[m] = { team: 'Unknown', stake: 0 }; betSlip[m].stake = isNaN(v) ? 0 : v;
+        updateMobileSlipSummary();
       });
     });
     const parlayStakeInput = document.getElementById('parlayStake');
     if (parlayStakeInput) {
       parlayStakeInput.addEventListener('input', () => {
         const v = parseFloat(parlayStakeInput.value); parlayStake = isNaN(v) ? 0 : v;
+        updateMobileSlipSummary();
       });
     }
     const toggleBtn = document.getElementById('toggleBetMode');
@@ -586,7 +608,7 @@
           // Remove the started game from the bet slip
           delete betSlip[matchId];
           renderBetSlip();
-          await failFlow('started', 'One or more games have already started. They have been removed from your bet slip.');
+          await failFlow('started', 'One or more games have already started. They have been removed from your Pick Slip.');
           confirmBtn.disabled = false;
           confirmBtn.classList.remove('opacity-60', 'cursor-not-allowed');
           return;
@@ -680,7 +702,7 @@
           });
           if (!resp.ok) {
             const err = await resp.json().catch(() => ({ error: 'unknown' }));
-            throw new Error(err && err.error ? err.error : 'Failed to place bet on server');
+            throw new Error(err && err.error ? err.error : 'Failed to submit picks');
           }
           const payload = await resp.json();
           const bet = payload && payload.bet ? payload.bet : null;
@@ -739,7 +761,7 @@
             });
             if (!resp.ok) {
               const err = await resp.json().catch(() => ({ error: 'unknown' }));
-              throw new Error(err && err.error ? err.error : 'Failed to place bet on server');
+              throw new Error(err && err.error ? err.error : 'Failed to submit picks');
             }
             const payload = await resp.json();
             const bet = payload && payload.bet ? payload.bet : null;
@@ -786,7 +808,7 @@
         return;
       } catch (err) {
         console.warn('Server bet placement failed:', err && err.message);
-        await failFlow('server', 'Failed to place bet on server: ' + (err && err.message ? err.message : 'unknown error'));
+        await failFlow('server', 'Failed to submit picks: ' + (err && err.message ? err.message : 'unknown error'));
         confirmBtn.disabled = false;
         confirmBtn.classList.remove('opacity-60', 'cursor-not-allowed');
         return;
@@ -1086,7 +1108,23 @@
 
   function renderSkeletons(container, count = 6) {
     if (!container) return; container.innerHTML = '';
-    for (let i=0;i<count;i++) { const s = document.createElement('div'); s.className = 'animate-pulse bg-gray-800 rounded-lg p-4 h-36 mb-4'; container.appendChild(s); }
+    for (let i=0;i<count;i++) {
+      const skeleton = document.createElement('div');
+      skeleton.className = 'sports-skeleton';
+      skeleton.setAttribute('aria-hidden', 'true');
+      skeleton.innerHTML = '<div class="sports-skeleton-lines"></div>';
+      container.appendChild(skeleton);
+    }
+  }
+
+  function renderPicksEmpty(container, title, detail) {
+    if (!container) return;
+    container.innerHTML =
+      '<div class="sports-empty" role="status">' +
+        '<div class="sports-empty-icon" aria-hidden="true">◌</div>' +
+        '<h3>' + escapeHtml(title || 'No games available right now') + '</h3>' +
+        '<p>' + escapeHtml(detail || 'Check back soon for new Pickr matchups.') + '</p>' +
+      '</div>';
   }
 
   function renderPicksError(container, message) {
@@ -1292,7 +1330,7 @@
 
   function createLiveScoreCard(pick, espnGame) {
     const card = document.createElement('article');
-    card.className = '';
+    card.className = 'market-card live-match-card';
     card.style.cssText = 'background:rgba(13,18,32,0.92);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:18px;box-shadow:0 4px 28px rgba(0,0,0,0.45);overflow:hidden;position:relative;';
     // Top accent bar
     (function(){const a=document.createElement('div');a.style.cssText='position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,rgba(52,211,153,0.6),rgba(122,167,255,0.25),transparent);pointer-events:none;';card.appendChild(a);})();
@@ -1748,7 +1786,7 @@
       if (gameStarted) {
         const startedBanner = document.createElement('div');
         startedBanner.className = 'mt-3 mb-1 text-center text-xs font-bold uppercase tracking-widest text-red-400 bg-red-900/30 border border-red-700/40 rounded-lg py-2';
-        startedBanner.textContent = '\u26A0 Game started \u2014 betting closed';
+        startedBanner.textContent = '\u26A0 Game started \u2014 picks locked';
         card.appendChild(startedBanner);
       }
       card.appendChild(btns);
@@ -1850,7 +1888,7 @@
 
       container.innerHTML = '';
       if (!picks || picks.length === 0) {
-        container.innerHTML = '<div class="text-gray-400 p-6">No bets available atm.</div>';
+        renderPicksEmpty(container);
         return;
       }
       const now = Date.now();
@@ -1876,11 +1914,11 @@
         }
       });
       if (!rendered) {
-        container.innerHTML = '<div class="text-gray-400 p-6">No valid odds available atm.</div>';
+        renderPicksEmpty(container, 'No odds available right now', 'Check back soon as markets continue to update.');
       }
     } catch (e) {
       console.error('loadPicks error', e);
-      renderPicksError(container, 'Failed to load bets. Try again later.');
+      renderPicksError(container, 'Failed to load matchups. Try again later.');
     }
   }
 
@@ -2848,10 +2886,14 @@
     const openSlip = () => {
       overlay.classList.remove('hidden');
       slip.classList.add('open');
+      document.body.classList.add('slip-open');
+      toggle.setAttribute('aria-expanded', 'true');
     };
     const closeSlip = () => {
       overlay.classList.add('hidden');
       slip.classList.remove('open');
+      document.body.classList.remove('slip-open');
+      toggle.setAttribute('aria-expanded', 'false');
     };
     const toggleSlip = () => {
       if (slip.classList.contains('open')) {
@@ -2862,7 +2904,12 @@
     };
 
     toggle.addEventListener('click', toggleSlip);
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', 'betSlipContainer');
     overlay.addEventListener('click', closeSlip);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && slip.classList.contains('open')) closeSlip();
+    });
     window.addEventListener('resize', () => {
       if (window.innerWidth >= 1024) closeSlip();
     });
@@ -2907,6 +2954,14 @@
 
   // Setup page interactions when DOM ready
   document.addEventListener('DOMContentLoaded', async () => {
+    document.querySelectorAll('[data-date-offset]').forEach((button) => {
+      const offset = Number(button.getAttribute('data-date-offset') || 0);
+      const date = new Date();
+      date.setDate(date.getDate() + offset);
+      const prefix = button.querySelector('span');
+      const label = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
+      button.innerHTML = (prefix ? '<span>' + escapeHtml(prefix.textContent) + '</span>' : '') + escapeHtml(label);
+    });
     // Safety timeout — avoid flash while auth gate is pending, but never hang forever
     const gateStart = Date.now();
     const gateSafetyMs = 15000;
@@ -3144,9 +3199,9 @@
           const container = getPicksContainer();
           if (container) {
             if (hadError) {
-              renderPicksError(container, 'Failed to load bets. Try again later.');
+              renderPicksError(container, 'Failed to load matchups. Try again later.');
             } else {
-              container.innerHTML = '<div class="text-gray-400 p-6">No bets available atm.</div>';
+              renderPicksEmpty(container);
             }
           }
           return;
@@ -3193,7 +3248,7 @@
           if (!alreadyDisabled && !card.querySelector('.game-started-banner')) {
             const banner = document.createElement('div');
             banner.className = 'game-started-banner mt-2 text-center text-xs font-bold uppercase tracking-widest text-red-400 bg-red-900/30 border border-red-700/40 rounded-lg py-2';
-            banner.textContent = '\u26A0 Game started \u2014 betting closed';
+            banner.textContent = '\u26A0 Game started \u2014 picks locked';
             const btnsContainer = card.querySelector('.grid');
             if (btnsContainer) btnsContainer.parentNode.insertBefore(banner, btnsContainer);
           }
